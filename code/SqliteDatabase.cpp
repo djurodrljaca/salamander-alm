@@ -40,7 +40,7 @@ SqliteDatabase::~SqliteDatabase()
 
 bool SqliteDatabase::connect()
 {
-    m_database.setDatabaseName("SalamanderALM.db3");
+    m_database.setDatabaseName("database.db3");
     bool success = m_database.open();
 
     if (success)

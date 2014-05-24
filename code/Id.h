@@ -25,20 +25,23 @@
 
 #include <QtGlobal>
 
-class DatabaseId
+namespace Database
+{
+class Id
 {
 public:
-    DatabaseId();
-    DatabaseId(const qint64 id);
+    Id();
+    Id(const qint64 value);
 
     bool isNull();
     void setNull();
-    qint64 getId();
-    void setId(const qint64 id);
+    qint64 getValue();
+    void setValue(const qint64 value);
 
 private:
     bool m_null;
-    qint64 m_id;
+    qint64 m_value;
 };
+}
 
 #endif // DATABASEID_H

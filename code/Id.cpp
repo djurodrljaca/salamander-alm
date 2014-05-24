@@ -20,38 +20,40 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DatabaseId.h"
+#include "Id.h"
 
-DatabaseId::DatabaseId()
+using namespace Database;
+
+Id::Id()
     : m_null(true),
-      m_id(-1LL)
+      m_value(-1LL)
 {
 }
 
-DatabaseId::DatabaseId(const qint64 id)
+Id::Id(const qint64 value)
     : m_null(false),
-      m_id(id)
+      m_value(value)
 {
 }
 
-bool DatabaseId::isNull()
+bool Id::isNull()
 {
     return m_null;
 }
 
-void DatabaseId::setNull()
+void Id::setNull()
 {
     m_null = true;
-    m_id = -1LL;
+    m_value = -1LL;
 }
 
-qint64 DatabaseId::getId()
+qint64 Id::getValue()
 {
-    return m_id;
+    return m_value;
 }
 
-void DatabaseId::setId(const qint64 id)
+void Id::setValue(const qint64 value)
 {
     m_null = false;
-    m_id = id;
+    m_value = value;
 }
