@@ -37,8 +37,8 @@ public:
     void setId(const qint64 id);
 
 private:
-    qint64 m_id;
     bool m_null;
+    qint64 m_id;
 };
 
 #endif // DATABASEID_H
