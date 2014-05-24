@@ -23,11 +23,14 @@
 #ifndef NODETYPE_H
 #define NODETYPE_H
 
-#include "Id.h"
+#include "Database/DataTypes/Integer.h"
+#include "Database/DataTypes/Text.h"
 #include <QtCore/QString>
 #include <QtSql/QSqlRecord>
 
 namespace Database
+{
+namespace Tables
 {
 class NodeType
 {
@@ -38,22 +41,23 @@ public:
     };
 
     NodeType();
-    NodeType(const Id id, QString name);
+    NodeType(const DataTypes::Integer &id, const DataTypes::Text &name);
 
     bool isValid() const;
 
-    Id getId() const;
-    void setId(const Id id);
+    DataTypes::Integer getId() const;
+    void setId(const DataTypes::Integer &id);
 
-    QString getName() const;
-    void setName(const QString &name);
+    DataTypes::Text getName() const;
+    void setName(const DataTypes::Text &name);
 
     static NodeType fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
-    Id m_id;
-    QString m_name;
+    DataTypes::Integer m_id;
+    DataTypes::Text m_name;
 };
+}
 }
 
 #endif // NODETYPE_H

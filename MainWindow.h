@@ -1,5 +1,5 @@
 /**
- * @file   DatabaseId.h
+ * @file   MainWindow.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-5-24
  * @brief  Brief description of file.
@@ -20,31 +20,30 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASEID_H
-#define DATABASEID_H
+#ifndef MAINWINDOW_H
+#define MAINWINDOW_H
 
-#include <QtGlobal>
-#include <QtSql/QSqlField>
+#include "Database/SqliteDatabase.h"
+#include <QMainWindow>
 
-namespace Database
-{
-class Id
-{
-public:
-    Id();
-    Id(const qint64 value);
-
-    bool isNull() const;
-    void setNull();
-    qint64 getValue() const;
-    void setValue(const qint64 value);
-
-    static Id fromField(const QSqlField &field, bool *ok = NULL);
-
-private:
-    bool m_null;
-    qint64 m_value;
-};
+namespace Ui {
+class MainWindow;
 }
 
-#endif // DATABASEID_H
+class MainWindow : public QMainWindow
+{
+    Q_OBJECT
+
+public:
+    explicit MainWindow(QWidget *parent = 0);
+    ~MainWindow();
+
+private slots:
+    void buttonPushed();
+
+private:
+    Ui::MainWindow *ui;
+    Database::SqliteDatabase m_database;
+};
+
+#endif // MAINWINDOW_H

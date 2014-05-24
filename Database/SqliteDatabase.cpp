@@ -29,6 +29,8 @@
 #include <QtCore/QFile>
 
 using namespace Database;
+using namespace Database::DataTypes;
+using namespace Database::Tables;
 
 SqliteDatabase::SqliteDatabase()
     : m_database()
@@ -67,7 +69,7 @@ void SqliteDatabase::disconnect()
     }
 }
 
-Node SqliteDatabase::getNode(const Id id, bool *ok) const
+Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
 {
     Node node;
     bool success = false;
@@ -97,7 +99,7 @@ Node SqliteDatabase::getNode(const Id id, bool *ok) const
     return node;
 }
 
-bool SqliteDatabase::addNode(const Id parent, const Id type) const
+bool SqliteDatabase::addNode(const Integer &parent, const Integer &type) const
 {
     // TODO: implement
 }

@@ -1,7 +1,7 @@
 /**
- * @file   DatabaseId.cpp
+ * @file   Integer.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,54 +20,54 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Id.h"
+#include "Database/DataTypes/Integer.h"
 
-using namespace Database;
+using namespace Database::DataTypes;
 
-Id::Id()
+Integer::Integer()
     : m_null(true),
       m_value(-1LL)
 {
 }
 
-Id::Id(const qint64 value)
+Integer::Integer(const qint64 value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool Id::isNull() const
+bool Integer::isNull() const
 {
     return m_null;
 }
 
-void Id::setNull()
+void Integer::setNull()
 {
     m_null = true;
     m_value = -1LL;
 }
 
-qint64 Id::getValue() const
+qint64 Integer::getValue() const
 {
     return m_value;
 }
 
-void Id::setValue(const qint64 value)
+void Integer::setValue(const qint64 value)
 {
     m_null = false;
     m_value = value;
 }
 
-Id Id::fromField(const QSqlField &field, bool *ok)
+Integer Integer::fromField(const QSqlField &field, bool *ok)
 {
-    Id id;
+    Integer integer;
     bool success = false;
 
-    if (field.isValid() && (field.name() == "Id"))
+    if (field.isValid())
     {
         if (field.isNull())
         {
-            id.setNull();
+            integer.setNull();
             success = true;
         }
         else
@@ -76,7 +76,7 @@ Id Id::fromField(const QSqlField &field, bool *ok)
 
             if (success)
             {
-                id.setValue(value);
+                integer.setValue(value);
             }
         }
     }
@@ -86,5 +86,5 @@ Id Id::fromField(const QSqlField &field, bool *ok)
         *ok = success;
     }
 
-    return id;
+    return integer;
 }

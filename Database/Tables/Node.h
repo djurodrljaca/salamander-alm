@@ -1,7 +1,7 @@
 /**
  * @file   Node.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -23,35 +23,40 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include "Id.h"
+#include "Database/DataTypes/Integer.h"
 #include <QtSql/QSqlRecord>
 
 namespace Database
+{
+namespace Tables
 {
 class Node
 {
 public:
     Node();
-    Node(const Id id, const Id parent, const Id type);
+    Node(const DataTypes::Integer &id,
+         const DataTypes::Integer &parent,
+         const DataTypes::Integer &type);
 
     bool isValid() const;
 
-    Id getId() const;
-    void setId(const Id id);
+    DataTypes::Integer getId() const;
+    void setId(const DataTypes::Integer &id);
 
-    Id getParent() const;
-    void setParent(const Id parent);
+    DataTypes::Integer getParent() const;
+    void setParent(const DataTypes::Integer &parent);
 
-    Id getType() const;
-    void setType(const Id type);
+    DataTypes::Integer getType() const;
+    void setType(const DataTypes::Integer &type);
 
     static Node fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
-    Id m_id;
-    Id m_parent;
-    Id m_type;
+    DataTypes::Integer m_id;
+    DataTypes::Integer m_parent;
+    DataTypes::Integer m_type;
 };
+}
 }
 
 #endif // NODE_H

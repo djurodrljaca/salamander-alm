@@ -23,11 +23,10 @@
 #ifndef SQLITEDATABASE_H
 #define SQLITEDATABASE_H
 
-#include "Node.h"
+#include "Database/DataTypes/Integer.h"
+#include "Database/Tables/Node.h"
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
-
-class QSqlRecord;
 
 namespace Database
 {
@@ -40,8 +39,8 @@ public:
     bool connect();
     void disconnect();
 
-    Node getNode(const Id id, bool *ok = NULL) const;
-    bool addNode(const Id parent, const Id type) const;
+    Tables::Node getNode(const DataTypes::Integer &id, bool *ok = NULL) const;
+    bool addNode(const DataTypes::Integer &parent, const DataTypes::Integer &type) const;
 
 private:
     bool init() const;

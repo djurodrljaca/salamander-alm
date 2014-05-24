@@ -1,7 +1,7 @@
 /**
- * @file   MainWindow.h
+ * @file   Text.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,30 +20,34 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
+#ifndef STRING_H
+#define STRING_H
 
-#include "SqliteDatabase.h"
-#include <QMainWindow>
+#include <QtCore/QString>
+#include <QtSql/QSqlField>
 
-namespace Ui {
-class MainWindow;
-}
-
-class MainWindow : public QMainWindow
+namespace Database
 {
-    Q_OBJECT
-
+namespace DataTypes
+{
+class Text
+{
 public:
-    explicit MainWindow(QWidget *parent = 0);
-    ~MainWindow();
+    Text();
+    Text(const QString &value);
 
-private slots:
-    void buttonPushed();
+    bool isNull() const;
+    void setNull();
+    QString getValue() const;
+    void setValue(const QString &value);
+
+    static Text fromField(const QSqlField &field, bool *ok = NULL);
 
 private:
-    Ui::MainWindow *ui;
-    SqliteDatabase m_database;
+    bool m_null;
+    QString m_value;
 };
+}
+}
 
-#endif // MAINWINDOW_H
+#endif // STRING_H

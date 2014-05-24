@@ -1,7 +1,7 @@
 /**
- * @file   NodeType.cpp
+ * @file   Node.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,82 +20,83 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "NodeType.h"
+#include "Database/Tables/Node.h"
 
-using namespace Database;
+using namespace Database::Tables;
+using namespace Database::DataTypes;
 
-NodeType::NodeType()
+Node::Node()
     : m_id(),
-      m_name()
+      m_parent(),
+      m_type()
 {
 }
 
-NodeType::NodeType(const Id id, QString name)
+Node::Node(const Integer &id,
+           const Integer &parent,
+           const Integer &type)
     : m_id(id),
-      m_name(name)
+      m_parent(parent),
+      m_type(type)
 {
 }
 
-bool NodeType::isValid() const
+bool Node::isValid() const
 {
-    bool valid = false;
-
-    if (!m_id.isNull())
-    {
-        switch (m_id.getValue())
-        {
-            case NodeType::Project:
-            {
-                valid = true;
-                break;
-            }
-
-            default:
-            {
-                valid = false;
-                break;
-            }
-        }
-    }
-
-    return valid;
+    return (m_id.isNull() || m_type.isNull());
 }
 
-Id NodeType::getId() const
+Integer Node::getId() const
 {
     return m_id;
 }
 
-void NodeType::setId(const Id id)
+void Node::setId(const Integer &id)
 {
     m_id = id;
 }
 
-QString NodeType::getName() const
+Integer Node::getParent() const
 {
-    return m_name;
+    return m_parent;
 }
 
-void NodeType::setName(const QString &name)
+void Node::setParent(const Integer &parent)
 {
-    m_name = name;
+    m_parent = parent;
 }
 
-NodeType NodeType::fromRecord(const QSqlRecord &record, bool *ok)
+Integer Node::getType() const
 {
-    NodeType nodeType;
+    return m_type;
+}
+
+void Node::setType(const Integer &type)
+{
+    m_type = type;
+}
+
+Node Node::fromRecord(const QSqlRecord &record, bool *ok)
+{
+    Node node;
     bool success = !record.isEmpty();
 
     // Id
     if (success)
     {
-        nodeType.setId(Id::fromField(record.field("Id"), &success));
+        node.setId(Integer::fromField(record.field("Id"), &success));
     }
 
-    // Name
+    // Parent
     if (success)
     {
-        // TODO: implement
+        node.setParent(Integer::fromField(record.field("Parent"), &success));
+    }
+
+    // Type
+    if (success)
+    {
+        node.setParent(Integer::fromField(record.field("Type"), &success));
     }
 
     if (ok != NULL)
@@ -103,5 +104,5 @@ NodeType NodeType::fromRecord(const QSqlRecord &record, bool *ok)
         *ok = success;
     }
 
-    return nodeType;
+    return node;
 }
