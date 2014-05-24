@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Database/Sqlite/Tables/CreateTable_Node.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeAttachment.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeAttachmentItem.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeAttachmentList.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeAttributes.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeComment.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeCommentItem.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeCommentList.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeDescription.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeName.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeReference.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeReferenceItem.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeReferenceList.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_NodeType.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_Revision.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_User.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_UserGroup.sqlite</file>
+        <file>Database/Sqlite/Tables/CreateTable_UserGroupType.sqlite</file>
+        <file>Database/Sqlite/Tables/Tables.txt</file>
+    </qresource>
+</RCC>

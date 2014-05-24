@@ -1,0 +1,5 @@
+CREATE TABLE `NodeReference` (
+	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`Reference`	INTEGER NOT NULL,
+	FOREIGN KEY(`Reference`) REFERENCES `Node`(`Id`)
+);

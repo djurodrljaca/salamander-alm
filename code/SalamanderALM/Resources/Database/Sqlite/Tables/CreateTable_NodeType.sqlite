@@ -1,0 +1,14 @@
+CREATE TABLE `NodeType` (
+	`Id`	INTEGER NOT NULL PRIMARY KEY,
+	`Name`	TEXT NOT NULL
+);
+
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (1, 'Project');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (2, 'Requirement Group');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (3, 'Requirement Item');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (4, 'Architecture Group');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (5, 'Architecture Item');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (6, 'Design Group');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (7, 'Design Item');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (8, 'Test Case Group');
+INSERT INTO `NodeType`(`Id`,`Name`) VALUES (9, 'Test Case Item');
