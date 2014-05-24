@@ -1,5 +1,5 @@
 /**
- * @file   SqliteDatabase.h
+ * @file   NodeType.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-5-24
  * @brief  Brief description of file.
@@ -20,38 +20,40 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SQLITEDATABASE_H
-#define SQLITEDATABASE_H
+#ifndef NODETYPE_H
+#define NODETYPE_H
 
-#include "Node.h"
-#include <QtCore/QStringList>
-#include <QtSql/QSqlDatabase>
-
-class QSqlRecord;
+#include "Id.h"
+#include <QtCore/QString>
+#include <QtSql/QSqlRecord>
 
 namespace Database
 {
-class SqliteDatabase
+class NodeType
 {
 public:
-    SqliteDatabase();
-    ~SqliteDatabase();
+    enum
+    {
+        Project = 1
+    };
 
-    bool connect();
-    void disconnect();
+    NodeType();
+    NodeType(const Id id, QString name);
 
-    Node getNode(const Id id, bool *ok = NULL) const;
-    bool addNode(const Id parent, const Id type) const;
+    bool isValid() const;
+
+    Id getId() const;
+    void setId(const Id id);
+
+    QString getName() const;
+    void setName(const QString &name);
+
+    static NodeType fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
-    bool init() const;
-    bool createTables() const;
-    QStringList getTableList() const;
-    bool createTable(const QString &tableName) const;
-    bool executeScriptFile(const QString &scriptFilePath) const;
-
-    QSqlDatabase m_database;
+    Id m_id;
+    QString m_name;
 };
 }
 
-#endif // SQLITEDATABASE_H
+#endif // NODETYPE_H

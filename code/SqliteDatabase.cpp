@@ -23,9 +23,12 @@
 #include "SqliteDatabase.h"
 #include <QtSql/QSqlQuery>
 #include <QtSql/QSqlError>
-#include <QtSql/QSqlResult>
+#include <QtSql/QSqlRecord>
+#include <QtSql/QSqlField>
 #include <QtCore/QtDebug>
 #include <QtCore/QFile>
+
+using namespace Database;
 
 SqliteDatabase::SqliteDatabase()
     : m_database()
@@ -64,10 +67,44 @@ void SqliteDatabase::disconnect()
     }
 }
 
-bool SqliteDatabase::init()
+Node SqliteDatabase::getNode(const Id id, bool *ok) const
+{
+    Node node;
+    bool success = false;
+
+    if (!id.isNull())
+    {
+        const QString queryCommand = QString("SELECT `Id`,`Parent`,`Type`"
+                                             " FROM `Node`"
+                                             " WHERE `Id`=%1").arg(id.getValue());
+
+        QSqlQuery query;
+
+        if (query.exec(queryCommand))
+        {
+            if (query.first())
+            {
+                node = Node::fromRecord(query.record(), &success);
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return node;
+}
+
+bool SqliteDatabase::addNode(const Id parent, const Id type) const
+{
+    // TODO: implement
+}
+
+bool SqliteDatabase::init() const
 {
     QSqlQuery query;
-
     bool success = query.exec("PRAGMA foreign_keys = ON;");
 
     if (success)
@@ -78,7 +115,7 @@ bool SqliteDatabase::init()
     return success;
 }
 
-bool SqliteDatabase::createTables()
+bool SqliteDatabase::createTables() const
 {
     bool success = false;
     const QStringList tableList = getTableList();
@@ -100,7 +137,7 @@ bool SqliteDatabase::createTables()
     return success;
 }
 
-QStringList SqliteDatabase::getTableList()
+QStringList SqliteDatabase::getTableList() const
 {
     QFile file(":/Database/Sqlite/Tables/Tables.txt");
 
@@ -118,7 +155,7 @@ QStringList SqliteDatabase::getTableList()
     return tableList;
 }
 
-bool SqliteDatabase::createTable(const QString &tableName)
+bool SqliteDatabase::createTable(const QString &tableName) const
 {
     // Check if table exists
     const QString queryCommand =
@@ -145,7 +182,7 @@ bool SqliteDatabase::createTable(const QString &tableName)
     return success;
 }
 
-bool SqliteDatabase::executeScriptFile(const QString &scriptFilePath)
+bool SqliteDatabase::executeScriptFile(const QString &scriptFilePath) const
 {
     QFile file(scriptFilePath);
 
@@ -161,7 +198,6 @@ bool SqliteDatabase::executeScriptFile(const QString &scriptFilePath)
         foreach (const QString queryCommand, queryList)
         {
             QSqlQuery query;
-
             bool success = query.exec(queryCommand);
 
             if (!success)

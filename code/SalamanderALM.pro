@@ -15,11 +15,15 @@ TEMPLATE = app
 SOURCES += main.cpp\
         MainWindow.cpp \
     SqliteDatabase.cpp \
-    Id.cpp
+    Id.cpp \
+    Node.cpp \
+    NodeType.cpp
 
 HEADERS  += MainWindow.h \
     SqliteDatabase.h \
-    Id.h
+    Id.h \
+    Node.h \
+    NodeType.h
 
 FORMS    += MainWindow.ui
 

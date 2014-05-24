@@ -24,6 +24,7 @@
 #define DATABASEID_H
 
 #include <QtGlobal>
+#include <QtSql/QSqlField>
 
 namespace Database
 {
@@ -33,10 +34,12 @@ public:
     Id();
     Id(const qint64 value);
 
-    bool isNull();
+    bool isNull() const;
     void setNull();
-    qint64 getValue();
+    qint64 getValue() const;
     void setValue(const qint64 value);
+
+    static Id fromField(const QSqlField &field, bool *ok = NULL);
 
 private:
     bool m_null;
