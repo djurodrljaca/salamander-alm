@@ -1,0 +1,170 @@
+1. Node
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Parent: int64 + null, forgein key to Node.Id
+  - Type: int64, forgein key to NodeType.Id
+
+Constraints:
+  - Node.Parent --> Node.Id
+  - Node.Type --> NodeType.Id
+  - Comment.Node --> Node.Id
+
+2. NodeRevision
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Node: int64, forgein key to Node.Id
+  - Revision: int64
+  - Timestamp: datetime
+  - User: int64, forgein key to User.Id
+  - Name: int64 + null, forgein key to NodeName.Id
+  - Description: int64 + null, forgein key to NodeDescription.Id
+  - Status: int64, forgein key to NodeStatusType.Id
+  - Priority: int64, forgein key to NodePriorityType.Id
+  - References: int64 + null, forgein key to RevisionGenericList.Id
+  - Attachments: int64 + null, forgein key to RevisionGenericList.Id
+  - CustomAttributes: int64 + null, forgein key to RevisionGenericList.Id
+
+Constraints:
+  - NodeRevision.Node --> Node.Id
+  - NodeRevision.User --> User.Id
+  - NodeRevision.Name --> NodeName.Id
+  - NodeRevision.Description --> NodeDescription.Id
+  - NodeRevision.Status --> NodeStatusType.Id
+  - NodeRevision.Priority --> NodePriorityType.Id
+  - NodeRevision.References --> RevisionGenericList.Id (RevisionGenericList.Type == <Node Reference>)
+  - NodeRevision.Attachments --> RevisionGenericList.Id (RevisionGenericList.Type == <Attachment>)
+  - NodeRevision.CustomAttributes --> RevisionGenericList.Id (RevisionGenericList.Type == <Custom Attributes>)
+
+3. NodeName
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Name: string
+  - IsLatestRevision: bool
+
+Constraints:
+  - NodeRevision.Name --> NodeName.Id
+
+4. NodeDescription
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Description: string
+  - IsLatestRevision: bool
+
+Constraints:
+  - NodeRevision.Description --> NodeDescription.Id
+
+5. RevisionGenericList
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Type: int64, forgein key to RevisionGenericListType.Id
+  - IsLatestRevision: bool
+
+Constraints:
+  - RevisionGenericList.Type --> RevisionGenericListType.Id
+  - <Table defined by RevisionGenericListType.Id>.List --> RevisionGenericList.Id
+
+6. NodeReferenceListItem
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - List: int64, forgein key to RevisionGenericList.Id
+  - Node: int64, forgein key to Node.Id
+  - Reference: int64, forgein key to Node.Id
+  - IsLatestRevision: bool
+
+Constraints:
+  - NodeReferenceListItem.List --> RevisionGenericList.Id
+  - NodeReferenceListItem.Node --> Node.Id
+  - NodeReferenceListItem.Reference --> Node.Id
+
+7. AttachmentItem
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - List: int64, forgein key to RevisionGenericList.Id
+  - FileName: string
+  - FileData: binary blob (or location on disk?)
+  - IsLatestRevision: bool
+
+Constraints:
+  - AttachmentReferenceItem.List --> RevisionGenericList.Id
+
+8. CustomAttributeItem
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - List: int64, forgein key to RevisionGenericList.Id
+  - Type: int64, forgein key to CustomAttributeItemType.Id
+  - Attribute: int64
+  - IsLatestRevision: bool
+
+Constraints:
+  - CustomAttributeItem.List --> RevisionGenericList.Id
+  - CustomAttributeItem.Type --> CustomAttributeItemType.Id
+  - CustomAttributeItem.Attribute --> <Table defined by CustomAttributeItemType.Id>.Id
+
+9. Comment
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Node: int64, forgein key to Node.Id
+  - User: int64, forgein key to User.Id
+  - Comment: string
+  - Timestamp: datetime
+
+Constraints:
+  - Comment.Node --> Node.Id
+  - Comment.User --> User.Id
+
+10. NodeType
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Name: string
+  - Description: string
+
+Constraints:
+  - Node.Type --> NodeType.Id
+
+11. NodeStatusType
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Name: string
+  - Description: string
+
+Constraints:
+  - NodeRevision.Status --> NodeStatusType.Id
+
+12. NodePriorityType
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Name: string
+  - Description: string
+
+Constraints:
+  - NodeRevision.Priority --> NodePriorityType.Id
+
+13. RevisionGenericListType
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Name: string
+  - Description: string
+
+Constraints:
+  - RevisionGenericList.Type --> RevisionGenericListType.Id
+
+14. User
+Table:
+  - Id: int64, primary key, index, unique/auto-increment
+  - Group: int64, forgein key to UserGroup.Id
+  - Name: string
+  - Description: string
+
+Constraints:
+  - User.Group --> UserGroup.Id
+  - NodeRevision.User --> User.Id
+  - Comment.User --> User.Id
+
+15. Group
+Table:
+  - Id: int64, primary key, index, unique/auto-increment+
+  - Name: string
+  - Description: string
+
+Constraints:
+  - User.Group --> UserGroup.Id

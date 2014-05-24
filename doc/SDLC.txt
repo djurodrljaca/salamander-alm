@@ -1,0 +1,68 @@
+1. Requirements
+Fields:
+- ID
+- parent ID
+- name
+- description
+- priority
+- status
+- references to other items
+- referenced by other items
+- attachments
+- comments
+- revisions/history
+
+2. Test cases
+Fields:
+- ID
+- parent ID
+- name
+- description
+- status
+- references to other items
+- referenced by other items
+- attachments
+- comments
+- revisions/history
+
+3. Architecture
+Fields:
+- ID
+- parent ID
+- name
+- description
+- priority
+- status
+- references to other items
+- referenced by other items
+- attachments
+- comments
+- revisions/history
+
+4. Design
+Fields:
+- ID
+- parent ID
+- name
+- description
+- priority
+- status
+- references to other items
+- referenced by other items
+- attachments
+- comments
+- revisions/history
+
+5. Project
+Fields:
+- ID
+- parent ID = null
+- name
+- description
+- priority???
+- status
+- references to other items???
+- referenced by other items???
+- attachments???
+- comments???
+- revisions/history

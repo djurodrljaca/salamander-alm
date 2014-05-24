@@ -1,0 +1,8 @@
+CREATE TABLE `User` (
+	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+	`Group`	INTEGER NOT NULL,
+	`Name`	TEXT NOT NULL,
+	`Description`	TEXT,
+	`Password`	TEXT NOT NULL,
+	FOREIGN KEY(`Group`) REFERENCES `UserGroup`(`Id`)
+);

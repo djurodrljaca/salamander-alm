@@ -1,0 +1,232 @@
+-------------------------------------------------
+| Node
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Parent: int64 + null, forgein key to Node.Id
+	- Type: int64, forgein key to NodeType.Id
+
+Constraints:
+	- Parent --> Node.Id
+	- Type --> NodeType.Id
+
+-------------------------------------------------
+| NodeType
+-------------------------------------------------
+Table:
+	- Id: int, primary key
+	- Name: string
+
+Available type:
+	- 1: Project
+	- 2: Requirement Group
+	- 3: Requirement Item
+	- 4: Architecture Group
+	- 5: Architecture Item
+	- 6: Design Group
+	- 7: Design Item
+	- 8: Test Case Group
+	- 9: Test Case Item
+	- ...
+
+-------------------------------------------------
+| NodeAttributes
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Node: int64, forgein key to Node.Id
+	- Revision: int64, forgein key to Revision.Id
+	- Name: int64, forgein key to NodeName.Id
+	- Description: int64 + null, forgein key to NodeDescription.Id
+	- References: int64 + null, forgein key to NodeReferenceList.Id
+	- Attachments: int64 + null, forgein key to NodeAttachmentList.Id
+	- Comments: int64 + null, forgein key to NodeCommentList.Id
+	- IsActive: bool
+
+Constraints:
+	- Node --> Node.Id
+	- Revision --> Revision.Id
+	- Name --> NodeName.Id
+	- Description --> NodeDescription.Id
+	- References --> NodeReferenceList.Id
+	- Attachments --> NodeAttachmentList.Id
+	- Comments --> NodeCommentList.Id
+
+-------------------------------------------------
+| Revision
+-------------------------------------------------
+Table:
+	- Id: int64, primary key
+	- Timestamp: datetime
+	- User: int64, forgein key to User.Id
+
+Constraints:
+	- User --> User.Id
+
+-------------------------------------------------
+| UserGroup
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Name: string
+	- Type: int64, forgein key to UserGroupType.Id
+	- Description: string
+
+Constraints:
+	- Type --> UserGroupType.Id
+
+-------------------------------------------------
+| UserGroupType
+-------------------------------------------------
+Table:
+	- Id: int, primary key
+	- Name: string
+
+Available type:
+	- 1: Administrator
+	- 2: User
+	- ...
+
+-------------------------------------------------
+| User
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Group: int64, forgein key to UserGroup.Id
+	- Name: string
+	- Description: string
+	- Password: string
+
+Constraints:
+	- Group --> UserGroup.Id
+
+-------------------------------------------------
+| NodeName
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Text: string
+
+-------------------------------------------------
+| NodeDescription
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Text: string
+
+-------------------------------------------------
+| NodeReferenceList
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+
+-------------------------------------------------
+| NodeReferenceItem
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- List: int64, forgein key to NodeReferenceList.Id
+	- Reference: int64, forgein key to NodeReference.Id
+
+Constraints:
+	- List --> NodeReferenceList.Id
+	- Reference --> NodeReference.Id
+
+-------------------------------------------------
+| NodeReference
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Node: int64, forgein key to Node.Id
+
+Constraints:
+	- Node --> Node.Id
+
+-------------------------------------------------
+| NodeAttachmentList
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+
+-------------------------------------------------
+| NodeAttachmentItem
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- List: int64, forgein key to NodeAttachmentList.Id
+	- Attachment: int64, forgein key to NodeAttachment.Id
+
+Constraints:
+	- List --> NodeAttachmentList.Id
+	- Attachment --> NodeAttachment.Id
+
+-------------------------------------------------
+| NodeAttachment
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- FileName: string
+	- FileData: binary blob
+
+-------------------------------------------------
+| NodeCommentList
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+
+-------------------------------------------------
+| NodeCommentItem
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- List: int64, forgein key to NodeCommentList.Id
+	- Comment: int64, forgein key to NodeComment.Id
+
+Constraints:
+	- List --> NodeCommentList.Id
+	- Comment --> NodeComment.Id
+
+-------------------------------------------------
+| NodeComment
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- Text: string
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------
+| ProjectNodeAttributes
+-------------------------------------------------
+Table:
+	- Id: int64, primary key, auto-increment
+	- NodeAttributes: int64, forgein key to NodeAttributes.Id
+	- Status: int64, forgein key to ProjectNodeStatus.Id
+
+Constraints:
+	- NodeAttributes --> NodeAttributes.Id
+	- Status --> ProjectNodeStatus.Id
+
+-------------------------------------------------
+| ProjectNodeStatus
+-------------------------------------------------
+Table:
+	- Id: int, primary key
+	- Name: string
+	- DisplayedName: string
+
+Available statuses:
+	- 1: x?
+	- 2: y?
+	- 3: z?
+	- ...
