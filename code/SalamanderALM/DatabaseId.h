@@ -1,5 +1,5 @@
 /**
- * @file   SqliteDatabase.h
+ * @file   DatabaseId.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-5-24
  * @brief  Brief description of file.
@@ -20,29 +20,25 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SQLITEDATABASE_H
-#define SQLITEDATABASE_H
+#ifndef DATABASEID_H
+#define DATABASEID_H
 
-#include <QtCore/QStringList>
-#include <QtSql/QSqlDatabase>
+#include <QtGlobal>
 
-class SqliteDatabase
+class DatabaseId
 {
 public:
-    SqliteDatabase();
-    ~SqliteDatabase();
+    DatabaseId();
+    DatabaseId(const qint64 id);
 
-    bool connect();
-    void disconnect();
+    bool isNull();
+    void setNull();
+    qint64 getId();
+    void setId(const qint64 id);
 
 private:
-    bool init();
-    bool createTables();
-    QStringList getTableList();
-    bool createTable(const QString &tableName);
-    bool executeScriptFile(const QString &scriptFilePath);
-
-    QSqlDatabase m_database;
+    qint64 m_id;
+    bool m_null;
 };
 
-#endif // SQLITEDATABASE_H
+#endif // DATABASEID_H

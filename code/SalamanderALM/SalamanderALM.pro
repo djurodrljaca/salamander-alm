@@ -14,12 +14,14 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         MainWindow.cpp \
-    SqliteDatabase.cpp
+    SqliteDatabase.cpp \
+    DatabaseId.cpp
 
 HEADERS  += MainWindow.h \
-    SqliteDatabase.h
+    SqliteDatabase.h \
+    DatabaseId.h
 
 FORMS    += MainWindow.ui
 
 RESOURCES += \
-    Resources/Database.qrc
+    Resources/Database/Database.qrc

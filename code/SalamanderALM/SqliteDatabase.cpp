@@ -38,7 +38,7 @@ SqliteDatabase::~SqliteDatabase()
     m_database.removeDatabase("SalamanderALM");
 }
 
-bool SqliteDatabase::open()
+bool SqliteDatabase::connect()
 {
     m_database.setDatabaseName("SalamanderALM.db3");
     bool success = m_database.open();
@@ -49,14 +49,14 @@ bool SqliteDatabase::open()
 
         if (!success)
         {
-            close();
+            disconnect();
         }
     }
 
     return success;
 }
 
-void SqliteDatabase::close()
+void SqliteDatabase::disconnect()
 {
     if (m_database.isOpen())
     {

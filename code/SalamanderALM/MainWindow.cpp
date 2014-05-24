@@ -36,12 +36,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    m_database.close();
+    m_database.disconnect();
     delete ui;
 }
 
 void MainWindow::buttonPushed()
 {
-    bool success = m_database.open();
+    bool success = m_database.connect();
     qDebug() << "Database opened:" << success;
 }
