@@ -27,7 +27,10 @@ SOURCES += \
     Database/Tables/UserGroupType.cpp \
     Database/Tables/User.cpp \
     Database/Tables/NodeName.cpp \
-    Database/Tables/NodeDescription.cpp
+    Database/Tables/NodeDescription.cpp \
+    Database/Tables/NodeReferenceList.cpp \
+    Database/Tables/NodeReferenceItem.cpp \
+    Database/Tables/NodeReference.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -44,7 +47,10 @@ HEADERS  += \
     Database/Tables/UserGroupType.h \
     Database/Tables/User.h \
     Database/Tables/NodeName.h \
-    Database/Tables/NodeDescription.h
+    Database/Tables/NodeDescription.h \
+    Database/Tables/NodeReferenceList.h \
+    Database/Tables/NodeReferenceItem.h \
+    Database/Tables/NodeReference.h
 
 FORMS    += \
     MainWindow.ui
