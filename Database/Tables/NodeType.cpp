@@ -101,6 +101,13 @@ NodeType NodeType::fromRecord(const QSqlRecord &record, bool *ok)
         nodeType.setName(Text::fromField(record.field("Name"), &success));
     }
 
+    // Check NodeType
+    if (!nodeType.isValid())
+    {
+        nodeType = NodeType();
+        success = false;
+    }
+
     if (ok != NULL)
     {
         *ok = success;

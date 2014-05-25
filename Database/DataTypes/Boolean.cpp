@@ -1,5 +1,5 @@
 /**
- * @file   Text.cpp
+ * @file   Boolean.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,61 +20,65 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/DataTypes/Text.h"
+#include "Database/DataTypes/Boolean.h"
 
 using namespace Database::DataTypes;
 
-Text::Text()
+Boolean::Boolean()
     : m_null(true),
-      m_value()
+      m_value(false)
 {
 }
 
-Text::Text(const QString &value)
+Boolean::Boolean(const bool value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool Text::isNull() const
+bool Boolean::isNull() const
 {
     return m_null;
 }
 
-void Text::setNull()
+void Boolean::setNull()
 {
     m_null = true;
-    m_value = QString();
+    m_value = false;
 }
 
-QString Text::getValue() const
+bool Boolean::getValue() const
 {
     return m_value;
 }
 
-void Text::setValue(const QString &value)
+void Boolean::setValue(const bool value)
 {
     m_null = false;
     m_value = value;
 }
 
-Text Text::fromField(const QSqlField &field, bool *ok)
+Boolean Boolean::fromField(const QSqlField &field, bool *ok)
 {
-    Text string;
+    Boolean boolean;
     bool success = false;
 
     if (field.isValid())
     {
         if (field.isNull())
         {
-            string.setNull();
+            bool.setNull();
+            success = true;
         }
         else
         {
-            string.setValue(field.value().toString());
-        }
+            const bool value = field.value().toLongLong(&success);
 
-        success = true;
+            if (success)
+            {
+                boolean.setValue(value);
+            }
+        }
     }
 
     if (ok != NULL)
@@ -82,5 +86,5 @@ Text Text::fromField(const QSqlField &field, bool *ok)
         *ok = success;
     }
 
-    return string;
+    return boolean;
 }

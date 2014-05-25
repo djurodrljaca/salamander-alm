@@ -19,14 +19,6 @@ Table:
 
 Available type:
 	- 1: Project
-	- 2: Requirement Group
-	- 3: Requirement Item
-	- 4: Architecture Group
-	- 5: Architecture Item
-	- 6: Design Group
-	- 7: Design Item
-	- 8: Test Case Group
-	- 9: Test Case Item
 	- ...
 
 -------------------------------------------------

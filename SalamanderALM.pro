@@ -18,7 +18,9 @@ SOURCES += \
     Database/DataTypes/Integer.cpp \
     Database/Tables/Node.cpp \
     Database/Tables/NodeType.cpp \
-    Database/DataTypes/Text.cpp
+    Database/DataTypes/Text.cpp \
+    Database/DataTypes/Boolean.cpp \
+    Database/Tables/NodeAttributes.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -26,7 +28,9 @@ HEADERS  += \
     Database/DataTypes/Integer.h \
     Database/Tables/Node.h \
     Database/Tables/NodeType.h \
-    Database/DataTypes/Text.h
+    Database/DataTypes/Text.h \
+    Database/DataTypes/Boolean.h \
+    Database/Tables/NodeAttributes.h
 
 FORMS    += \
     MainWindow.ui

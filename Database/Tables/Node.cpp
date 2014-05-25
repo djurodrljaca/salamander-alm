@@ -99,6 +99,13 @@ Node Node::fromRecord(const QSqlRecord &record, bool *ok)
         node.setParent(Integer::fromField(record.field("Type"), &success));
     }
 
+    // Check Node
+    if (!node.isValid())
+    {
+        node = Node();
+        success = false;
+    }
+
     if (ok != NULL)
     {
         *ok = success;
