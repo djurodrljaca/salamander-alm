@@ -41,6 +41,8 @@ public:
     QString getValue() const;
     void setValue(const QString &value);
 
+    QVariant toVariant() const;
+
     static Text fromField(const QSqlField &field, bool *ok = NULL);
 
 private:

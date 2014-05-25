@@ -58,6 +58,18 @@ void Text::setValue(const QString &value)
     m_value = value;
 }
 
+QVariant Text::toVariant() const
+{
+    QVariant value(QVariant::String);
+
+    if (!isNull())
+    {
+        value.setValue(m_value);
+    }
+
+    return value;
+}
+
 Text Text::fromField(const QSqlField &field, bool *ok)
 {
     Text text;

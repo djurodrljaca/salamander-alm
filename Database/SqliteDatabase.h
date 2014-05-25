@@ -43,8 +43,10 @@ public:
     bool validate() const;
     bool create();
 
+    bool addNode(const DataTypes::Integer &parent,
+                 const DataTypes::Integer &type,
+                 DataTypes::Integer *id = NULL) const;
     Tables::Node getNode(const DataTypes::Integer &id, bool *ok = NULL) const;
-    bool addNode(const DataTypes::Integer &parent, const DataTypes::Integer &type) const;
 
 
 

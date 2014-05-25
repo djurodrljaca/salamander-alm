@@ -58,8 +58,71 @@ void Integer::setValue(const qint64 value)
     m_value = value;
 }
 
+QVariant Integer::toVariant() const
+{
+    QVariant value(QVariant::LongLong);
+
+    if (!isNull())
+    {
+        value.setValue(m_value);
+    }
+
+    return value;
+}
+
+Integer Integer::fromVariant(const QVariant &value, bool *ok)
+{
+    Integer integerValue;
+    bool success = value.isValid();
+
+    if (success)
+    {
+        if (value.isNull())
+        {
+            integerValue.setNull();
+        }
+        else
+        {
+            if (value.canConvert(QVariant::LongLong))
+            {
+                const qint64 newValue = value.toLongLong(&success);
+
+                if (success)
+                {
+                    integerValue.setValue(newValue);
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return integerValue;
+}
+
+QString Integer::toString() const
+{
+    QString str;
+
+    if (isNull())
+    {
+        str = QString("NULL");
+    }
+    else
+    {
+        str = QString::number(getValue());
+    }
+
+    return str;
+}
+
 Integer Integer::fromField(const QSqlField &field, bool *ok)
 {
+    // TODO: remove?
+
     Integer integer;
     bool success = false;
 

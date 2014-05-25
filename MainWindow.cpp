@@ -22,6 +22,7 @@
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
+#include "Database/DataTypes/Integer.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -31,7 +32,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->pushButton, SIGNAL(clicked()), this, SLOT(buttonPushed()));
+    connect(ui->connect_pushButton, SIGNAL(clicked()), this, SLOT(connectButtonPushed()));
+    connect(ui->add_pushButton, SIGNAL(clicked()), this, SLOT(addButtonPushed()));
+    connect(ui->get_pushButton, SIGNAL(clicked()), this, SLOT(getButtonPushed()));
 }
 
 MainWindow::~MainWindow()
@@ -40,7 +43,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::buttonPushed()
+void MainWindow::connectButtonPushed()
 {
     bool success = m_database.connect();
     qDebug() << "Database opened:" << success;
@@ -55,5 +58,31 @@ void MainWindow::buttonPushed()
     {
         success = m_database.create();
         qDebug() << "Database reinitialized:" << success;
+    }
+}
+
+void MainWindow::addButtonPushed()
+{
+    if (m_database.isConnected())
+    {
+        using namespace Database::DataTypes;
+        Integer id;
+
+        bool success = m_database.addNode(Integer(), Integer(1), &id);
+        qDebug() << "MainWindow::addButtonPushed:" << success << id.toString();
+    }
+}
+
+void MainWindow::getButtonPushed()
+{
+    if (m_database.isConnected())
+    {
+        using namespace Database::DataTypes;
+        using namespace Database::Tables;
+
+        bool success = false;
+        const Integer id(1);
+        const Node node = m_database.getNode(id, &success);
+        qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << node.toString();
     }
 }

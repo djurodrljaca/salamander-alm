@@ -42,6 +42,8 @@ public:
     QDateTime getValue() const;
     void setValue(const QDateTime &value);
 
+    QVariant toVariant() const;
+
     static DateTime fromField(const QSqlField &field, bool *ok = NULL);
 
 private:

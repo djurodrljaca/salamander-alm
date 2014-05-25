@@ -41,6 +41,8 @@ public:
     bool getValue() const;
     void setValue(const bool value);
 
+    QVariant toVariant() const;
+
     static Boolean fromField(const QSqlField &field, bool *ok = NULL);
 
 private:

@@ -60,6 +60,18 @@ void DateTime::setValue(const QDateTime &value)
     m_value = value;
 }
 
+QVariant DateTime::toVariant() const
+{
+    QVariant value(QVariant::DateTime);
+
+    if (!isNull())
+    {
+        value.setValue(m_value);
+    }
+
+    return value;
+}
+
 DateTime DateTime::fromField(const QSqlField &field, bool *ok)
 {
     DateTime dateTime;

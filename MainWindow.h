@@ -39,7 +39,9 @@ public:
     ~MainWindow();
 
 private slots:
-    void buttonPushed();
+    void connectButtonPushed();
+    void addButtonPushed();
+    void getButtonPushed();
 
 private:
     Ui::MainWindow *ui;

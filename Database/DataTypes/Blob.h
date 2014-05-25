@@ -41,6 +41,8 @@ public:
     QByteArray getValue() const;
     void setValue(const QByteArray &value);
 
+    QVariant toVariant() const;
+
     static Blob fromField(const QSqlField &field, bool *ok = NULL);
 
 private:

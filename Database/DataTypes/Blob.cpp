@@ -58,6 +58,18 @@ void Blob::setValue(const QByteArray &value)
     m_value = value;
 }
 
+QVariant Blob::toVariant() const
+{
+    QVariant value(QVariant::ByteArray);
+
+    if (!isNull())
+    {
+        value.setValue(m_value);
+    }
+
+    return value;
+}
+
 Blob Blob::fromField(const QSqlField &field, bool *ok)
 {
     Blob blob;

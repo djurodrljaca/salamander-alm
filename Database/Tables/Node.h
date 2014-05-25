@@ -25,6 +25,7 @@
 
 #include "Database/DataTypes/Integer.h"
 #include <QtSql/QSqlRecord>
+#include <QtCore/QString>
 
 namespace Database
 {
@@ -49,7 +50,7 @@ public:
     DataTypes::Integer getType() const;
     void setType(const DataTypes::Integer &type);
 
-    static Node fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    QString toString() const;
 
 private:
     DataTypes::Integer m_id;

@@ -77,41 +77,11 @@ void Node::setType(const Integer &type)
     m_type = type;
 }
 
-Node Node::fromRecord(const QSqlRecord &record, bool *ok)
+QString Node::toString() const
 {
-    Node node;
-    bool success = !record.isEmpty();
+    static const QString str("Id=%1 Parent=%2 Type=%3");
 
-    // Id
-    if (success)
-    {
-        node.setId(Integer::fromField(record.field("Id"), &success));
-    }
-
-    // Parent
-    if (success)
-    {
-        node.setParent(Integer::fromField(record.field("Parent"), &success));
-    }
-
-    // Type
-    if (success)
-    {
-        node.setType(Integer::fromField(record.field("Type"), &success));
-    }
-
-    // Check Node
-    if (!success ||
-        !node.isValid())
-    {
-        node = Node();
-        success = false;
-    }
-
-    if (ok != NULL)
-    {
-        *ok = success;
-    }
-
-    return node;
+    return str.arg(m_id.toString(),
+                   m_parent.toString(),
+                   m_type.toString());
 }

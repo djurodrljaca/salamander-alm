@@ -58,6 +58,18 @@ void Boolean::setValue(const bool value)
     m_value = value;
 }
 
+QVariant Boolean::toVariant() const
+{
+    QVariant value(QVariant::Bool);
+
+    if (!isNull())
+    {
+        value.setValue(m_value);
+    }
+
+    return value;
+}
+
 Boolean Boolean::fromField(const QSqlField &field, bool *ok)
 {
     Boolean boolean;
