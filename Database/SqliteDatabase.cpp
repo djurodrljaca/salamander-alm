@@ -232,7 +232,7 @@ bool SqliteDatabase::addNode(const Integer &parent, const Integer &type, Integer
 
             if (success)
             {
-                *id = Integer::fromVariant(query.value(0), &success);
+                *id = convertVariantToInteger(query.value(0), &success);
 
                 if (success && id->isNull())
                 {
@@ -254,7 +254,7 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
     {
         // Get Node from database
         static const QString selectCommand(
-                    "SELECT `Id`,`Parent`,`Type`"
+                    "SELECT `Parent`,`Type`"
                     " FROM `Node`"
                     " WHERE `Id`=:Id"
                     );
@@ -277,25 +277,13 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
         // Id
         if (success)
         {
-            Integer value = Integer::fromVariant(query.value(0), &success);
-
-            if (success)
-            {
-                if (value.isNull())
-                {
-                    success = false;
-                }
-                else
-                {
-                    node.setId(value);
-                }
-            }
+            node.setId(id);
         }
 
         // Parent
         if (success)
         {
-            Integer value = Integer::fromVariant(query.value(1), &success);
+            const Integer value = convertVariantToInteger(query.value(0), &success);
 
             if (success)
             {
@@ -306,7 +294,7 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
         // Type
         if (success)
         {
-            Integer value = Integer::fromVariant(query.value(2), &success);
+            const Integer value = convertVariantToInteger(query.value(1), &success);
 
             if (success)
             {
@@ -333,6 +321,66 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
     }
 
     return node;
+}
+
+NodeType SqliteDatabase::getNodeType(const Integer &id, bool *ok) const
+{
+    NodeType nodeType;
+    bool success = false;
+
+    if (!id.isNull())
+    {
+        // Get NodeType from database
+        static const QString selectCommand(
+                    "SELECT `Name`"
+                    " FROM `NodeType`"
+                    " WHERE `Id`=:Id"
+                    );
+
+        QSqlQuery query;
+        success = query.prepare(selectCommand);
+
+        if (success)
+        {
+            query.bindValue(":Id", id.toVariant());
+
+            success = query.exec();
+
+            if (success)
+            {
+                success = query.first();
+            }
+        }
+
+        // Id
+        if (success)
+        {
+            nodeType.setId(id);
+        }
+
+        // Name
+        if (success)
+        {
+            const Text value = convertVariantToText(query.value(0), &success);
+
+            if (success)
+            {
+                nodeType.setName(value);
+            }
+        }
+    }
+
+    if (!success || !nodeType.isValid())
+    {
+        nodeType = NodeType();
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return nodeType;
 }
 
 
@@ -622,4 +670,76 @@ bool SqliteDatabase::executeScriptFile(const QString &scriptFilePath) const
     }
 
     return success;
+}
+
+Integer SqliteDatabase::convertVariantToInteger(const QVariant &value, bool *ok) const
+{
+    Integer integerValue;
+    bool success = value.isValid();
+
+    if (success)
+    {
+        if (value.isNull())
+        {
+            integerValue.setNull();
+        }
+        else
+        {
+            switch (value.type())
+            {
+                case QVariant::Int:
+                case QVariant::LongLong:
+                {
+                    const qint64 newValue = value.toLongLong(&success);
+
+                    if (success)
+                    {
+                        integerValue.setValue(newValue);
+                    }
+                    break;
+                }
+
+                default:
+                {
+                    success = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return integerValue;
+}
+
+Text SqliteDatabase::convertVariantToText(const QVariant &value, bool *ok) const
+{
+    Text textValue;
+    bool success = value.isValid();
+
+    if (success)
+    {
+        if (value.isNull())
+        {
+            textValue.setNull();
+        }
+        else
+        {
+            if (value.type() == QVariant::String)
+            {
+                textValue.setValue(value.toString());
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return textValue;
 }

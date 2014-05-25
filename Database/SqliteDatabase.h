@@ -25,6 +25,7 @@
 
 #include "Database/DataTypes/Integer.h"
 #include "Database/Tables/Node.h"
+#include "Database/Tables/NodeType.h"
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
 
@@ -48,6 +49,8 @@ public:
                  DataTypes::Integer *id = NULL) const;
     Tables::Node getNode(const DataTypes::Integer &id, bool *ok = NULL) const;
 
+    Tables::NodeType getNodeType(const DataTypes::Integer &id, bool *ok = NULL) const;
+
 
 
 
@@ -70,6 +73,9 @@ private:
     QStringList getTableList() const;
     bool createTable(const QString &tableName) const;
     bool executeScriptFile(const QString &scriptFilePath) const;
+
+    DataTypes::Integer convertVariantToInteger(const QVariant &value, bool *ok = NULL) const;
+    DataTypes::Text convertVariantToText(const QVariant &value, bool *ok = NULL) const;
 
     QSqlDatabase m_database;
 };

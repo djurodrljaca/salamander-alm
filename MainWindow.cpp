@@ -82,7 +82,11 @@ void MainWindow::getButtonPushed()
 
         bool success = false;
         const Integer id(1);
+
         const Node node = m_database.getNode(id, &success);
         qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << node.toString();
+
+        const NodeType nodeType = m_database.getNodeType(id, &success);
+        qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << nodeType.toString();
     }
 }

@@ -26,6 +26,7 @@
 #include "Database/DataTypes/Integer.h"
 #include "Database/DataTypes/Text.h"
 #include <QtCore/QString>
+#include <QtCore/QVariant>
 #include <QtSql/QSqlRecord>
 
 namespace Database
@@ -52,7 +53,7 @@ public:
     DataTypes::Text getName() const;
     void setName(const DataTypes::Text &name);
 
-    static NodeType fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    QString toString() const;
 
 private:
     DataTypes::Integer m_id;

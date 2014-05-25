@@ -70,8 +70,26 @@ QVariant Text::toVariant() const
     return value;
 }
 
+QString Text::toString() const
+{
+    QString str;
+
+    if (isNull())
+    {
+        str = QString("NULL");
+    }
+    else
+    {
+        str = getValue();
+    }
+
+    return str;
+}
+
 Text Text::fromField(const QSqlField &field, bool *ok)
 {
+    // TODO: remove?
+
     Text text;
     bool success = false;
 

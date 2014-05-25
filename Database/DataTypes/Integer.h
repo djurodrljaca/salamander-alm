@@ -44,8 +44,6 @@ public:
     void setValue(const qint64 value);
 
     QVariant toVariant() const;
-    static Integer fromVariant(const QVariant &value, bool *ok = NULL);
-
     QString toString() const;
 
     static Integer fromField(const QSqlField &field, bool *ok = NULL);

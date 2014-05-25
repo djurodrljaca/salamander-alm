@@ -70,39 +70,6 @@ QVariant Integer::toVariant() const
     return value;
 }
 
-Integer Integer::fromVariant(const QVariant &value, bool *ok)
-{
-    Integer integerValue;
-    bool success = value.isValid();
-
-    if (success)
-    {
-        if (value.isNull())
-        {
-            integerValue.setNull();
-        }
-        else
-        {
-            if (value.canConvert(QVariant::LongLong))
-            {
-                const qint64 newValue = value.toLongLong(&success);
-
-                if (success)
-                {
-                    integerValue.setValue(newValue);
-                }
-            }
-        }
-    }
-
-    if (ok != NULL)
-    {
-        *ok = success;
-    }
-
-    return integerValue;
-}
-
 QString Integer::toString() const
 {
     QString str;

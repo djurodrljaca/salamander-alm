@@ -42,6 +42,7 @@ public:
     void setValue(const QString &value);
 
     QVariant toVariant() const;
+    QString toString() const;
 
     static Text fromField(const QSqlField &field, bool *ok = NULL);
 

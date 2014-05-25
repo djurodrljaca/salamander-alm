@@ -86,35 +86,10 @@ void NodeType::setName(const Text &name)
     m_name = name;
 }
 
-NodeType NodeType::fromRecord(const QSqlRecord &record, bool *ok)
+QString NodeType::toString() const
 {
-    NodeType nodeType;
-    bool success = !record.isEmpty();
+    static const QString str("NodeType (Id='%1' Name='%2')");
 
-    // Id
-    if (success)
-    {
-        nodeType.setId(Integer::fromField(record.field("Id"), &success));
-    }
-
-    // Name
-    if (success)
-    {
-        nodeType.setName(Text::fromField(record.field("Name"), &success));
-    }
-
-    // Check NodeType
-    if (!success ||
-        !nodeType.isValid())
-    {
-        nodeType = NodeType();
-        success = false;
-    }
-
-    if (ok != NULL)
-    {
-        *ok = success;
-    }
-
-    return nodeType;
+    return str.arg(m_id.toString(),
+                   m_name.toString());
 }

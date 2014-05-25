@@ -79,7 +79,7 @@ void Node::setType(const Integer &type)
 
 QString Node::toString() const
 {
-    static const QString str("Id=%1 Parent=%2 Type=%3");
+    static const QString str("Node (Id='%1' Parent='%2' Type='%3')");
 
     return str.arg(m_id.toString(),
                    m_parent.toString(),
