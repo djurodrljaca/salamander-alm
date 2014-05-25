@@ -28,6 +28,47 @@
 #include <QtCore/QtDebug>
 #include <QtCore/QFile>
 
+#define SQLITE_PRAGMA_APPLICATION_ID qint32(0x5A1ADEA1) /* App. ID: SAlA(man)DE(r) Al(m) */
+#define SQLITE_PRAGMA_ENCODING       QString("UTF-8")
+#define SQLITE_PRAGMA_LOCKING_MODE   QString("exclusive")
+#define SQLITE_PRAGMA_USER_VERSION   qint32(0) /* User version */
+
+#define SQLITE_PRAGMA_CASE_SENSITIVE_LIKE int(0) /* Case-insensitive like */
+#define SQLITE_PRAGMA_FOREIGN_KEYS        int(1) /* Enabled */
+
+#define DATABASE_TYPE QString("QSQLITE")
+#define DATABASE_NAME QString("database.db3")
+
+struct PragmaItem
+{
+    PragmaItem()
+        : name(), value()
+    {}
+
+    PragmaItem(const QString name, const QVariant value)
+        : name(name), value(value)
+    {}
+
+    QString name;
+    QVariant value;
+};
+
+static const PragmaItem s_persistentConfigList[] =
+{
+    PragmaItem(QString("application_id"), SQLITE_PRAGMA_APPLICATION_ID),
+    PragmaItem(QString("encoding"),       SQLITE_PRAGMA_ENCODING),
+    PragmaItem(QString("locking_mode"),   SQLITE_PRAGMA_LOCKING_MODE),
+    PragmaItem(QString("user_version"),   SQLITE_PRAGMA_USER_VERSION),
+    PragmaItem()
+};
+
+static const PragmaItem s_runtimeConfigList[] =
+{
+    PragmaItem(QString("case_sensitive_like"), SQLITE_PRAGMA_CASE_SENSITIVE_LIKE),
+    PragmaItem(QString("foreign_keys"),        SQLITE_PRAGMA_FOREIGN_KEYS),
+    PragmaItem()
+};
+
 using namespace Database;
 using namespace Database::DataTypes;
 using namespace Database::Tables;
@@ -35,22 +76,39 @@ using namespace Database::Tables;
 SqliteDatabase::SqliteDatabase()
     : m_database()
 {
-    m_database = QSqlDatabase::addDatabase("QSQLITE");
+    m_database = QSqlDatabase::addDatabase(DATABASE_TYPE);
 }
 
 SqliteDatabase::~SqliteDatabase()
 {
-    m_database.removeDatabase("SalamanderALM");
+    disconnect();
+
+    const QString defaultConnectionName = m_database.connectionName();
+
+    if (!defaultConnectionName.isEmpty())
+    {
+        QSqlDatabase::removeDatabase(defaultConnectionName);
+    }
+}
+
+bool SqliteDatabase::isConnected() const
+{
+    return m_database.isOpen();
 }
 
 bool SqliteDatabase::connect()
 {
-    m_database.setDatabaseName("database.db3");
-    bool success = m_database.open();
+    bool success = !isConnected();
 
     if (success)
     {
-        success = init();
+        m_database.setDatabaseName(DATABASE_NAME);
+        success = m_database.open();
+    }
+
+    if (success)
+    {
+        success = setRuntimeConfig();
 
         if (!success)
         {
@@ -67,6 +125,70 @@ void SqliteDatabase::disconnect()
     {
         m_database.close();
     }
+}
+
+bool SqliteDatabase::validate() const
+{
+    bool success = isConnected();
+
+    if (success)
+    {
+        success = integrityCheck();
+    }
+
+    if (success)
+    {
+        success = validatePersistentConfig();
+    }
+
+    return success;
+}
+
+bool SqliteDatabase::create()
+{
+    bool initialyConnected = isConnected();
+
+    if (initialyConnected)
+    {
+        disconnect();
+    }
+
+    bool success = true;
+
+    if (success)
+    {
+        if (QFile::exists(DATABASE_NAME))
+        {
+            success = QFile::remove(DATABASE_NAME);
+        }
+    }
+
+    if (success)
+    {
+        success = connect();
+    }
+
+    if (success)
+    {
+        success = setPersistentConfig();
+    }
+
+    if (success)
+    {
+        success = createTables();
+    }
+
+    if (success)
+    {
+        success = validate();
+    }
+
+    if (!initialyConnected)
+    {
+        disconnect();
+    }
+
+    return success;
 }
 
 Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
@@ -105,14 +227,190 @@ bool SqliteDatabase::addNode(const Integer &parent, const Integer &type) const
     return false;
 }
 
-bool SqliteDatabase::init() const
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+bool SqliteDatabase::integrityCheck() const
 {
+    const static QString command = "PRAGMA integrity_check;";
     QSqlQuery query;
-    bool success = query.exec("PRAGMA foreign_keys = ON;");
+
+    bool success = query.prepare(command);
 
     if (success)
     {
-        success = createTables();
+        success = query.exec();
+
+        if (success)
+        {
+            success = query.first();
+
+            if (success)
+            {
+                const QString value = query.value(0).toString();
+
+                if (value != "ok")
+                {
+                    success = false;
+                }
+            }
+        }
+    }
+
+    return success;
+}
+
+bool SqliteDatabase::validatePersistentConfig() const
+{
+    bool success = true;
+    int index = 0;
+
+    while (success)
+    {
+        // Get pragma name and value
+        const PragmaItem &item = s_persistentConfigList[index];
+        index++;
+
+        if (item.name.isEmpty())
+        {
+            // Last item in the list, exit loop
+            break;
+        }
+
+        // Get pragma value
+        const QVariant value = getPragmaValue(item.name);
+
+        // Verify pragma value
+        if (value.canConvert(QVariant::String) &&
+            item.value.canConvert(QVariant::String))
+        {
+            const QString v1 = value.toString();
+            const QString v2 = item.value.toString();
+
+            if (v1 != v2)
+            {
+                success = false;
+            }
+        }
+        else
+        {
+            success = false;
+        }
+    }
+
+    return success;
+}
+
+bool SqliteDatabase::setPersistentConfig() const
+{
+    bool success = true;
+    int index = 0;
+
+    while (success)
+    {
+        // Get pragma name and value
+        const PragmaItem &item = s_persistentConfigList[index];
+        index++;
+
+        if (item.name.isEmpty())
+        {
+            // Last item in the list, exit loop
+            break;
+        }
+
+        // Set pragma value
+        success = setPragmaValue(item.name, item.value);
+    }
+
+    return success;
+}
+
+bool SqliteDatabase::setRuntimeConfig() const
+{
+    bool success = true;
+    int index = 0;
+
+    while (success)
+    {
+        // Get pragma name and value
+        const PragmaItem &item = s_runtimeConfigList[index];
+        index++;
+
+        if (item.name.isEmpty())
+        {
+            // Last item in the list, exit loop
+            break;
+        }
+
+        // Set pragma value
+        success = setPragmaValue(item.name, item.value);
+    }
+
+    return success;
+}
+
+QVariant SqliteDatabase::getPragmaValue(const QString &name) const
+{
+    QVariant value;
+    bool success = !name.isEmpty();
+
+    if (success)
+    {
+        const static QString command = "PRAGMA %1;";
+        QSqlQuery query;
+
+        success = query.prepare(command.arg(name));
+
+        if (success)
+        {
+            success = query.exec();
+
+            if (success)
+            {
+                success = query.first();
+
+                if (success)
+                {
+                    value = query.value(0);
+                }
+            }
+        }
+    }
+
+    if (!success)
+    {
+        value.clear();
+    }
+
+    return value;
+}
+
+bool SqliteDatabase::setPragmaValue(const QString &name, const QVariant &value) const
+{
+    bool success = (!name.isEmpty() && value.isValid());
+
+    if (success)
+    {
+        const static QString command = "PRAGMA %1 = '%2';";
+        QSqlQuery query;
+
+        success = query.prepare(command.arg(name, value.toString()));
+
+        if (success)
+        {
+            success = query.exec();
+        }
     }
 
     return success;
@@ -178,7 +476,7 @@ bool SqliteDatabase::createTable(const QString &tableName) const
     if (success && !tableExists)
     {
         const QString filePath =
-                QString(":/Database/Sqlite/Tables/CreateTable_%1.sqlite").arg(tableName);
+                QString(":/Database/Sqlite/Tables/%1_CreateTable.sqlite").arg(tableName);
         success = executeScriptFile(filePath);
     }
 

@@ -44,4 +44,16 @@ void MainWindow::buttonPushed()
 {
     bool success = m_database.connect();
     qDebug() << "Database opened:" << success;
+
+    if (success)
+    {
+        success = m_database.validate();
+        qDebug() << "Database valid:" << success;
+    }
+
+    if (!success)
+    {
+        success = m_database.create();
+        qDebug() << "Database reinitialized:" << success;
+    }
 }

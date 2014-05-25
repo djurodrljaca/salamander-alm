@@ -1,23 +1,23 @@
 <RCC>
     <qresource prefix="/Database">
-        <file>Sqlite/Tables/CreateTable_Node.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeAttachment.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeAttachmentItem.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeAttachmentList.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeAttributes.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeComment.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeCommentItem.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeCommentList.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeDescription.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeName.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeReference.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeReferenceItem.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeReferenceList.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_NodeType.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_Revision.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_User.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_UserGroup.sqlite</file>
-        <file>Sqlite/Tables/CreateTable_UserGroupType.sqlite</file>
+        <file>Sqlite/Tables/Node_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeAttachment_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeAttachmentItem_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeAttachmentList_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeAttributes_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeComment_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeCommentItem_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeCommentList_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeDescription_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeName_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeReference_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeReferenceItem_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeReferenceList_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/NodeType_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/Revision_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/User_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/UserGroup_CreateTable.sqlite</file>
+        <file>Sqlite/Tables/UserGroupType_CreateTable.sqlite</file>
         <file>Sqlite/Tables/Tables.txt</file>
     </qresource>
 </RCC>

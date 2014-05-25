@@ -1,7 +1,0 @@
-CREATE TABLE `NodeAttachmentItem` (
-	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	`List`	INTEGER NOT NULL,
-	`Attachment`	INTEGER NOT NULL,
-	FOREIGN KEY(`List`) REFERENCES `NodeAttachmentList`(`Id`),
-	FOREIGN KEY(`Attachment`) REFERENCES `NodeAttachment`(`Id`)
-);

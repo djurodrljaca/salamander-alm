@@ -1,7 +1,0 @@
-CREATE TABLE `UserGroupType` (
-	`Id`	INTEGER NOT NULL PRIMARY KEY,
-	`Name`	TEXT NOT NULL
-);
-
-INSERT INTO `UserGroupType`(`Id`,`Name`) VALUES (1, 'Administrator');
-INSERT INTO `UserGroupType`(`Id`,`Name`) VALUES (2, 'User');

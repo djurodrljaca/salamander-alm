@@ -1,7 +1,0 @@
-CREATE TABLE `NodeReferenceItem` (
-	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	`List`	INTEGER NOT NULL,
-	`Reference`	INTEGER NOT NULL,
-	FOREIGN KEY(`List`) REFERENCES `NodeReferenceList`(`Id`),
-	FOREIGN KEY(`Reference`) REFERENCES `NodeReference`(`Id`)
-);

@@ -1,7 +1,0 @@
-CREATE TABLE `NodeCommentItem` (
-	`Id`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-	`List`	INTEGER NOT NULL,
-	`Comment`	INTEGER NOT NULL,
-	FOREIGN KEY(`List`) REFERENCES `NodeCommentList`(`Id`),
-	FOREIGN KEY(`Comment`) REFERENCES `NodeComment`(`Id`)
-);

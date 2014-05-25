@@ -98,7 +98,7 @@ NodeAttachment NodeAttachment::fromRecord(const QSqlRecord &record, bool *ok)
     // FileData
     if (success)
     {
-        nodeAttachment.setFileData(Text::fromField(record.field("FileData"), &success));
+        nodeAttachment.setFileData(Blob::fromField(record.field("FileData"), &success));
     }
 
     // Check NodeAttachment

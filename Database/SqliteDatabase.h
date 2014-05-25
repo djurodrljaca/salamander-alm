@@ -36,14 +36,33 @@ public:
     SqliteDatabase();
     ~SqliteDatabase();
 
+    bool isConnected() const;
     bool connect();
     void disconnect();
+
+    bool validate() const;
+    bool create();
 
     Tables::Node getNode(const DataTypes::Integer &id, bool *ok = NULL) const;
     bool addNode(const DataTypes::Integer &parent, const DataTypes::Integer &type) const;
 
+
+
+
+
+
+
+
+
 private:
-    bool init() const;
+    bool integrityCheck() const;
+    bool validatePersistentConfig() const;
+    bool setPersistentConfig() const;
+    bool setRuntimeConfig() const;
+
+    QVariant getPragmaValue(const QString &name) const;
+    bool setPragmaValue(const QString &name, const QVariant &value) const;
+
     bool createTables() const;
     QStringList getTableList() const;
     bool createTable(const QString &tableName) const;

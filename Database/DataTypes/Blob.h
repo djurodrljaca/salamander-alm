@@ -34,7 +34,7 @@ class Blob
 {
 public:
     Blob();
-    Blob(const QString &value);
+    Blob(const QByteArray &value);
 
     bool isNull() const;
     void setNull();
