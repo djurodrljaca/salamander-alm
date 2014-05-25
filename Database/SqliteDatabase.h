@@ -63,6 +63,7 @@ private:
     QVariant getPragmaValue(const QString &name) const;
     bool setPragmaValue(const QString &name, const QVariant &value) const;
 
+    bool validateTables() const;
     bool createTables() const;
     QStringList getTableList() const;
     bool createTable(const QString &tableName) const;

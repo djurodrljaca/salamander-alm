@@ -30,11 +30,11 @@
 
 #define SQLITE_PRAGMA_APPLICATION_ID qint32(0x5A1ADEA1) /* App. ID: SAlA(man)DE(r) Al(m) */
 #define SQLITE_PRAGMA_ENCODING       QString("UTF-8")
-#define SQLITE_PRAGMA_LOCKING_MODE   QString("exclusive")
 #define SQLITE_PRAGMA_USER_VERSION   qint32(0) /* User version */
 
 #define SQLITE_PRAGMA_CASE_SENSITIVE_LIKE int(0) /* Case-insensitive like */
 #define SQLITE_PRAGMA_FOREIGN_KEYS        int(1) /* Enabled */
+#define SQLITE_PRAGMA_LOCKING_MODE        QString("exclusive")
 
 #define DATABASE_TYPE QString("QSQLITE")
 #define DATABASE_NAME QString("database.db3")
@@ -57,7 +57,6 @@ static const PragmaItem s_persistentConfigList[] =
 {
     PragmaItem(QString("application_id"), SQLITE_PRAGMA_APPLICATION_ID),
     PragmaItem(QString("encoding"),       SQLITE_PRAGMA_ENCODING),
-    PragmaItem(QString("locking_mode"),   SQLITE_PRAGMA_LOCKING_MODE),
     PragmaItem(QString("user_version"),   SQLITE_PRAGMA_USER_VERSION),
     PragmaItem()
 };
@@ -66,6 +65,7 @@ static const PragmaItem s_runtimeConfigList[] =
 {
     PragmaItem(QString("case_sensitive_like"), SQLITE_PRAGMA_CASE_SENSITIVE_LIKE),
     PragmaItem(QString("foreign_keys"),        SQLITE_PRAGMA_FOREIGN_KEYS),
+    PragmaItem(QString("locking_mode"),        SQLITE_PRAGMA_LOCKING_MODE),
     PragmaItem()
 };
 
@@ -87,6 +87,7 @@ SqliteDatabase::~SqliteDatabase()
 
     if (!defaultConnectionName.isEmpty())
     {
+        m_database = QSqlDatabase(); // Needed to completely release the database
         QSqlDatabase::removeDatabase(defaultConnectionName);
     }
 }
@@ -139,6 +140,11 @@ bool SqliteDatabase::validate() const
     if (success)
     {
         success = validatePersistentConfig();
+    }
+
+    if (success)
+    {
+        success = validateTables();
     }
 
     return success;
@@ -300,11 +306,13 @@ bool SqliteDatabase::validatePersistentConfig() const
 
             if (v1 != v2)
             {
+                qDebug() << "SqliteDatabase::validatePersistentConfig: invalid values:" << v1 << v2;
                 success = false;
             }
         }
         else
         {
+            qDebug() << "SqliteDatabase::validatePersistentConfig: invalid types:" << value << item.value;
             success = false;
         }
     }
@@ -416,6 +424,27 @@ bool SqliteDatabase::setPragmaValue(const QString &name, const QVariant &value) 
     return success;
 }
 
+bool SqliteDatabase::validateTables() const
+{
+    // Get a list of existing tables
+    QStringList existingTableList = m_database.tables();
+
+    // Get list of needed tables
+    bool success = true;
+    const QStringList neededTableList = getTableList();
+
+    foreach (const QString neededTable, neededTableList)
+    {
+        if (!existingTableList.contains(neededTable))
+        {
+            success = false;
+            break;
+        }
+    }
+
+    return success;
+}
+
 bool SqliteDatabase::createTables() const
 {
     bool success = false;
@@ -458,29 +487,11 @@ QStringList SqliteDatabase::getTableList() const
 
 bool SqliteDatabase::createTable(const QString &tableName) const
 {
-    // Check if table exists
-    const QString queryCommand =
-            QString("SELECT name FROM sqlite_master WHERE type='%1'").arg(tableName);
-
-    QSqlQuery query;
-    bool success = query.exec(queryCommand);
-    bool tableExists = false;
-
-    if (success)
-    {
-        const int size = query.size();
-        tableExists = (size == 1);
-    }
-
     // Create table
-    if (success && !tableExists)
-    {
-        const QString filePath =
-                QString(":/Database/Sqlite/Tables/%1_CreateTable.sqlite").arg(tableName);
-        success = executeScriptFile(filePath);
-    }
+    const QString filePath =
+            QString(":/Database/Sqlite/Tables/%1_CreateTable.sqlite").arg(tableName);
 
-    return success;
+    return executeScriptFile(filePath);
 }
 
 bool SqliteDatabase::executeScriptFile(const QString &scriptFilePath) const
