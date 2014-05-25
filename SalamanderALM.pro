@@ -25,7 +25,9 @@ SOURCES += \
     Database/Tables/Revision.cpp \
     Database/Tables/UserGroup.cpp \
     Database/Tables/UserGroupType.cpp \
-    Database/Tables/User.cpp
+    Database/Tables/User.cpp \
+    Database/Tables/NodeName.cpp \
+    Database/Tables/NodeDescription.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -40,7 +42,9 @@ HEADERS  += \
     Database/Tables/Revision.h \
     Database/Tables/UserGroup.h \
     Database/Tables/UserGroupType.h \
-    Database/Tables/User.h
+    Database/Tables/User.h \
+    Database/Tables/NodeName.h \
+    Database/Tables/NodeDescription.h
 
 FORMS    += \
     MainWindow.ui

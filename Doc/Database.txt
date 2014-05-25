@@ -2,9 +2,9 @@
 | Node
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- Parent: int64 + null, forgein key to Node.Id
-	- Type: int64, forgein key to NodeType.Id
+	- Id: integer, primary key, auto-increment
+	- Parent: integer + null, forgein key to Node.Id
+	- Type: integer, forgein key to NodeType.Id
 
 Constraints:
 	- Parent --> Node.Id
@@ -14,7 +14,7 @@ Constraints:
 | NodeType
 -------------------------------------------------
 Table:
-	- Id: int, primary key
+	- Id: integer, primary key
 	- Name: text
 
 Available type:
@@ -25,15 +25,15 @@ Available type:
 | NodeAttributes
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- Node: int64, forgein key to Node.Id
-	- Revision: int64, forgein key to Revision.Id
-	- Name: int64, forgein key to NodeName.Id
-	- Description: int64 + null, forgein key to NodeDescription.Id
-	- References: int64 + null, forgein key to NodeReferenceList.Id
-	- Attachments: int64 + null, forgein key to NodeAttachmentList.Id
-	- Comments: int64 + null, forgein key to NodeCommentList.Id
-	- IsActive: bool
+	- Id: integer, primary key, auto-increment
+	- Node: integer, forgein key to Node.Id
+	- Revision: integer, forgein key to Revision.Id
+	- Name: integer, forgein key to NodeName.Id
+	- Description: integer + null, forgein key to NodeDescription.Id
+	- References: integer + null, forgein key to NodeReferenceList.Id
+	- Attachments: integer + null, forgein key to NodeAttachmentList.Id
+	- Comments: integer + null, forgein key to NodeCommentList.Id
+	- IsActive: boolean
 
 Constraints:
 	- Node --> Node.Id
@@ -48,9 +48,9 @@ Constraints:
 | Revision
 -------------------------------------------------
 Table:
-	- Id: int64, primary key
+	- Id: integer, primary key
 	- Timestamp: datetime
-	- User: int64, forgein key to User.Id
+	- User: integer, forgein key to User.Id
 
 Constraints:
 	- User --> User.Id
@@ -59,9 +59,9 @@ Constraints:
 | UserGroup
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 	- Name: text
-	- Type: int64, forgein key to UserGroupType.Id
+	- Type: integer, forgein key to UserGroupType.Id
 	- Description: text + null
 
 Constraints:
@@ -71,7 +71,7 @@ Constraints:
 | UserGroupType
 -------------------------------------------------
 Table:
-	- Id: int, primary key
+	- Id: integer, primary key
 	- Name: text
 
 Available type:
@@ -83,8 +83,8 @@ Available type:
 | User
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- Group: int64, forgein key to UserGroup.Id
+	- Id: integer, primary key, auto-increment
+	- Group: integer, forgein key to UserGroup.Id
 	- Name: text
 	- Description: text + null
 	- Password: text
@@ -96,29 +96,29 @@ Constraints:
 | NodeName
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 	- Text: text
 
 -------------------------------------------------
 | NodeDescription
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 	- Text: text
 
 -------------------------------------------------
 | NodeReferenceList
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 
 -------------------------------------------------
 | NodeReferenceItem
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- List: int64, forgein key to NodeReferenceList.Id
-	- Reference: int64, forgein key to NodeReference.Id
+	- Id: integer, primary key, auto-increment
+	- List: integer, forgein key to NodeReferenceList.Id
+	- Reference: integer, forgein key to NodeReference.Id
 
 Constraints:
 	- List --> NodeReferenceList.Id
@@ -128,8 +128,8 @@ Constraints:
 | NodeReference
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- Node: int64, forgein key to Node.Id
+	- Id: integer, primary key, auto-increment
+	- Node: integer, forgein key to Node.Id
 
 Constraints:
 	- Node --> Node.Id
@@ -138,15 +138,15 @@ Constraints:
 | NodeAttachmentList
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 
 -------------------------------------------------
 | NodeAttachmentItem
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- List: int64, forgein key to NodeAttachmentList.Id
-	- Attachment: int64, forgein key to NodeAttachment.Id
+	- Id: integer, primary key, auto-increment
+	- List: integer, forgein key to NodeAttachmentList.Id
+	- Attachment: integer, forgein key to NodeAttachment.Id
 
 Constraints:
 	- List --> NodeAttachmentList.Id
@@ -156,7 +156,7 @@ Constraints:
 | NodeAttachment
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 	- FileName: text
 	- FileData: blob
 
@@ -164,15 +164,15 @@ Table:
 | NodeCommentList
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 
 -------------------------------------------------
 | NodeCommentItem
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- List: int64, forgein key to NodeCommentList.Id
-	- Comment: int64, forgein key to NodeComment.Id
+	- Id: integer, primary key, auto-increment
+	- List: integer, forgein key to NodeCommentList.Id
+	- Comment: integer, forgein key to NodeComment.Id
 
 Constraints:
 	- List --> NodeCommentList.Id
@@ -182,7 +182,7 @@ Constraints:
 | NodeComment
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
+	- Id: integer, primary key, auto-increment
 	- Text: text
 
 
@@ -201,9 +201,9 @@ Table:
 | ProjectNodeAttributes
 -------------------------------------------------
 Table:
-	- Id: int64, primary key, auto-increment
-	- NodeAttributes: int64, forgein key to NodeAttributes.Id
-	- Status: int64, forgein key to ProjectNodeStatus.Id
+	- Id: integer, primary key, auto-increment
+	- NodeAttributes: integer, forgein key to NodeAttributes.Id
+	- Status: integer, forgein key to ProjectNodeStatus.Id
 
 Constraints:
 	- NodeAttributes --> NodeAttributes.Id
@@ -213,7 +213,7 @@ Constraints:
 | ProjectNodeStatus
 -------------------------------------------------
 Table:
-	- Id: int, primary key
+	- Id: integer, primary key
 	- Name: text
 	- DisplayedName: text
 
