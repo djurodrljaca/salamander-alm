@@ -1,7 +1,7 @@
 /**
- * @file   Node.h
+ * @file   DateTime.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-05-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,43 +20,35 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODE_H
-#define DATABASE_TABLES_NODE_H
+#ifndef DATABASE_DATATYPES_DATETIME_H
+#define DATABASE_DATATYPES_DATETIME_H
 
-#include "Database/DataTypes/Integer.h"
-#include <QtSql/QSqlRecord>
+#include <QtCore/QDateTime>
+#include <QtCore/QString>
+#include <QtSql/QSqlField>
 
 namespace Database
 {
-namespace Tables
+namespace DataTypes
 {
-class Node
+class DateTime
 {
 public:
-    Node();
-    Node(const DataTypes::Integer &id,
-         const DataTypes::Integer &parent,
-         const DataTypes::Integer &type);
+    DateTime();
+    DateTime(const QDateTime &value);
 
-    bool isValid() const;
+    bool isNull() const;
+    void setNull();
+    QDateTime getValue() const;
+    void setValue(const QDateTime &value);
 
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    DataTypes::Integer getParent() const;
-    void setParent(const DataTypes::Integer &parent);
-
-    DataTypes::Integer getType() const;
-    void setType(const DataTypes::Integer &type);
-
-    static Node fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    static DateTime fromField(const QSqlField &field, bool *ok = NULL);
 
 private:
-    DataTypes::Integer m_id;
-    DataTypes::Integer m_parent;
-    DataTypes::Integer m_type;
+    bool m_null;
+    QDateTime m_value;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODE_H
+#endif // DATABASE_DATATYPES_DATETIME_H

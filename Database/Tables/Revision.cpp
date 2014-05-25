@@ -1,7 +1,7 @@
 /**
- * @file   Node.cpp
+ * @file   Revision.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-5-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,91 +20,92 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Tables/Node.h"
+#include "Database/Tables/Revision.h"
 
 using namespace Database::Tables;
 using namespace Database::DataTypes;
 
-Node::Node()
+Revision::Revision()
     : m_id(),
-      m_parent(),
-      m_type()
+      m_timestamp(),
+      m_user()
 {
 }
 
-Node::Node(const Integer &id,
-           const Integer &parent,
-           const Integer &type)
+Revision::Revision(const Integer &id,
+                   const DateTime &timestamp,
+                   const Integer &user)
     : m_id(id),
-      m_parent(parent),
-      m_type(type)
+      m_timestamp(timestamp),
+      m_user(user)
 {
 }
 
-bool Node::isValid() const
+bool Revision::isValid() const
 {
     return (!m_id.isNull() &&
-            !m_type.isNull());
+            !m_timestamp.isNull() &&
+            !m_user.isNull());
 }
 
-Integer Node::getId() const
+Integer Revision::getId() const
 {
     return m_id;
 }
 
-void Node::setId(const Integer &id)
+void Revision::setId(const Integer &id)
 {
     m_id = id;
 }
 
-Integer Node::getParent() const
+DateTime Revision::getTimestamp() const
 {
-    return m_parent;
+    return m_timestamp;
 }
 
-void Node::setParent(const Integer &parent)
+void Revision::setTimestamp(const DateTime &timestamp)
 {
-    m_parent = parent;
+    m_timestamp = timestamp;
 }
 
-Integer Node::getType() const
+Integer Revision::getUser() const
 {
-    return m_type;
+    return m_user;
 }
 
-void Node::setType(const Integer &type)
+void Revision::setUser(const Integer &user)
 {
-    m_type = type;
+    m_user = user;
 }
 
-Node Node::fromRecord(const QSqlRecord &record, bool *ok)
+Revision Revision::fromRecord(const QSqlRecord &record, bool *ok)
 {
-    Node node;
+    Revision revision;
     bool success = !record.isEmpty();
 
     // Id
     if (success)
     {
-        node.setId(Integer::fromField(record.field("Id"), &success));
+        revision.setId(Integer::fromField(record.field("Id"), &success));
     }
 
-    // Parent
+    // Timestamp
     if (success)
     {
-        node.setParent(Integer::fromField(record.field("Parent"), &success));
+        revision.setTimestamp(DateTime::fromField(record.field("Timestamp"), &success));
     }
 
-    // Type
+    // User
     if (success)
     {
-        node.setType(Integer::fromField(record.field("Type"), &success));
+        revision.setUser(Integer::fromField(record.field("User"), &success));
     }
 
-    // Check Node
+    // Check Revision
     if (!success ||
-        !node.isValid())
+        !revision.isValid())
     {
-        node = Node();
+        revision = Revision();
         success = false;
     }
 
@@ -113,5 +114,5 @@ Node Node::fromRecord(const QSqlRecord &record, bool *ok)
         *ok = success;
     }
 
-    return node;
+    return revision;
 }

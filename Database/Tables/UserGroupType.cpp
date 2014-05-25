@@ -1,7 +1,7 @@
 /**
- * @file   NodeType.cpp
+ * @file   UserGroupType.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,25 +20,25 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Tables/NodeType.h"
+#include "Database/Tables/UserGroupType.h"
 
 using namespace Database::Tables;
 using namespace Database::DataTypes;
 
-NodeType::NodeType()
+UserGroupType::UserGroupType()
     : m_id(),
       m_name()
 {
 }
 
-NodeType::NodeType(const Integer &id,
-                   const Text &name)
+UserGroupType::UserGroupType(const Integer &id,
+                             const Text &name)
     : m_id(id),
       m_name(name)
 {
 }
 
-bool NodeType::isValid() const
+bool UserGroupType::isValid() const
 {
     bool valid = false;
 
@@ -47,9 +47,18 @@ bool NodeType::isValid() const
     {
         switch (m_id.getValue())
         {
-            case NodeType::Project:
+            case UserGroupType::Administrator:
             {
-                if (m_name.getValue() == "Project")
+                if (m_name.getValue() == "Administrator")
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case UserGroupType::User:
+            {
+                if (m_name.getValue() == "User")
                 {
                     valid = true;
                 }
@@ -66,48 +75,48 @@ bool NodeType::isValid() const
     return valid;
 }
 
-Integer NodeType::getId() const
+Integer UserGroupType::getId() const
 {
     return m_id;
 }
 
-void NodeType::setId(const Integer &id)
+void UserGroupType::setId(const Integer &id)
 {
     m_id = id;
 }
 
-Text NodeType::getName() const
+Text UserGroupType::getName() const
 {
     return m_name;
 }
 
-void NodeType::setName(const Text &name)
+void UserGroupType::setName(const Text &name)
 {
     m_name = name;
 }
 
-NodeType NodeType::fromRecord(const QSqlRecord &record, bool *ok)
+UserGroupType UserGroupType::fromRecord(const QSqlRecord &record, bool *ok)
 {
-    NodeType nodeType;
+    UserGroupType userGroupType;
     bool success = !record.isEmpty();
 
     // Id
     if (success)
     {
-        nodeType.setId(Integer::fromField(record.field("Id"), &success));
+        userGroupType.setId(Integer::fromField(record.field("Id"), &success));
     }
 
     // Name
     if (success)
     {
-        nodeType.setName(Text::fromField(record.field("Name"), &success));
+        userGroupType.setName(Text::fromField(record.field("Name"), &success));
     }
 
-    // Check NodeType
+    // Check UserGroupType
     if (!success ||
-        !nodeType.isValid())
+        !userGroupType.isValid())
     {
-        nodeType = NodeType();
+        userGroupType = UserGroupType();
         success = false;
     }
 
@@ -116,5 +125,5 @@ NodeType NodeType::fromRecord(const QSqlRecord &record, bool *ok)
         *ok = success;
     }
 
-    return nodeType;
+    return userGroupType;
 }

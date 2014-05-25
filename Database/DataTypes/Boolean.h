@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BOOL_H
-#define BOOL_H
+#ifndef DATABASE_DATATYPES_BOOLEAN_H
+#define DATABASE_DATATYPES_BOOLEAN_H
 
 #include <QtGlobal>
 #include <QtSql/QSqlField>
@@ -50,4 +50,4 @@ private:
 }
 }
 
-#endif // BOOL_H
+#endif // DATABASE_DATATYPES_BOOLEAN_H

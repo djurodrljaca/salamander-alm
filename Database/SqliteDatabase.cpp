@@ -102,6 +102,7 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
 bool SqliteDatabase::addNode(const Integer &parent, const Integer &type) const
 {
     // TODO: implement
+    return false;
 }
 
 bool SqliteDatabase::init() const

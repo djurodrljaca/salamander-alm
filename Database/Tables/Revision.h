@@ -1,7 +1,7 @@
 /**
- * @file   Node.h
+ * @file   Revision.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-5-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,43 +20,44 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODE_H
-#define DATABASE_TABLES_NODE_H
+#ifndef DATABASE_TABLES_REVISION_H
+#define DATABASE_TABLES_REVISION_H
 
 #include "Database/DataTypes/Integer.h"
+#include "Database/DataTypes/DateTime.h"
 #include <QtSql/QSqlRecord>
 
 namespace Database
 {
 namespace Tables
 {
-class Node
+class Revision
 {
 public:
-    Node();
-    Node(const DataTypes::Integer &id,
-         const DataTypes::Integer &parent,
-         const DataTypes::Integer &type);
+    Revision();
+    Revision(const DataTypes::Integer &id,
+             const DataTypes::DateTime &timestamp,
+             const DataTypes::Integer &user);
 
     bool isValid() const;
 
     DataTypes::Integer getId() const;
     void setId(const DataTypes::Integer &id);
 
-    DataTypes::Integer getParent() const;
-    void setParent(const DataTypes::Integer &parent);
+    DataTypes::DateTime getTimestamp() const;
+    void setTimestamp(const DataTypes::DateTime &timestamp);
 
-    DataTypes::Integer getType() const;
-    void setType(const DataTypes::Integer &type);
+    DataTypes::Integer getUser() const;
+    void setUser(const DataTypes::Integer &user);
 
-    static Node fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    static Revision fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
     DataTypes::Integer m_id;
-    DataTypes::Integer m_parent;
-    DataTypes::Integer m_type;
+    DataTypes::DateTime m_timestamp;
+    DataTypes::Integer m_user;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODE_H
+#endif // DATABASE_TABLES_REVISION_H

@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASEID_H
-#define DATABASEID_H
+#ifndef DATABASE_DATATYPES_INTEGER_H
+#define DATABASE_DATATYPES_INTEGER_H
 
 #include <QtGlobal>
 #include <QtSql/QSqlField>
@@ -50,4 +50,4 @@ private:
 }
 }
 
-#endif // DATABASEID_H
+#endif // DATABASE_DATATYPES_INTEGER_H

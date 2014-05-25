@@ -1,7 +1,7 @@
 /**
- * @file   Node.h
+ * @file   User.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-5-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,43 +20,54 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODE_H
-#define DATABASE_TABLES_NODE_H
+#ifndef DATABASE_TABLES_USER_H
+#define DATABASE_TABLES_USER_H
 
 #include "Database/DataTypes/Integer.h"
+#include "Database/DataTypes/Text.h"
 #include <QtSql/QSqlRecord>
 
 namespace Database
 {
 namespace Tables
 {
-class Node
+class User
 {
 public:
-    Node();
-    Node(const DataTypes::Integer &id,
-         const DataTypes::Integer &parent,
-         const DataTypes::Integer &type);
+    User();
+    User(const DataTypes::Integer &id,
+         const DataTypes::Integer &group,
+         const DataTypes::Text &name,
+         const DataTypes::Text &description,
+         const DataTypes::Text &password);
 
     bool isValid() const;
 
     DataTypes::Integer getId() const;
     void setId(const DataTypes::Integer &id);
 
-    DataTypes::Integer getParent() const;
-    void setParent(const DataTypes::Integer &parent);
+    DataTypes::Integer getGroup() const;
+    void setGroup(const DataTypes::Integer &group);
 
-    DataTypes::Integer getType() const;
-    void setType(const DataTypes::Integer &type);
+    DataTypes::Text getName() const;
+    void setName(const DataTypes::Text &name);
 
-    static Node fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    DataTypes::Text getDescription() const;
+    void setDescription(const DataTypes::Text &description);
+
+    DataTypes::Text getPassword() const;
+    void setPassword(const DataTypes::Text &password);
+
+    static User fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
     DataTypes::Integer m_id;
-    DataTypes::Integer m_parent;
-    DataTypes::Integer m_type;
+    DataTypes::Integer m_group;
+    DataTypes::Text m_name;
+    DataTypes::Text m_description;
+    DataTypes::Text m_password;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODE_H
+#endif // DATABASE_TABLES_USER_H

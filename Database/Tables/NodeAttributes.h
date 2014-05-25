@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NODEATTRIBUTES_H
-#define NODEATTRIBUTES_H
+#ifndef DATABASE_TABLES_NODEATTRIBUTES_H
+#define DATABASE_TABLES_NODEATTRIBUTES_H
 
 #include "Database/DataTypes/Boolean.h"
 #include "Database/DataTypes/Integer.h"
@@ -90,4 +90,4 @@ private:
 }
 }
 
-#endif // NODEATTRIBUTES_H
+#endif // DATABASE_TABLES_NODEATTRIBUTES_H

@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STRING_H
-#define STRING_H
+#ifndef DATABASE_DATATYPES_TEXT_H
+#define DATABASE_DATATYPES_TEXT_H
 
 #include <QtCore/QString>
 #include <QtSql/QSqlField>
@@ -50,4 +50,4 @@ private:
 }
 }
 
-#endif // STRING_H
+#endif // DATABASE_DATATYPES_TEXT_H

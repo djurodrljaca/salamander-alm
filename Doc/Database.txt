@@ -15,7 +15,7 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int, primary key
-	- Name: string
+	- Name: text
 
 Available type:
 	- 1: Project
@@ -60,9 +60,9 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int64, primary key, auto-increment
-	- Name: string
+	- Name: text
 	- Type: int64, forgein key to UserGroupType.Id
-	- Description: string
+	- Description: text + null
 
 Constraints:
 	- Type --> UserGroupType.Id
@@ -72,7 +72,7 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int, primary key
-	- Name: string
+	- Name: text
 
 Available type:
 	- 1: Administrator
@@ -85,9 +85,9 @@ Available type:
 Table:
 	- Id: int64, primary key, auto-increment
 	- Group: int64, forgein key to UserGroup.Id
-	- Name: string
-	- Description: string
-	- Password: string
+	- Name: text
+	- Description: text + null
+	- Password: text
 
 Constraints:
 	- Group --> UserGroup.Id
@@ -97,14 +97,14 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int64, primary key, auto-increment
-	- Text: string
+	- Text: text
 
 -------------------------------------------------
 | NodeDescription
 -------------------------------------------------
 Table:
 	- Id: int64, primary key, auto-increment
-	- Text: string
+	- Text: text
 
 -------------------------------------------------
 | NodeReferenceList
@@ -157,8 +157,8 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int64, primary key, auto-increment
-	- FileName: string
-	- FileData: binary blob
+	- FileName: text
+	- FileData: blob
 
 -------------------------------------------------
 | NodeCommentList
@@ -183,7 +183,7 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int64, primary key, auto-increment
-	- Text: string
+	- Text: text
 
 
 
@@ -214,8 +214,8 @@ Constraints:
 -------------------------------------------------
 Table:
 	- Id: int, primary key
-	- Name: string
-	- DisplayedName: string
+	- Name: text
+	- DisplayedName: text
 
 Available statuses:
 	- 1: x?

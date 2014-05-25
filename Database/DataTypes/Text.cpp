@@ -60,21 +60,23 @@ void Text::setValue(const QString &value)
 
 Text Text::fromField(const QSqlField &field, bool *ok)
 {
-    Text string;
+    Text text;
     bool success = false;
 
     if (field.isValid())
     {
         if (field.isNull())
         {
-            string.setNull();
+            success = true;
         }
         else
         {
-            string.setValue(field.value().toString());
+            if (field.value().type() == QVariant::String)
+            {
+                text.setValue(field.value().toString());
+                success = true;
+            }
         }
-
-        success = true;
     }
 
     if (ok != NULL)
@@ -82,5 +84,5 @@ Text Text::fromField(const QSqlField &field, bool *ok)
         *ok = success;
     }
 
-    return string;
+    return text;
 }

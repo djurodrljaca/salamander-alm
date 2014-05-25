@@ -1,5 +1,5 @@
 /**
- * @file   Boolean.cpp
+ * @file   DateTime.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,82 +20,88 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/DataTypes/Boolean.h"
+#include "Database/DataTypes/DateTime.h"
+
+static const QString s_dateTimeFormat("yyyy-MM-ddThh:mm:ss.zzz");
 
 using namespace Database::DataTypes;
 
-Boolean::Boolean()
+DateTime::DateTime()
     : m_null(true),
-      m_value(false)
+      m_value()
 {
 }
 
-Boolean::Boolean(const bool value)
+DateTime::DateTime(const QDateTime &value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool Boolean::isNull() const
+bool DateTime::isNull() const
 {
     return m_null;
 }
 
-void Boolean::setNull()
+void DateTime::setNull()
 {
     m_null = true;
-    m_value = false;
+    m_value = QDateTime();
 }
 
-bool Boolean::getValue() const
+QDateTime DateTime::getValue() const
 {
     return m_value;
 }
 
-void Boolean::setValue(const bool value)
+void DateTime::setValue(const QDateTime &value)
 {
     m_null = false;
     m_value = value;
 }
 
-Boolean Boolean::fromField(const QSqlField &field, bool *ok)
+DateTime DateTime::fromField(const QSqlField &field, bool *ok)
 {
-    Boolean boolean;
+    DateTime dateTime;
     bool success = false;
 
     if (field.isValid())
     {
         if (field.isNull())
         {
-            boolean.setNull();
+            dateTime.setNull();
             success = true;
         }
         else
         {
-            const qint64 value = field.value().toLongLong(&success);
+            QDateTime value;
+
+            switch (field.value().type())
+            {
+                case QVariant::DateTime:
+                {
+                    value = field.value().toDateTime();
+                    break;
+                }
+
+                case QVariant::String:
+                {
+                    value = QDateTime::fromString(field.value().toString(), s_dateTimeFormat);
+                    break;
+                }
+
+                default:
+                {
+                    break;
+                }
+            }
+
+            success = value.isValid();
 
             if (success)
             {
-                switch (value)
-                {
-                    case 0:
-                    {
-                        boolean.setValue(false);
-                        break;
-                    }
-
-                    case 1:
-                    {
-                        boolean.setValue(true);
-                        break;
-                    }
-
-                    default:
-                    {
-                        success = false;
-                        break;
-                    }
-                }
+                value.setTimeSpec(Qt::UTC);
+                dateTime.setValue(value);
             }
         }
     }
@@ -105,5 +111,5 @@ Boolean Boolean::fromField(const QSqlField &field, bool *ok)
         *ok = success;
     }
 
-    return boolean;
+    return dateTime;
 }

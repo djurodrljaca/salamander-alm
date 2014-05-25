@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef NODETYPE_H
-#define NODETYPE_H
+#ifndef DATABASE_TABLES_NODETYPE_H
+#define DATABASE_TABLES_NODETYPE_H
 
 #include "Database/DataTypes/Integer.h"
 #include "Database/DataTypes/Text.h"
@@ -41,7 +41,8 @@ public:
     };
 
     NodeType();
-    NodeType(const DataTypes::Integer &id, const DataTypes::Text &name);
+    NodeType(const DataTypes::Integer &id,
+             const DataTypes::Text &name);
 
     bool isValid() const;
 
@@ -60,4 +61,4 @@ private:
 }
 }
 
-#endif // NODETYPE_H
+#endif // DATABASE_TABLES_NODETYPE_H

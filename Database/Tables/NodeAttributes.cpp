@@ -38,15 +38,15 @@ NodeAttributes::NodeAttributes()
 {
 }
 
-NodeAttributes::NodeAttributes(const DataTypes::Integer &id,
-                               const DataTypes::Integer &node,
-                               const DataTypes::Integer &revision,
-                               const DataTypes::Integer &name,
-                               const DataTypes::Integer &description,
-                               const DataTypes::Integer &references,
-                               const DataTypes::Integer &attachments,
-                               const DataTypes::Integer &comments,
-                               const DataTypes::Boolean &isActive)
+NodeAttributes::NodeAttributes(const Integer &id,
+                               const Integer &node,
+                               const Integer &revision,
+                               const Integer &name,
+                               const Integer &description,
+                               const Integer &references,
+                               const Integer &attachments,
+                               const Integer &comments,
+                               const Boolean &isActive)
     : m_id(id),
       m_node(node),
       m_revision(revision),
@@ -61,10 +61,11 @@ NodeAttributes::NodeAttributes(const DataTypes::Integer &id,
 
 bool NodeAttributes::isValid() const
 {
-    return (m_id.isNull() ||
-            m_node.isNull() ||
-            m_revision.isNull() ||
-            m_isActive.isNull());
+    return (!m_id.isNull() &&
+            !m_node.isNull() &&
+            !m_revision.isNull() &&
+            !m_name.isNull() &&
+            !m_isActive.isNull());
 }
 
 Integer NodeAttributes::getId() const
@@ -217,7 +218,8 @@ NodeAttributes NodeAttributes::fromRecord(const QSqlRecord &record, bool *ok)
     }
 
     // Check NodeAttributes
-    if (!nodeAttributes.isValid())
+    if (!success ||
+        !nodeAttributes.isValid())
     {
         nodeAttributes = NodeAttributes();
         success = false;

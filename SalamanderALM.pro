@@ -20,7 +20,12 @@ SOURCES += \
     Database/Tables/NodeType.cpp \
     Database/DataTypes/Text.cpp \
     Database/DataTypes/Boolean.cpp \
-    Database/Tables/NodeAttributes.cpp
+    Database/Tables/NodeAttributes.cpp \
+    Database/DataTypes/DateTime.cpp \
+    Database/Tables/Revision.cpp \
+    Database/Tables/UserGroup.cpp \
+    Database/Tables/UserGroupType.cpp \
+    Database/Tables/User.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -30,7 +35,12 @@ HEADERS  += \
     Database/Tables/NodeType.h \
     Database/DataTypes/Text.h \
     Database/DataTypes/Boolean.h \
-    Database/Tables/NodeAttributes.h
+    Database/Tables/NodeAttributes.h \
+    Database/DataTypes/DateTime.h \
+    Database/Tables/Revision.h \
+    Database/Tables/UserGroup.h \
+    Database/Tables/UserGroupType.h \
+    Database/Tables/User.h
 
 FORMS    += \
     MainWindow.ui
