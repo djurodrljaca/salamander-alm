@@ -34,7 +34,10 @@ SOURCES += \
     Database/Tables/NodeAttachmentList.cpp \
     Database/Tables/NodeAttachmentItem.cpp \
     Database/DataTypes/Blob.cpp \
-    Database/Tables/NodeAttachment.cpp
+    Database/Tables/NodeAttachment.cpp \
+    Database/Tables/NodeCommentList.cpp \
+    Database/Tables/NodeCommentItem.cpp \
+    Database/Tables/NodeComment.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -58,7 +61,10 @@ HEADERS  += \
     Database/Tables/NodeAttachmentList.h \
     Database/Tables/NodeAttachmentItem.h \
     Database/DataTypes/Blob.h \
-    Database/Tables/NodeAttachment.h
+    Database/Tables/NodeAttachment.h \
+    Database/Tables/NodeCommentList.h \
+    Database/Tables/NodeCommentItem.h \
+    Database/Tables/NodeComment.h
 
 FORMS    += \
     MainWindow.ui
