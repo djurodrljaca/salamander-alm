@@ -1,5 +1,5 @@
 /**
- * @file   NodeReferenceList.cpp
+ * @file   Blob.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,53 +20,64 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Tables/NodeReferenceList.h"
+#include "Database/DataTypes/Blob.h"
 
-using namespace Database::Tables;
 using namespace Database::DataTypes;
 
-NodeReferenceList::NodeReferenceList()
-    : m_id()
+Blob::Blob()
+    : m_null(true),
+      m_value()
 {
 }
 
-NodeReferenceList::NodeReferenceList(const Integer &id)
-    : m_id(id)
+Blob::Blob(const QByteArray &value)
+    : m_null(false),
+      m_value(value)
 {
 }
 
-bool NodeReferenceList::isValid() const
+bool Blob::isNull() const
 {
-    return !m_id.isNull();
+    return m_null;
 }
 
-Integer NodeReferenceList::getId() const
+void Blob::setNull()
 {
-    return m_id;
+    m_null = true;
+    m_value = QByteArray();
 }
 
-void NodeReferenceList::setId(const Integer &id)
+QByteArray Blob::getValue() const
 {
-    m_id = id;
+    return m_value;
 }
 
-NodeReferenceList NodeReferenceList::fromRecord(const QSqlRecord &record, bool *ok)
+void Blob::setValue(const QByteArray &value)
 {
-    NodeReferenceList nodeReferenceList;
-    bool success = !record.isEmpty();
+    m_null = false;
+    m_value = value;
+}
 
-    // Id
-    if (success)
+Blob Blob::fromField(const QSqlField &field, bool *ok)
+{
+    Blob blob;
+    bool success = false;
+
+    if (field.isValid())
     {
-        nodeReferenceList.setId(Integer::fromField(record.field("Id"), &success));
-    }
-
-    // Check NodeReferenceList
-    if (!success ||
-        !nodeReferenceList.isValid())
-    {
-        nodeReferenceList = NodeReferenceList();
-        success = false;
+        if (field.isNull())
+        {
+            blob.setNull();
+            success = true;
+        }
+        else
+        {
+            if (field.value().type() == QVariant::ByteArray)
+            {
+                blob.setValue(field.value().toByteArray());
+                success = true;
+            }
+        }
     }
 
     if (ok != NULL)
@@ -74,5 +85,5 @@ NodeReferenceList NodeReferenceList::fromRecord(const QSqlRecord &record, bool *
         *ok = success;
     }
 
-    return nodeReferenceList;
+    return blob;
 }

@@ -30,7 +30,11 @@ SOURCES += \
     Database/Tables/NodeDescription.cpp \
     Database/Tables/NodeReferenceList.cpp \
     Database/Tables/NodeReferenceItem.cpp \
-    Database/Tables/NodeReference.cpp
+    Database/Tables/NodeReference.cpp \
+    Database/Tables/NodeAttachmentList.cpp \
+    Database/Tables/NodeAttachmentItem.cpp \
+    Database/DataTypes/Blob.cpp \
+    Database/Tables/NodeAttachment.cpp
 
 HEADERS  += \
     MainWindow.h \
@@ -50,7 +54,11 @@ HEADERS  += \
     Database/Tables/NodeDescription.h \
     Database/Tables/NodeReferenceList.h \
     Database/Tables/NodeReferenceItem.h \
-    Database/Tables/NodeReference.h
+    Database/Tables/NodeReference.h \
+    Database/Tables/NodeAttachmentList.h \
+    Database/Tables/NodeAttachmentItem.h \
+    Database/DataTypes/Blob.h \
+    Database/Tables/NodeAttachment.h
 
 FORMS    += \
     MainWindow.ui

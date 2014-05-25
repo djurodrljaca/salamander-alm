@@ -1,5 +1,5 @@
 /**
- * @file   NodeReference.h
+ * @file   NodeAttachmentItem.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEREFERENCE_H
-#define DATABASE_TABLES_NODEREFERENCE_H
+#ifndef DATABASE_TABLES_NODEATTACHMENTITEM_H
+#define DATABASE_TABLES_NODEATTACHMENTITEM_H
 
 #include "Database/DataTypes/Integer.h"
 #include <QtSql/QSqlRecord>
@@ -30,28 +30,33 @@ namespace Database
 {
 namespace Tables
 {
-class NodeReference
+class NodeAttachmentItem
 {
 public:
-    NodeReference();
-    NodeReference(const DataTypes::Integer &id,
-                  const DataTypes::Integer &node);
+    NodeAttachmentItem();
+    NodeAttachmentItem(const DataTypes::Integer &id,
+                       const DataTypes::Integer &list,
+                       const DataTypes::Integer &attachment);
 
     bool isValid() const;
 
     DataTypes::Integer getId() const;
     void setId(const DataTypes::Integer &id);
 
-    DataTypes::Integer getNode() const;
-    void setNode(const DataTypes::Integer &node);
+    DataTypes::Integer getList() const;
+    void setList(const DataTypes::Integer &list);
 
-    static NodeReference fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    DataTypes::Integer getAttachment() const;
+    void setAttachment(const DataTypes::Integer &attachment);
+
+    static NodeAttachmentItem fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
     DataTypes::Integer m_id;
-    DataTypes::Integer m_node;
+    DataTypes::Integer m_list;
+    DataTypes::Integer m_attachment;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODEREFERENCE_H
+#endif // DATABASE_TABLES_NODEATTACHMENTITEM_H

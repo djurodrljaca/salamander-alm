@@ -1,5 +1,5 @@
 /**
- * @file   NodeReferenceList.cpp
+ * @file   NodeAttachmentList.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,52 +20,52 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Tables/NodeReferenceList.h"
+#include "Database/Tables/NodeAttachmentList.h"
 
 using namespace Database::Tables;
 using namespace Database::DataTypes;
 
-NodeReferenceList::NodeReferenceList()
+NodeAttachmentList::NodeAttachmentList()
     : m_id()
 {
 }
 
-NodeReferenceList::NodeReferenceList(const Integer &id)
+NodeAttachmentList::NodeAttachmentList(const Integer &id)
     : m_id(id)
 {
 }
 
-bool NodeReferenceList::isValid() const
+bool NodeAttachmentList::isValid() const
 {
     return !m_id.isNull();
 }
 
-Integer NodeReferenceList::getId() const
+Integer NodeAttachmentList::getId() const
 {
     return m_id;
 }
 
-void NodeReferenceList::setId(const Integer &id)
+void NodeAttachmentList::setId(const Integer &id)
 {
     m_id = id;
 }
 
-NodeReferenceList NodeReferenceList::fromRecord(const QSqlRecord &record, bool *ok)
+NodeAttachmentList NodeAttachmentList::fromRecord(const QSqlRecord &record, bool *ok)
 {
-    NodeReferenceList nodeReferenceList;
+    NodeAttachmentList nodeAttachmentList;
     bool success = !record.isEmpty();
 
     // Id
     if (success)
     {
-        nodeReferenceList.setId(Integer::fromField(record.field("Id"), &success));
+        nodeAttachmentList.setId(Integer::fromField(record.field("Id"), &success));
     }
 
-    // Check NodeReferenceList
+    // Check NodeAttachmentList
     if (!success ||
-        !nodeReferenceList.isValid())
+        !nodeAttachmentList.isValid())
     {
-        nodeReferenceList = NodeReferenceList();
+        nodeAttachmentList = NodeAttachmentList();
         success = false;
     }
 
@@ -74,5 +74,5 @@ NodeReferenceList NodeReferenceList::fromRecord(const QSqlRecord &record, bool *
         *ok = success;
     }
 
-    return nodeReferenceList;
+    return nodeAttachmentList;
 }

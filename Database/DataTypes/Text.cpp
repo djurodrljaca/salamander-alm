@@ -67,6 +67,7 @@ Text Text::fromField(const QSqlField &field, bool *ok)
     {
         if (field.isNull())
         {
+            text.setNull();
             success = true;
         }
         else

@@ -1,5 +1,5 @@
 /**
- * @file   NodeReference.h
+ * @file   Blob.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,38 +20,34 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEREFERENCE_H
-#define DATABASE_TABLES_NODEREFERENCE_H
+#ifndef DATABASE_DATATYPES_BLOB_H
+#define DATABASE_DATATYPES_BLOB_H
 
-#include "Database/DataTypes/Integer.h"
-#include <QtSql/QSqlRecord>
+#include <QtCore/QByteArray>
+#include <QtSql/QSqlField>
 
 namespace Database
 {
-namespace Tables
+namespace DataTypes
 {
-class NodeReference
+class Blob
 {
 public:
-    NodeReference();
-    NodeReference(const DataTypes::Integer &id,
-                  const DataTypes::Integer &node);
+    Blob();
+    Blob(const QString &value);
 
-    bool isValid() const;
+    bool isNull() const;
+    void setNull();
+    QByteArray getValue() const;
+    void setValue(const QByteArray &value);
 
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    DataTypes::Integer getNode() const;
-    void setNode(const DataTypes::Integer &node);
-
-    static NodeReference fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    static Blob fromField(const QSqlField &field, bool *ok = NULL);
 
 private:
-    DataTypes::Integer m_id;
-    DataTypes::Integer m_node;
+    bool m_null;
+    QByteArray m_value;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODEREFERENCE_H
+#endif // DATABASE_DATATYPES_BLOB_H

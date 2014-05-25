@@ -1,5 +1,5 @@
 /**
- * @file   NodeReference.h
+ * @file   NodeAttachmentList.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEREFERENCE_H
-#define DATABASE_TABLES_NODEREFERENCE_H
+#ifndef DATABASE_TABLES_NODEATTACHMENTLIST_H
+#define DATABASE_TABLES_NODEATTACHMENTLIST_H
 
 #include "Database/DataTypes/Integer.h"
 #include <QtSql/QSqlRecord>
@@ -30,28 +30,23 @@ namespace Database
 {
 namespace Tables
 {
-class NodeReference
+class NodeAttachmentList
 {
 public:
-    NodeReference();
-    NodeReference(const DataTypes::Integer &id,
-                  const DataTypes::Integer &node);
+    NodeAttachmentList();
+    NodeAttachmentList(const DataTypes::Integer &id);
 
     bool isValid() const;
 
     DataTypes::Integer getId() const;
     void setId(const DataTypes::Integer &id);
 
-    DataTypes::Integer getNode() const;
-    void setNode(const DataTypes::Integer &node);
-
-    static NodeReference fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    static NodeAttachmentList fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
     DataTypes::Integer m_id;
-    DataTypes::Integer m_node;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODEREFERENCE_H
+#endif // DATABASE_TABLES_NODEATTACHMENTLIST_H

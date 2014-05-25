@@ -1,5 +1,5 @@
 /**
- * @file   NodeReference.h
+ * @file   NodeAttachment.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,38 +20,45 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEREFERENCE_H
-#define DATABASE_TABLES_NODEREFERENCE_H
+#ifndef DATABASE_TABLES_NODEATTACHMENT_H
+#define DATABASE_TABLES_NODEATTACHMENT_H
 
+#include "Database/DataTypes/Blob.h"
 #include "Database/DataTypes/Integer.h"
+#include "Database/DataTypes/Text.h"
 #include <QtSql/QSqlRecord>
 
 namespace Database
 {
 namespace Tables
 {
-class NodeReference
+class NodeAttachment
 {
 public:
-    NodeReference();
-    NodeReference(const DataTypes::Integer &id,
-                  const DataTypes::Integer &node);
+    NodeAttachment();
+    NodeAttachment(const DataTypes::Integer &id,
+                   const DataTypes::Text &fileName,
+                   const DataTypes::Blob &fileData);
 
     bool isValid() const;
 
     DataTypes::Integer getId() const;
     void setId(const DataTypes::Integer &id);
 
-    DataTypes::Integer getNode() const;
-    void setNode(const DataTypes::Integer &node);
+    DataTypes::Text getFileName() const;
+    void setFileName(const DataTypes::Text &fileName);
 
-    static NodeReference fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    DataTypes::Blob getFileData() const;
+    void setFileData(const DataTypes::Blob &fileData);
+
+    static NodeAttachment fromRecord(const QSqlRecord &record, bool *ok = NULL);
 
 private:
     DataTypes::Integer m_id;
-    DataTypes::Integer m_node;
+    DataTypes::Text m_fileName;
+    DataTypes::Blob m_fileData;
 };
 }
 }
 
-#endif // DATABASE_TABLES_NODEREFERENCE_H
+#endif // DATABASE_TABLES_NODEATTACHMENT_H
