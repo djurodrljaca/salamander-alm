@@ -24,8 +24,11 @@
 #define SQLITEDATABASE_H
 
 #include "Database/DataTypes/Integer.h"
+#include "Database/DataTypes/Boolean.h"
 #include "Database/Tables/Node.h"
 #include "Database/Tables/NodeType.h"
+#include "Database/Tables/NodeAttributes.h"
+#include <QtCore/QList>
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
 
@@ -48,8 +51,19 @@ public:
                  const DataTypes::Integer &type,
                  DataTypes::Integer *id = NULL) const;
     Tables::Node getNode(const DataTypes::Integer &id, bool *ok = NULL) const;
+    QList<Tables::Node> getNodes(const DataTypes::Integer &parent, bool *ok = NULL) const;
 
     Tables::NodeType getNodeType(const DataTypes::Integer &id, bool *ok = NULL) const;
+
+    bool addNodeAttributes(const DataTypes::Integer &node,
+                           const DataTypes::Integer &revision,
+                           const DataTypes::Integer &name,
+                           const DataTypes::Integer &description,
+                           const DataTypes::Integer &references,
+                           const DataTypes::Integer &attachments,
+                           const DataTypes::Integer &comments,
+                           const DataTypes::Boolean &isActive,
+                           DataTypes::Integer *id = NULL) const;
 
 
 
@@ -74,8 +88,12 @@ private:
     bool createTable(const QString &tableName) const;
     bool executeScriptFile(const QString &scriptFilePath) const;
 
+    DataTypes::Integer getLastInsertId(const QSqlQuery &query, bool *ok = NULL) const;
+
     DataTypes::Integer convertVariantToInteger(const QVariant &value, bool *ok = NULL) const;
     DataTypes::Text convertVariantToText(const QVariant &value, bool *ok = NULL) const;
+
+    Tables::Node getNodeFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
 
     QSqlDatabase m_database;
 };

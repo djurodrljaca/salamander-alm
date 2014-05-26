@@ -70,6 +70,11 @@ void MainWindow::addButtonPushed()
 
         bool success = m_database.addNode(Integer(), Integer(1), &id);
         qDebug() << "MainWindow::addButtonPushed:" << success << id.toString();
+
+        success = m_database.addNodeAttributes(Integer(1), Integer(1), Integer(1), Integer(1),
+                                               Integer(1), Integer(1), Integer(1), Boolean(false),
+                                               &id);
+        qDebug() << "MainWindow::addButtonPushed:" << success << id.toString();
     }
 }
 
@@ -85,6 +90,13 @@ void MainWindow::getButtonPushed()
 
         const Node node = m_database.getNode(id, &success);
         qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << node.toString();
+
+        const QList<Node> nodeList = m_database.getNodes(Integer(), &success);
+
+        foreach (const Node nodeItem, nodeList)
+        {
+            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem.toString();
+        }
 
         const NodeType nodeType = m_database.getNodeType(id, &success);
         qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << nodeType.toString();

@@ -217,27 +217,11 @@ bool SqliteDatabase::addNode(const Integer &parent, const Integer &type, Integer
             query.bindValue(":Type", type.toVariant());
 
             success = query.exec();
-        }
-    }
 
-    // Get Node.Id
-    if (success && (id != NULL))
-    {
-        QSqlQuery query;
-        success = query.exec("SELECT last_insert_rowid();");
-
-        if (success)
-        {
-            success = query.first();
-
-            if (success)
+            // Get Node.Id
+            if (success && (id != NULL))
             {
-                *id = convertVariantToInteger(query.value(0), &success);
-
-                if (success && id->isNull())
-                {
-                    success = false;
-                }
+                *id = getLastInsertId(query, &success);
             }
         }
     }
@@ -253,11 +237,7 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
     if (!id.isNull())
     {
         // Get Node from database
-        static const QString selectCommand(
-                    "SELECT `Parent`,`Type`"
-                    " FROM `Node`"
-                    " WHERE `Id`=:Id"
-                    );
+        static const QString selectCommand("SELECT * FROM `Node` WHERE `Id` == :Id");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -271,48 +251,21 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
             if (success)
             {
                 success = query.first();
-            }
-        }
 
-        // Id
-        if (success)
-        {
-            node.setId(id);
-        }
-
-        // Parent
-        if (success)
-        {
-            const Integer value = convertVariantToInteger(query.value(0), &success);
-
-            if (success)
-            {
-                node.setParent(value);
-            }
-        }
-
-        // Type
-        if (success)
-        {
-            const Integer value = convertVariantToInteger(query.value(1), &success);
-
-            if (success)
-            {
-                if (value.isNull())
+                if (success)
                 {
-                    success = false;
-                }
-                else
-                {
-                    node.setType(value);
+                    node = getNodeFromQuery(query, &success);
+
+                    if (success)
+                    {
+                        if (!node.isValid())
+                        {
+                            success = false;
+                        }
+                    }
                 }
             }
         }
-    }
-
-    if (!success || !node.isValid())
-    {
-        node = Node();
     }
 
     if (ok != NULL)
@@ -321,6 +274,63 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
     }
 
     return node;
+}
+
+QList<Node> SqliteDatabase::getNodes(const Integer &parent, bool *ok) const
+{
+    QList<Node> nodeList;
+    bool success = false;
+
+    // Get Node from database
+    static const QString selectCommand("SELECT * FROM `Node` WHERE `Parent` %1");
+
+    QSqlQuery query;
+
+    if (parent.isNull())
+    {
+        success = query.prepare(selectCommand.arg("IS NULL"));
+    }
+    else
+    {
+        success = query.prepare(selectCommand.arg("== :Parent"));
+    }
+
+    if (success)
+    {
+        if (!parent.isNull())
+        {
+            query.bindValue(":Parent", parent.toVariant());
+        }
+
+        success = query.exec();
+
+        if (success)
+        {
+            while (query.next() && success)
+            {
+                const Node node = getNodeFromQuery(query, &success);
+
+                if (success)
+                {
+                    if (node.isValid())
+                    {
+                        nodeList.append(node);
+                    }
+                    else
+                    {
+                        success = false;
+                    }
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return nodeList;
 }
 
 NodeType SqliteDatabase::getNodeType(const Integer &id, bool *ok) const
@@ -381,6 +391,63 @@ NodeType SqliteDatabase::getNodeType(const Integer &id, bool *ok) const
     }
 
     return nodeType;
+}
+
+bool SqliteDatabase::addNodeAttributes(const Integer &node,
+                                       const Integer &revision,
+                                       const Integer &name,
+                                       const Integer &description,
+                                       const Integer &references,
+                                       const Integer &attachments,
+                                       const Integer &comments,
+                                       const Boolean &isActive,
+                                       Integer *id) const
+{
+    // Insert value
+    static const QString insertCommand(
+                "INSERT INTO `NodeAttributes`"
+                "(`Node`, `Revision`, `Name`, `Description`, `References`, `Attachments`,"
+                " `Comments`, `IsActive`)"
+                " VALUES"
+                "(:Node, :Revision, :Name, :Description, :References, :Attachments,"
+                " :Comments, :IsActive);"
+                );
+
+    bool success = (!node.isNull() &&
+                    !revision.isNull() &&
+                    !name.isNull() &&
+                    !isActive.isNull());
+
+    if (success)
+    {
+        QSqlQuery query;
+        success = query.prepare(insertCommand);
+
+        if (success)
+        {
+            query.bindValue(":Node", node.toVariant());
+            query.bindValue(":Revision", revision.toVariant());
+            query.bindValue(":Name", name.toVariant());
+            query.bindValue(":Description", description.toVariant());
+            query.bindValue(":References", references.toVariant());
+            query.bindValue(":Attachments", attachments.toVariant());
+            query.bindValue(":Comments", comments.toVariant());
+            query.bindValue(":IsActive", isActive.toVariant());
+
+            success = query.exec();
+
+            qDebug() << query.executedQuery();
+            qDebug() << query.lastError();
+
+            // Get NodeAttributes.Id
+            if (success && (id != NULL))
+            {
+                *id = getLastInsertId(query, &success);
+            }
+        }
+    }
+
+    return success;
 }
 
 
@@ -456,13 +523,11 @@ bool SqliteDatabase::validatePersistentConfig() const
 
             if (v1 != v2)
             {
-                qDebug() << "SqliteDatabase::validatePersistentConfig: invalid values:" << v1 << v2;
                 success = false;
             }
         }
         else
         {
-            qDebug() << "SqliteDatabase::validatePersistentConfig: invalid types:" << value << item.value;
             success = false;
         }
     }
@@ -672,6 +737,24 @@ bool SqliteDatabase::executeScriptFile(const QString &scriptFilePath) const
     return success;
 }
 
+Integer SqliteDatabase::getLastInsertId(const QSqlQuery &query, bool *ok) const
+{
+    bool success = false;
+    const Integer integer = convertVariantToInteger(query.lastInsertId(), &success);
+
+    if (success && integer.isNull())
+    {
+        success = false;
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return integer;
+}
+
 Integer SqliteDatabase::convertVariantToInteger(const QVariant &value, bool *ok) const
 {
     Integer integerValue;
@@ -742,4 +825,67 @@ Text SqliteDatabase::convertVariantToText(const QVariant &value, bool *ok) const
     }
 
     return textValue;
+}
+
+Node SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) const
+{
+    Node node;
+    bool success = query.isActive();
+
+    // Id
+    if (success)
+    {
+        const int index = query.record().indexOf("Id");
+        const Integer value = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            if (value.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                node.setId(value);
+            }
+        }
+    }
+
+    // Parent
+    if (success)
+    {
+        const int index = query.record().indexOf("Parent");
+        const Integer value = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            node.setParent(value);
+        }
+    }
+
+    // Type
+    if (success)
+    {
+        const int index = query.record().indexOf("Type");
+        const Integer value = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            if (value.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                node.setType(value);
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return node;
 }
