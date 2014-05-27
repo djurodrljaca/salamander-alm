@@ -1,7 +1,7 @@
 /**
- * @file   Text.h
+ * @file   DataModel.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-27
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,34 +20,31 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TEXT_H
-#define DATABASE_TEXT_H
+#ifndef DATAMODEL_DATAMODEL_H
+#define DATAMODEL_DATAMODEL_H
 
-#include <QtCore/QString>
+#include "Database/SqliteDatabase.h"
+#include "DataModel/Node.h"
+#include <QtCore/QList>
 
-namespace Database
+namespace DataModel
 {
-
-// TODO: rename to TextField
-
-class Text
+class DataModel
 {
 public:
-    Text();
-    Text(const QString &value);
+    DataModel();
 
-    //operator ==
-    //operator !=
+    bool start();
+    void stop();
 
-    bool isNull() const;
-    void setNull();
-    QString getValue() const;
-    void setValue(const QString &value);
+    bool load();
 
 private:
-    bool m_null;
-    QString m_value;
+    bool loadNodeFromDatabase(const Database::Integer &id, Node *parent) const;
+
+    Database::SqliteDatabase m_database;
+    QList<Node> m_nodeList;
 };
 }
 
-#endif // DATABASE_TEXT_H
+#endif // DATAMODEL_DATAMODEL_H

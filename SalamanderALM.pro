@@ -13,7 +13,8 @@ TEMPLATE = app
 
 SOURCES += \
     main.cpp\
-    MainWindow.cpp
+    MainWindow.cpp \
+    DataModel/Node.cpp
 
 SOURCES += \
     Database/Blob.cpp \
@@ -25,8 +26,12 @@ SOURCES += \
     Database/SqliteDatabase.cpp \
     Database/Text.cpp
 
+SOURCES += \
+    DataModel/DataModel.cpp
+
 HEADERS  += \
-    MainWindow.h
+    MainWindow.h \
+    DataModel/Node.h
 
 HEADERS  += \
     Database/SqliteDatabase.h \
@@ -37,6 +42,9 @@ HEADERS  += \
     Database/Text.h \
     Database/Node.h \
     Database/NodeType.h
+
+HEADERS  += \
+    DataModel/DataModel.h
 
 FORMS    += \
     MainWindow.ui

@@ -27,11 +27,17 @@
 
 namespace Database
 {
+
+// TODO: rename to BlobField
+
 class Blob
 {
 public:
     Blob();
     Blob(const QByteArray &value);
+
+    //operator ==
+    //operator !=
 
     bool isNull() const;
     void setNull();

@@ -29,6 +29,9 @@
 
 namespace Database
 {
+
+// TODO: rename to NodeRecord
+
 class Node
 {
 public:

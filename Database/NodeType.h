@@ -20,14 +20,17 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODETYPE_H
-#define DATABASE_TABLES_NODETYPE_H
+#ifndef DATABASE_NODETYPE_H
+#define DATABASE_NODETYPE_H
 
 #include "Database/Integer.h"
 #include <QtCore/QDebug>
 
 namespace Database
 {
+
+// TODO: move to DataModel?
+
 enum NodeType
 {
     NodeType_Invalid = 0,
@@ -42,4 +45,4 @@ NodeType convertIntegerToNoteType(const Integer &integer, bool *ok = NULL);
 
 QDebug operator<<(QDebug dbg, const Database::NodeType nodeType);
 
-#endif // DATABASE_TABLES_NODETYPE_H
+#endif // DATABASE_NODETYPE_H

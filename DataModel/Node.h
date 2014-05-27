@@ -1,7 +1,7 @@
 /**
- * @file   Text.h
+ * @file   Node.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-27
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,34 +20,45 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TEXT_H
-#define DATABASE_TEXT_H
+#ifndef DATAMODEL_NODE_H
+#define DATAMODEL_NODE_H
 
-#include <QtCore/QString>
+#include "Database/Integer.h"
+#include "Database/NodeType.h"
+#include <QtCore/QList>
 
-namespace Database
+namespace DataModel
 {
-
-// TODO: rename to TextField
-
-class Text
+class Node
 {
 public:
-    Text();
-    Text(const QString &value);
+    Node();
+    Node(const Node &other);
+    ~Node();
 
-    //operator ==
-    //operator !=
+    Node & operator=(const Node &other);
 
-    bool isNull() const;
-    void setNull();
-    QString getValue() const;
-    void setValue(const QString &value);
+    bool isValid() const;
+
+    Database::Integer getId() const;
+    void setId(const Database::Integer &id);
+
+    Database::NodeType getType() const;
+    void setType(const Database::NodeType type);
+
+    Node * getParent() const;
+    void setParent(const Node *parent);
+
+    int getChildrenCount() const;
+    bool addChild(const Node &child);
+    Node * getChild(const int index);
 
 private:
-    bool m_null;
-    QString m_value;
+    Database::Integer m_id;
+    Database::NodeType m_type;
+    Node *m_parent;
+    QList<Node> m_children;
 };
 }
 
-#endif // DATABASE_TEXT_H
+#endif // DATAMODEL_NODE_H

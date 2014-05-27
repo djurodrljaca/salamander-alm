@@ -28,11 +28,17 @@
 
 namespace Database
 {
+
+// TODO: rename to IntegerField
+
 class Integer
 {
 public:
     Integer();
     Integer(const qlonglong value);
+
+    //operator ==
+    //operator !=
 
     bool isNull() const;
     void setNull();

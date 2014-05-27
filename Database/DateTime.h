@@ -27,11 +27,17 @@
 
 namespace Database
 {
+
+// TODO: rename to DateTimeField
+
 class DateTime
 {
 public:
     DateTime();
     DateTime(const QDateTime &value);
+
+    //operator ==
+    //operator !=
 
     bool isNull() const;
     void setNull();

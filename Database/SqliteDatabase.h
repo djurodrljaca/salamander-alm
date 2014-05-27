@@ -20,8 +20,8 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SQLITEDATABASE_H
-#define SQLITEDATABASE_H
+#ifndef DATABASE_SQLITEDATABASE_H
+#define DATABASE_SQLITEDATABASE_H
 
 #include "Database/Integer.h"
 #include "Database/Node.h"
@@ -82,4 +82,4 @@ private:
 };
 }
 
-#endif // SQLITEDATABASE_H
+#endif // DATABASE_SQLITEDATABASE_H

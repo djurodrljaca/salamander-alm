@@ -25,11 +25,17 @@
 
 namespace Database
 {
+
+// TODO: rename to BooleanField
+
 class Boolean
 {
 public:
     Boolean();
     Boolean(const bool value);
+
+    //operator ==
+    //operator !=
 
     bool isNull() const;
     void setNull();
