@@ -20,9 +20,9 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/DataTypes/Blob.h"
+#include "Database/Blob.h"
 
-using namespace Database::DataTypes;
+using namespace Database;
 
 Blob::Blob()
     : m_null(true),
@@ -56,46 +56,4 @@ void Blob::setValue(const QByteArray &value)
 {
     m_null = false;
     m_value = value;
-}
-
-QVariant Blob::toVariant() const
-{
-    QVariant value(QVariant::ByteArray);
-
-    if (!isNull())
-    {
-        value.setValue(m_value);
-    }
-
-    return value;
-}
-
-Blob Blob::fromField(const QSqlField &field, bool *ok)
-{
-    Blob blob;
-    bool success = false;
-
-    if (field.isValid())
-    {
-        if (field.isNull())
-        {
-            blob.setNull();
-            success = true;
-        }
-        else
-        {
-            if (field.value().type() == QVariant::ByteArray)
-            {
-                blob.setValue(field.value().toByteArray());
-                success = true;
-            }
-        }
-    }
-
-    if (ok != NULL)
-    {
-        *ok = success;
-    }
-
-    return blob;
 }

@@ -20,21 +20,21 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Tables/Node.h"
+#include "Database/Node.h"
+#include <QtCore/QString>
 
-using namespace Database::Tables;
-using namespace Database::DataTypes;
+using namespace Database;
 
 Node::Node()
     : m_id(),
       m_parent(),
-      m_type()
+      m_type(NodeType_Invalid)
 {
 }
 
 Node::Node(const Integer &id,
            const Integer &parent,
-           const Integer &type)
+           const NodeType type)
     : m_id(id),
       m_parent(parent),
       m_type(type)
@@ -43,8 +43,7 @@ Node::Node(const Integer &id,
 
 bool Node::isValid() const
 {
-    return (!m_id.isNull() &&
-            !m_type.isNull());
+    return isNodeTypeValid(m_type);
 }
 
 Integer Node::getId() const
@@ -67,21 +66,21 @@ void Node::setParent(const Integer &parent)
     m_parent = parent;
 }
 
-Integer Node::getType() const
+NodeType Node::getType() const
 {
     return m_type;
 }
 
-void Node::setType(const Integer &type)
+void Node::setType(const NodeType type)
 {
     m_type = type;
 }
 
-QString Node::toString() const
+QDebug operator<<(QDebug dbg, const Node &node)
 {
-    static const QString str("Node (Id='%1' Parent='%2' Type='%3')");
+    dbg.nospace() << "< Node: Id=" << node.getId();
+    dbg.nospace() << "Parent="<< node.getParent();
+    dbg.nospace() << "Type=" << node.getType() << ">";
 
-    return str.arg(m_id.toString(),
-                   m_parent.toString(),
-                   m_type.toString());
+    return dbg.space();
 }

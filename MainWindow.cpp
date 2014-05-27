@@ -22,7 +22,8 @@
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "Database/DataTypes/Integer.h"
+#include "Database/Integer.h"
+#include "Database/Node.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -65,16 +66,20 @@ void MainWindow::addButtonPushed()
 {
     if (m_database.isConnected())
     {
-        using namespace Database::DataTypes;
+        using namespace Database;
+        Node node(Integer(), Integer(), NodeType_Project);
         Integer id;
 
-        bool success = m_database.addNode(Integer(), Integer(1), &id);
-        qDebug() << "MainWindow::addButtonPushed:" << success << id.toString();
+        bool success = m_database.addNode(node, &id);
+        qDebug() << "MainWindow::addButtonPushed:" << success << id;
 
-        success = m_database.addNodeAttributes(Integer(1), Integer(1), Integer(1), Integer(1),
-                                               Integer(1), Integer(1), Integer(1), Boolean(false),
-                                               &id);
-        qDebug() << "MainWindow::addButtonPushed:" << success << id.toString();
+        if (success)
+        {
+            node.setParent(id);
+
+            success = m_database.addNode(node, &id);
+            qDebug() << "MainWindow::addButtonPushed:" << success << id;
+        }
     }
 }
 
@@ -82,23 +87,28 @@ void MainWindow::getButtonPushed()
 {
     if (m_database.isConnected())
     {
-        using namespace Database::DataTypes;
-        using namespace Database::Tables;
+        using namespace Database;
 
         bool success = false;
         const Integer id(1);
 
         const Node node = m_database.getNode(id, &success);
-        qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << node.toString();
+        qDebug() << "MainWindow::getButtonPushed:" << success << id << node;
 
-        const QList<Node> nodeList = m_database.getNodes(Integer(), &success);
+        const Integer parent1;
+        const QList<Node> nodeList1 = m_database.getNodes(parent1, &success);
 
-        foreach (const Node nodeItem, nodeList)
+        foreach (const Node nodeItem, nodeList1)
         {
-            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem.toString();
+            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
         }
 
-        const NodeType nodeType = m_database.getNodeType(id, &success);
-        qDebug() << "MainWindow::getButtonPushed:" << success << id.toString() << nodeType.toString();
+        const Integer parent2 = id;
+        const QList<Node> nodeList2 = m_database.getNodes(parent2, &success);
+
+        foreach (const Node nodeItem, nodeList2)
+        {
+            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
+        }
     }
 }

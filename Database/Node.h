@@ -1,7 +1,7 @@
 /**
- * @file   UserGroupType.h
+ * @file   Node.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,46 +20,41 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_USERGROUPTYPE_H
-#define DATABASE_TABLES_USERGROUPTYPE_H
+#ifndef DATABASE_NODE_H
+#define DATABASE_NODE_H
 
-#include "Database/DataTypes/Integer.h"
-#include "Database/DataTypes/Text.h"
-#include <QtCore/QString>
-#include <QtSql/QSqlRecord>
+#include "Database/Integer.h"
+#include "Database/NodeType.h"
+#include <QtCore/QtDebug>
 
 namespace Database
 {
-namespace Tables
-{
-class UserGroupType
+class Node
 {
 public:
-    enum
-    {
-        Administrator = 1,
-        User = 2
-    };
-
-    UserGroupType();
-    UserGroupType(const DataTypes::Integer &id,
-                  const DataTypes::Text &name);
+    Node();
+    Node(const Integer &id,
+         const Integer &parent,
+         const NodeType type);
 
     bool isValid() const;
 
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
+    Integer getId() const;
+    void setId(const Integer &id);
 
-    DataTypes::Text getName() const;
-    void setName(const DataTypes::Text &name);
+    Integer getParent() const;
+    void setParent(const Integer &parent);
 
-    static UserGroupType fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    NodeType getType() const;
+    void setType(const NodeType type);
 
 private:
-    DataTypes::Integer m_id;
-    DataTypes::Text m_name;
+    Integer m_id;
+    Integer m_parent;
+    NodeType m_type;
 };
 }
-}
 
-#endif // DATABASE_TABLES_USERGROUPTYPE_H
+QDebug operator<<(QDebug dbg, const Database::Node &node);
+
+#endif // DATABASE_NODE_H

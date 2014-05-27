@@ -1,7 +1,7 @@
 /**
- * @file   NodeType.h
+ * @file   Boolean.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,46 +20,40 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODETYPE_H
-#define DATABASE_TABLES_NODETYPE_H
+#include "Database/Boolean.h"
 
-#include "Database/DataTypes/Integer.h"
-#include "Database/DataTypes/Text.h"
-#include <QtCore/QString>
-#include <QtCore/QVariant>
-#include <QtSql/QSqlRecord>
+using namespace Database;
 
-namespace Database
+Boolean::Boolean()
+    : m_null(true),
+      m_value(false)
 {
-namespace Tables
-{
-class NodeType
-{
-public:
-    enum
-    {
-        Project = 1
-    };
-
-    NodeType();
-    NodeType(const DataTypes::Integer &id,
-             const DataTypes::Text &name);
-
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    DataTypes::Text getName() const;
-    void setName(const DataTypes::Text &name);
-
-    QString toString() const;
-
-private:
-    DataTypes::Integer m_id;
-    DataTypes::Text m_name;
-};
-}
 }
 
-#endif // DATABASE_TABLES_NODETYPE_H
+Boolean::Boolean(const bool value)
+    : m_null(false),
+      m_value(value)
+{
+}
+
+bool Boolean::isNull() const
+{
+    return m_null;
+}
+
+void Boolean::setNull()
+{
+    m_null = true;
+    m_value = false;
+}
+
+bool Boolean::getValue() const
+{
+    return m_value;
+}
+
+void Boolean::setValue(const bool value)
+{
+    m_null = false;
+    m_value = value;
+}

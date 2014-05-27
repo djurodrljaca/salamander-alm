@@ -13,11 +13,9 @@
         <file>Sqlite/Tables/NodeReference_CreateTable.sqlite</file>
         <file>Sqlite/Tables/NodeReferenceItem_CreateTable.sqlite</file>
         <file>Sqlite/Tables/NodeReferenceList_CreateTable.sqlite</file>
-        <file>Sqlite/Tables/NodeType_CreateTable.sqlite</file>
         <file>Sqlite/Tables/Revision_CreateTable.sqlite</file>
         <file>Sqlite/Tables/User_CreateTable.sqlite</file>
         <file>Sqlite/Tables/UserGroup_CreateTable.sqlite</file>
-        <file>Sqlite/Tables/UserGroupType_CreateTable.sqlite</file>
         <file>Sqlite/Tables/Tables.txt</file>
     </qresource>
 </RCC>

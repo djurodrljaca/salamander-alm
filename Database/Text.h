@@ -1,5 +1,5 @@
 /**
- * @file   Boolean.h
+ * @file   Text.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,36 +20,28 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_DATATYPES_BOOLEAN_H
-#define DATABASE_DATATYPES_BOOLEAN_H
+#ifndef DATABASE_TEXT_H
+#define DATABASE_TEXT_H
 
-#include <QtGlobal>
-#include <QtSql/QSqlField>
+#include <QtCore/QString>
 
 namespace Database
 {
-namespace DataTypes
-{
-class Boolean
+class Text
 {
 public:
-    Boolean();
-    Boolean(const bool value);
+    Text();
+    Text(const QString &value);
 
     bool isNull() const;
     void setNull();
-    bool getValue() const;
-    void setValue(const bool value);
-
-    QVariant toVariant() const;
-
-    static Boolean fromField(const QSqlField &field, bool *ok = NULL);
+    QString getValue() const;
+    void setValue(const QString &value);
 
 private:
     bool m_null;
-    bool m_value;
+    QString m_value;
 };
 }
-}
 
-#endif // DATABASE_DATATYPES_BOOLEAN_H
+#endif // DATABASE_TEXT_H

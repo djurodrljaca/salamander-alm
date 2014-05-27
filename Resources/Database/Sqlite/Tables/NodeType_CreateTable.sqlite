@@ -1,6 +1,0 @@
-CREATE TABLE `NodeType` (
-    `Id`	INTEGER NOT NULL PRIMARY KEY,
-    `Name`	TEXT NOT NULL
-);
-
-INSERT INTO `NodeType`(`Id`,`Name`) VALUES (1, 'Project');

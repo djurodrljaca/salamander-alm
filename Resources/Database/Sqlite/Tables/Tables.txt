@@ -1,7 +1,5 @@
-NodeType
 Node
 Revision
-UserGroupType
 UserGroup
 User
 NodeName

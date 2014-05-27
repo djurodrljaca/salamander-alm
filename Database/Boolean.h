@@ -1,5 +1,5 @@
 /**
- * @file   NodeName.h
+ * @file   Boolean.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,40 +20,26 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODENAME_H
-#define DATABASE_TABLES_NODENAME_H
-
-#include "Database/DataTypes/Integer.h"
-#include "Database/DataTypes/Text.h"
-#include <QtCore/QString>
-#include <QtSql/QSqlRecord>
+#ifndef DATABASE_BOOLEAN_H
+#define DATABASE_BOOLEAN_H
 
 namespace Database
 {
-namespace Tables
-{
-class NodeName
+class Boolean
 {
 public:
-    NodeName();
-    NodeName(const DataTypes::Integer &id,
-             const DataTypes::Text &text);
+    Boolean();
+    Boolean(const bool value);
 
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    DataTypes::Text getText() const;
-    void setText(const DataTypes::Text &text);
-
-    static NodeName fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    bool isNull() const;
+    void setNull();
+    bool getValue() const;
+    void setValue(const bool value);
 
 private:
-    DataTypes::Integer m_id;
-    DataTypes::Text m_text;
+    bool m_null;
+    bool m_value;
 };
 }
-}
 
-#endif // DATABASE_TABLES_NODENAME_H
+#endif // DATABASE_BOOLEAN_H

@@ -1,7 +1,7 @@
 /**
- * @file   Node.h
+ * @file   NodeType.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-5-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,44 +20,26 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODE_H
-#define DATABASE_TABLES_NODE_H
+#ifndef DATABASE_TABLES_NODETYPE_H
+#define DATABASE_TABLES_NODETYPE_H
 
-#include "Database/DataTypes/Integer.h"
-#include <QtSql/QSqlRecord>
-#include <QtCore/QString>
+#include "Database/Integer.h"
+#include <QtCore/QDebug>
 
 namespace Database
 {
-namespace Tables
+enum NodeType
 {
-class Node
-{
-public:
-    Node();
-    Node(const DataTypes::Integer &id,
-         const DataTypes::Integer &parent,
-         const DataTypes::Integer &type);
-
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    DataTypes::Integer getParent() const;
-    void setParent(const DataTypes::Integer &parent);
-
-    DataTypes::Integer getType() const;
-    void setType(const DataTypes::Integer &type);
-
-    QString toString() const;
-
-private:
-    DataTypes::Integer m_id;
-    DataTypes::Integer m_parent;
-    DataTypes::Integer m_type;
+    NodeType_Invalid = 0,
+    NodeType_Project
 };
-}
+
+bool isNodeTypeValid(const NodeType nodeType);
+Integer convertNoteTypeToInteger(const NodeType nodeType, bool *ok = NULL);
+NodeType convertIntegerToNoteType(const Integer &integer, bool *ok = NULL);
+
 }
 
-#endif // DATABASE_TABLES_NODE_H
+QDebug operator<<(QDebug dbg, const Database::NodeType nodeType);
+
+#endif // DATABASE_TABLES_NODETYPE_H

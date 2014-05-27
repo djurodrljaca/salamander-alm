@@ -4,21 +4,17 @@
 Table:
 	- Id: integer, primary key, auto-increment
 	- Parent: integer + null, forgein key to Node.Id
-	- Type: integer, forgein key to NodeType.Id
+	- Type: integer (NodeType enum)
 
 Constraints:
 	- Parent --> Node.Id
-	- Type --> NodeType.Id
 
 -------------------------------------------------
 | NodeType
 -------------------------------------------------
-Table:
-	- Id: integer, primary key
-	- Name: text
-
-Available type:
+Values:
 	- 1: Project
+	- 2: ProjectVersion
 	- ...
 
 -------------------------------------------------
@@ -61,20 +57,13 @@ Constraints:
 Table:
 	- Id: integer, primary key, auto-increment
 	- Name: text
-	- Type: integer, forgein key to UserGroupType.Id
+	- Type: integer, (UserGroupType enum)
 	- Description: text + null
-
-Constraints:
-	- Type --> UserGroupType.Id
 
 -------------------------------------------------
 | UserGroupType
 -------------------------------------------------
-Table:
-	- Id: integer, primary key
-	- Name: text
-
-Available type:
+Values:
 	- 1: Administrator
 	- 2: User
 	- ...

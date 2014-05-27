@@ -1,5 +1,5 @@
 /**
- * @file   NodeCommentList.h
+ * @file   DateTime.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,33 +20,40 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODECOMMENTLIST_H
-#define DATABASE_TABLES_NODECOMMENTLIST_H
+#include "Database/DateTime.h"
 
-#include "Database/DataTypes/Integer.h"
-#include <QtSql/QSqlRecord>
+using namespace Database;
 
-namespace Database
+DateTime::DateTime()
+    : m_null(true),
+      m_value()
 {
-namespace Tables
-{
-class NodeCommentList
-{
-public:
-    NodeCommentList();
-    NodeCommentList(const DataTypes::Integer &id);
-
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    static NodeCommentList fromRecord(const QSqlRecord &record, bool *ok = NULL);
-
-private:
-    DataTypes::Integer m_id;
-};
-}
 }
 
-#endif // DATABASE_TABLES_NODECOMMENTLIST_H
+DateTime::DateTime(const QDateTime &value)
+    : m_null(false),
+      m_value(value)
+{
+}
+
+bool DateTime::isNull() const
+{
+    return m_null;
+}
+
+void DateTime::setNull()
+{
+    m_null = true;
+    m_value = QDateTime();
+}
+
+QDateTime DateTime::getValue() const
+{
+    return m_value;
+}
+
+void DateTime::setValue(const QDateTime &value)
+{
+    m_null = false;
+    m_value = value;
+}

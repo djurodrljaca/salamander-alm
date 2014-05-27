@@ -1,5 +1,5 @@
 /**
- * @file   NodeReferenceList.h
+ * @file   DateTime.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,33 +20,28 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEREFERENCELIST_H
-#define DATABASE_TABLES_NODEREFERENCELIST_H
+#ifndef DATABASE_DATETIME_H
+#define DATABASE_DATETIME_H
 
-#include "Database/DataTypes/Integer.h"
-#include <QtSql/QSqlRecord>
+#include <QtCore/QDateTime>
 
 namespace Database
 {
-namespace Tables
-{
-class NodeReferenceList
+class DateTime
 {
 public:
-    NodeReferenceList();
-    NodeReferenceList(const DataTypes::Integer &id);
+    DateTime();
+    DateTime(const QDateTime &value);
 
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    static NodeReferenceList fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    bool isNull() const;
+    void setNull();
+    QDateTime getValue() const;
+    void setValue(const QDateTime &value);
 
 private:
-    DataTypes::Integer m_id;
+    bool m_null;
+    QDateTime m_value;
 };
 }
-}
 
-#endif // DATABASE_TABLES_NODEREFERENCELIST_H
+#endif // DATABASE_DATETIME_H

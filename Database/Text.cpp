@@ -1,5 +1,5 @@
 /**
- * @file   Text.h
+ * @file   Text.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,37 +20,40 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_DATATYPES_TEXT_H
-#define DATABASE_DATATYPES_TEXT_H
+#include "Database/Text.h"
 
-#include <QtCore/QString>
-#include <QtSql/QSqlField>
+using namespace Database;
 
-namespace Database
+Text::Text()
+    : m_null(true),
+      m_value()
 {
-namespace DataTypes
-{
-class Text
-{
-public:
-    Text();
-    Text(const QString &value);
-
-    bool isNull() const;
-    void setNull();
-    QString getValue() const;
-    void setValue(const QString &value);
-
-    QVariant toVariant() const;
-    QString toString() const;
-
-    static Text fromField(const QSqlField &field, bool *ok = NULL);
-
-private:
-    bool m_null;
-    QString m_value;
-};
-}
 }
 
-#endif // DATABASE_DATATYPES_TEXT_H
+Text::Text(const QString &value)
+    : m_null(false),
+      m_value(value)
+{
+}
+
+bool Text::isNull() const
+{
+    return m_null;
+}
+
+void Text::setNull()
+{
+    m_null = true;
+    m_value = QString();
+}
+
+QString Text::getValue() const
+{
+    return m_value;
+}
+
+void Text::setValue(const QString &value)
+{
+    m_null = false;
+    m_value = value;
+}

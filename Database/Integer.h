@@ -1,7 +1,7 @@
 /**
- * @file   NodeAttachmentList.h
+ * @file   Integer.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,33 +20,31 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEATTACHMENTLIST_H
-#define DATABASE_TABLES_NODEATTACHMENTLIST_H
+#ifndef DATABASE_INTEGER_H
+#define DATABASE_INTEGER_H
 
-#include "Database/DataTypes/Integer.h"
-#include <QtSql/QSqlRecord>
+#include <QtCore/QtGlobal>
+#include <QtCore/QDebug>
 
 namespace Database
 {
-namespace Tables
-{
-class NodeAttachmentList
+class Integer
 {
 public:
-    NodeAttachmentList();
-    NodeAttachmentList(const DataTypes::Integer &id);
+    Integer();
+    Integer(const qlonglong value);
 
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    static NodeAttachmentList fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    bool isNull() const;
+    void setNull();
+    qlonglong getValue() const;
+    void setValue(const qlonglong value);
 
 private:
-    DataTypes::Integer m_id;
+    bool m_null;
+    qlonglong m_value;
 };
 }
-}
 
-#endif // DATABASE_TABLES_NODEATTACHMENTLIST_H
+QDebug operator<<(QDebug dbg, const Database::Integer &integer);
+
+#endif // DATABASE_INTEGER_H

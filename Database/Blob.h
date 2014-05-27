@@ -1,5 +1,5 @@
 /**
- * @file   NodeDescription.h
+ * @file   Blob.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,40 +20,28 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TABLES_NODEDESCRIPTION_H
-#define DATABASE_TABLES_NODEDESCRIPTION_H
+#ifndef DATABASE_BLOB_H
+#define DATABASE_BLOB_H
 
-#include "Database/DataTypes/Integer.h"
-#include "Database/DataTypes/Text.h"
-#include <QtCore/QString>
-#include <QtSql/QSqlRecord>
+#include <QtCore/QByteArray>
 
 namespace Database
 {
-namespace Tables
-{
-class NodeDescription
+class Blob
 {
 public:
-    NodeDescription();
-    NodeDescription(const DataTypes::Integer &id,
-                    const DataTypes::Text &text);
+    Blob();
+    Blob(const QByteArray &value);
 
-    bool isValid() const;
-
-    DataTypes::Integer getId() const;
-    void setId(const DataTypes::Integer &id);
-
-    DataTypes::Text getText() const;
-    void setText(const DataTypes::Text &text);
-
-    static NodeDescription fromRecord(const QSqlRecord &record, bool *ok = NULL);
+    bool isNull() const;
+    void setNull();
+    QByteArray getValue() const;
+    void setValue(const QByteArray &value);
 
 private:
-    DataTypes::Integer m_id;
-    DataTypes::Text m_text;
+    bool m_null;
+    QByteArray m_value;
 };
 }
-}
 
-#endif // DATABASE_TABLES_NODEDESCRIPTION_H
+#endif // DATABASE_BLOB_H
