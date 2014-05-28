@@ -32,6 +32,11 @@ DataModel::DataModel::DataModel()
 {
 }
 
+DataModel::DataModel::~DataModel()
+{
+    clear();
+}
+
 bool DataModel::DataModel::start()
 {
     bool success = false;
@@ -74,31 +79,51 @@ bool DataModel::DataModel::load()
 
     if (success)
     {
-        // Load all root nodes - only "Project" nodes are allowed to be root nodes!
+        // Load all root nodes
         const QList<NodeRecord> nodeRecordList = m_database.getNodes(IntegerField(), &success);
 
         if (success)
         {
             foreach (const NodeRecord nodeRecordItem, nodeRecordList)
             {
-                // TODO: check if all root nodes are "Project" nodes!
-                // Load each found "Project" node
-                Node node;
-                success = loadNodeFromDatabase(nodeRecordItem, &node);
+                // Only "Project" nodes are allwed as root node
+                if (nodeRecordItem.getType() != NodeType_Project)
+                {
+                    success = false;
+                }
 
+                // Load each found "Project" node
                 if (success)
                 {
-                    m_nodeList.append(node);
-                }
-                else
-                {
-                    break;
+                    Node *projectNode = new Node();
+                    success = loadNodeFromDatabase(nodeRecordItem, projectNode);
+
+                    if (success)
+                    {
+                        m_nodeList.append(projectNode);
+                    }
+                    else
+                    {
+                        delete projectNode;
+                        projectNode = NULL;
+                        break;
+                    }
                 }
             }
         }
     }
 
     return success;
+}
+
+void DataModel::DataModel::clear()
+{
+    foreach (Node *node, m_nodeList)
+    {
+        delete node;
+    }
+
+    m_nodeList.clear();
 }
 
 bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
@@ -131,8 +156,8 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
             foreach (const Database::NodeRecord nodeRecordItem, nodeRecordList)
             {
                 // Load child node and add it to the node
-                Node childNode;
-                success = loadNodeFromDatabase(nodeRecordItem, &childNode, node);
+                Node *childNode = new Node();
+                success = loadNodeFromDatabase(nodeRecordItem, childNode, node);
 
 
                 if (success)

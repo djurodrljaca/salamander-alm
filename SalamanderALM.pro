@@ -12,39 +12,39 @@ TARGET = SalamanderALM
 TEMPLATE = app
 
 SOURCES += \
-    main.cpp\
-    MainWindow.cpp \
-    DataModel/Node.cpp \
     Database/BlobField.cpp \
     Database/BooleanField.cpp \
     Database/DateTimeField.cpp \
     Database/IntegerField.cpp \
-    Database/TextField.cpp \
-    Database/NodeRecord.cpp
-
-SOURCES += \
+    Database/NodeRecord.cpp \
     Database/NodeType.cpp \
-    Database/SqliteDatabase.cpp
+    Database/SqliteDatabase.cpp \
+    Database/TextField.cpp
 
 SOURCES += \
-    DataModel/DataModel.cpp
+    DataModel/DataModel.cpp \
+    DataModel/Node.cpp
+
+SOURCES += \
+    main.cpp\
+    MainWindow.cpp
 
 HEADERS  += \
-    MainWindow.h \
-    DataModel/NodeRecord.h \
     Database/BlobField.h \
     Database/BooleanField.h \
     Database/DateTimeField.h \
     Database/IntegerField.h \
-    Database/TextField.h \
-    Database/NodeRecord.h
-
-HEADERS  += \
+    Database/NodeRecord.h \
+    Database/NodeType.h \
     Database/SqliteDatabase.h \
-    Database/NodeType.h
+    Database/TextField.h
 
 HEADERS  += \
-    DataModel/DataModel.h
+    DataModel/DataModel.h \
+    DataModel/Node.h
+
+HEADERS  += \
+    MainWindow.h
 
 FORMS    += \
     MainWindow.ui

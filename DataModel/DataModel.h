@@ -33,6 +33,7 @@ class DataModel
 {
 public:
     DataModel();
+    ~DataModel();
 
     bool start();
     void stop();
@@ -40,12 +41,13 @@ public:
     bool load();
 
 private:
+    void clear();
     bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
                               Node *node,
                               Node *parent = NULL) const;
 
     Database::SqliteDatabase m_database;
-    QList<Node> m_nodeList;
+    QList<Node *> m_nodeList;
 };
 }
 

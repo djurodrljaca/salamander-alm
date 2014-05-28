@@ -35,30 +35,22 @@ Node::Node()
 Node::Node(const Node &other)
     : m_id(other.m_id),
       m_type(other.m_type),
-      m_parent(NULL),
+      m_parent(other.m_parent),
       m_children(other.m_children)
 {
-    if (other.m_parent != NULL)
-    {
-        m_parent = new Node(*other.m_parent);
-    }
 }
 
 Node::~Node()
 {
-    delete m_parent;
+    clear();
 }
 
-Node &Node::operator=(const Node &other)
+Node & Node::operator =(const Node &other)
 {
     m_id = other.m_id;
     m_type = other.m_type;
+    m_parent = other.m_parent;
     m_children = other.m_children;
-
-    if (other.m_parent != NULL)
-    {
-        m_parent = new Node(*other.m_parent);
-    }
 
     return *this;
 }
@@ -88,23 +80,14 @@ void Node::setType(const Database::NodeType type)
     m_type = type;
 }
 
-Node *Node::getParent() const
+Node * Node::getParent() const
 {
     return m_parent;
 }
 
-void Node::setParent(const Node *parent)
+void Node::setParent(Node *parent)
 {
-    delete m_parent;
-
-    if (parent == NULL)
-    {
-        m_parent = NULL;
-    }
-    else
-    {
-        m_parent = new Node(*parent);
-    }
+    m_parent = parent;
 }
 
 int Node::getChildrenCount() const
@@ -112,7 +95,7 @@ int Node::getChildrenCount() const
     return m_children.size();
 }
 
-bool Node::addChild(const Node &child)
+bool Node::addChild(Node *child)
 {
     m_children.append(child);
     return true;
@@ -120,12 +103,22 @@ bool Node::addChild(const Node &child)
 
 Node * Node::getChild(const int index)
 {
-    Node *node = NULL;
+    Node *child = NULL;
 
     if ((index >= 0) && (index < m_children.size()))
     {
-        node = &m_children[index];
+        child = m_children[index];
     }
 
-    return node;
+    return child;
+}
+
+void Node::clear()
+{
+    foreach (Node *child, m_children)
+    {
+        delete child;
+    }
+
+    m_children.clear();
 }

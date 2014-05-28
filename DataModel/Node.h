@@ -36,7 +36,7 @@ public:
     Node(const Node &other);
     ~Node();
 
-    Node & operator=(const Node &other);
+    Node & operator =(const Node &other);
 
     bool isValid() const;
 
@@ -47,17 +47,19 @@ public:
     void setType(const Database::NodeType type);
 
     Node * getParent() const;
-    void setParent(const Node *parent);
+    void setParent(Node *parent);
 
     int getChildrenCount() const;
-    bool addChild(const Node &child);
+    bool addChild(Node *child);
     Node * getChild(const int index);
 
 private:
+    void clear();
+
     Database::IntegerField m_id;
     Database::NodeType m_type;
     Node *m_parent;
-    QList<Node> m_children;
+    QList<Node *> m_children;
 };
 }
 
