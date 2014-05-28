@@ -1,5 +1,5 @@
 /**
- * @file   Boolean.h
+ * @file   BooleanField.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,22 +20,19 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_BOOLEAN_H
-#define DATABASE_BOOLEAN_H
+#ifndef DATABASE_BOOLEANFIELD_H
+#define DATABASE_BOOLEANFIELD_H
 
 namespace Database
 {
-
-// TODO: rename to BooleanField
-
-class Boolean
+class BooleanField
 {
 public:
-    Boolean();
-    Boolean(const bool value);
+    BooleanField();
+    BooleanField(const bool value);
 
-    //operator ==
-    //operator !=
+    bool operator ==(const BooleanField& other) const;
+    bool operator !=(const BooleanField& other) const;
 
     bool isNull() const;
     void setNull();
@@ -48,4 +45,4 @@ private:
 };
 }
 
-#endif // DATABASE_BOOLEAN_H
+#endif // DATABASE_BOOLEANFIELD_H

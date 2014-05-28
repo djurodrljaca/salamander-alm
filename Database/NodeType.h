@@ -23,7 +23,7 @@
 #ifndef DATABASE_NODETYPE_H
 #define DATABASE_NODETYPE_H
 
-#include "Database/Integer.h"
+#include "Database/IntegerField.h"
 #include <QtCore/QDebug>
 
 namespace Database
@@ -38,8 +38,8 @@ enum NodeType
 };
 
 bool isNodeTypeValid(const NodeType nodeType);
-Integer convertNoteTypeToInteger(const NodeType nodeType, bool *ok = NULL);
-NodeType convertIntegerToNoteType(const Integer &integer, bool *ok = NULL);
+IntegerField convertNoteTypeToInteger(const NodeType nodeType, bool *ok = NULL);
+NodeType convertIntegerToNoteType(const IntegerField &integer, bool *ok = NULL);
 
 }
 

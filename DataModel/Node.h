@@ -1,5 +1,5 @@
 /**
- * @file   Node.h
+ * @file   NodeRecord.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-27
  * @brief  Brief description of file.
@@ -23,7 +23,7 @@
 #ifndef DATAMODEL_NODE_H
 #define DATAMODEL_NODE_H
 
-#include "Database/Integer.h"
+#include "Database/IntegerField.h"
 #include "Database/NodeType.h"
 #include <QtCore/QList>
 
@@ -40,8 +40,8 @@ public:
 
     bool isValid() const;
 
-    Database::Integer getId() const;
-    void setId(const Database::Integer &id);
+    Database::IntegerField getId() const;
+    void setId(const Database::IntegerField &id);
 
     Database::NodeType getType() const;
     void setType(const Database::NodeType type);
@@ -54,7 +54,7 @@ public:
     Node * getChild(const int index);
 
 private:
-    Database::Integer m_id;
+    Database::IntegerField m_id;
     Database::NodeType m_type;
     Node *m_parent;
     QList<Node> m_children;

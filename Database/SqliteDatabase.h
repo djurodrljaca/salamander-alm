@@ -23,8 +23,8 @@
 #ifndef DATABASE_SQLITEDATABASE_H
 #define DATABASE_SQLITEDATABASE_H
 
-#include "Database/Integer.h"
-#include "Database/Node.h"
+#include "Database/IntegerField.h"
+#include "Database/NodeRecord.h"
 #include <QtCore/QList>
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
@@ -44,9 +44,9 @@ public:
     bool validate() const;
     bool create();
 
-    bool addNode(const Node &node, Integer *id = NULL) const;
-    Node getNode(const Integer &id, bool *ok = NULL) const;
-    QList<Node> getNodes(const Integer &parent, bool *ok = NULL) const;
+    bool addNode(const NodeRecord &node, IntegerField *id = NULL) const;
+    NodeRecord getNode(const IntegerField &id, bool *ok = NULL) const;
+    QList<NodeRecord> getNodes(const IntegerField &parent, bool *ok = NULL) const;
 
 
 
@@ -69,14 +69,14 @@ private:
     QStringList getTableList() const;
     bool createTable(const QString &tableName) const;
 
-    QVariant convertIntegerToVariant(const Integer &integer, bool *ok = NULL) const;
-    Integer convertVariantToInteger(const QVariant &variant, bool *ok = NULL) const;
+    QVariant convertIntegerToVariant(const IntegerField &integer, bool *ok = NULL) const;
+    IntegerField convertVariantToInteger(const QVariant &variant, bool *ok = NULL) const;
 
-    Integer getLastInsertId(const QSqlQuery &query, bool *ok = NULL) const;
+    IntegerField getLastInsertId(const QSqlQuery &query, bool *ok = NULL) const;
 
 //    DataTypes::Text convertVariantToText(const QVariant &value, bool *ok = NULL) const;
 
-    Node getNodeFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
+    NodeRecord getNodeFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
 
     QSqlDatabase m_database;
 };

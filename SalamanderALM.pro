@@ -14,33 +14,33 @@ TEMPLATE = app
 SOURCES += \
     main.cpp\
     MainWindow.cpp \
-    DataModel/Node.cpp
+    DataModel/Node.cpp \
+    Database/BlobField.cpp \
+    Database/BooleanField.cpp \
+    Database/DateTimeField.cpp \
+    Database/IntegerField.cpp \
+    Database/TextField.cpp \
+    Database/NodeRecord.cpp
 
 SOURCES += \
-    Database/Blob.cpp \
-    Database/Boolean.cpp \
-    Database/DateTime.cpp \
-    Database/Integer.cpp \
-    Database/Node.cpp \
     Database/NodeType.cpp \
-    Database/SqliteDatabase.cpp \
-    Database/Text.cpp
+    Database/SqliteDatabase.cpp
 
 SOURCES += \
     DataModel/DataModel.cpp
 
 HEADERS  += \
     MainWindow.h \
-    DataModel/Node.h
+    DataModel/NodeRecord.h \
+    Database/BlobField.h \
+    Database/BooleanField.h \
+    Database/DateTimeField.h \
+    Database/IntegerField.h \
+    Database/TextField.h \
+    Database/NodeRecord.h
 
 HEADERS  += \
     Database/SqliteDatabase.h \
-    Database/Blob.h \
-    Database/Boolean.h \
-    Database/DateTime.h \
-    Database/Integer.h \
-    Database/Text.h \
-    Database/Node.h \
     Database/NodeType.h
 
 HEADERS  += \

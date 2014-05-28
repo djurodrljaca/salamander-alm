@@ -21,7 +21,10 @@
  */
 
 #include "DataModel/DataModel.h"
-#include "Database/Node.h"
+#include "Database/NodeRecord.h"
+
+using namespace DataModel;
+using namespace Database;
 
 DataModel::DataModel::DataModel()
     : m_database(),
@@ -71,17 +74,17 @@ bool DataModel::DataModel::load()
 
     if (success)
     {
-        const QList<Database::Node> databaseNodeList =
-                m_database.getNodes(Database::Integer(), &success);
+        // Load all root nodes - only "Project" nodes are allowed to be root nodes!
+        const QList<NodeRecord> nodeRecordList = m_database.getNodes(IntegerField(), &success);
 
         if (success)
         {
-            foreach (const Database::Node databaseNodeItem, databaseNodeList)
+            foreach (const NodeRecord nodeRecordItem, nodeRecordList)
             {
+                // TODO: check if all root nodes are "Project" nodes!
+                // Load each found "Project" node
                 Node node;
-                node.setParent(NULL);
-
-                success = loadNodeFromDatabase(databaseNodeItem.getId(), &node);
+                success = loadNodeFromDatabase(nodeRecordItem, &node);
 
                 if (success)
                 {
@@ -98,52 +101,49 @@ bool DataModel::DataModel::load()
     return success;
 }
 
-bool DataModel::DataModel::loadNodeFromDatabase(const Database::Integer &id, Node *parent) const
+bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
+                                                Node *node,
+                                                Node *parent) const
 {
-    bool success = (parent != NULL);
+    // Check if input parameters are valid
+    bool success = (nodeRecord.isValid() &&
+                    (node != NULL));
 
     if (success)
     {
-        const QList<Database::Node> databaseNodeList = m_database.getNodes(id, &success);
+        // Both node record's parent and the parent node must be compatible: both have to be null or
+        // both have to be not null
+        success = (nodeRecord.getParent().isNull() == (parent == NULL));
+    }
+
+    if (success)
+    {
+        // Set node parameters
+        node->setId(nodeRecord.getId());
+        node->setParent(parent);
+        node->setType(nodeRecord.getType());
+
+        // Load child nodes and add them to the node
+        const QList<NodeRecord> nodeRecordList = m_database.getNodes(nodeRecord.getId(), &success);
 
         if (success)
         {
-            Node childNode;
-
-            if (databaseNodeList.isEmpty())
+            foreach (const Database::NodeRecord nodeRecordItem, nodeRecordList)
             {
-                Database::Node databaseNode = m_database.getNode(id, &success);
+                // Load child node and add it to the node
+                Node childNode;
+                success = loadNodeFromDatabase(nodeRecordItem, &childNode, node);
+
 
                 if (success)
                 {
-                    if (parent->getId() == databaseNode.getParent())
-                    {
-                        childNode.setId(databaseNode.getId());
-                        childNode.setParent(parent);
-                        childNode.setType(databaseNode.getType());
-                    }
-                    else
-                    {
-                        success = false;
-                    }
+                    node->addChild(childNode);
                 }
-            }
-            else
-            {
-                foreach (const Database::Node databaseNodeItem, databaseNodeList)
+                else
                 {
-                    childNode = loadNodeFromDatabase(databaseNodeItem.getId(), &success);
-
-                    if (!success)
-                    {
-                        break;
-                    }
+                    break;
                 }
-            }
 
-            if (success)
-            {
-                parent->addChild(childNode);
             }
         }
     }

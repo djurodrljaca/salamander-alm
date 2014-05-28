@@ -44,9 +44,9 @@ bool Database::isNodeTypeValid(const NodeType nodeType)
     return valid;
 }
 
-Database::Integer Database::convertNoteTypeToInteger(const NodeType nodeType, bool *ok)
+Database::IntegerField Database::convertNoteTypeToInteger(const NodeType nodeType, bool *ok)
 {
-    Integer integer;
+    IntegerField integer;
     bool success = false;
 
     if (isNodeTypeValid(nodeType))
@@ -63,7 +63,7 @@ Database::Integer Database::convertNoteTypeToInteger(const NodeType nodeType, bo
     return integer;
 }
 
-Database::NodeType Database::convertIntegerToNoteType(const Integer &integer, bool *ok)
+Database::NodeType Database::convertIntegerToNoteType(const IntegerField &integer, bool *ok)
 {
     bool success = false;
     NodeType nodeType = NodeType_Invalid;

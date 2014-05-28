@@ -23,7 +23,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "Database/SqliteDatabase.h"
+#include "DataModel/DataModel.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -45,7 +45,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Database::SqliteDatabase m_database;
+    DataModel::DataModel m_dataModel;
 };
 
 #endif // MAINWINDOW_H

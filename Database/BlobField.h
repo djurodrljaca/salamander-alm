@@ -1,5 +1,5 @@
 /**
- * @file   Text.h
+ * @file   BlobField.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,34 +20,31 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_TEXT_H
-#define DATABASE_TEXT_H
+#ifndef DATABASE_BLOBFIELD_H
+#define DATABASE_BLOBFIELD_H
 
-#include <QtCore/QString>
+#include <QtCore/QByteArray>
 
 namespace Database
 {
-
-// TODO: rename to TextField
-
-class Text
+class BlobField
 {
 public:
-    Text();
-    Text(const QString &value);
+    BlobField();
+    BlobField(const QByteArray &value);
 
-    //operator ==
-    //operator !=
+    bool operator ==(const BlobField& other) const;
+    bool operator !=(const BlobField& other) const;
 
     bool isNull() const;
     void setNull();
-    QString getValue() const;
-    void setValue(const QString &value);
+    QByteArray getValue() const;
+    void setValue(const QByteArray &value);
 
 private:
     bool m_null;
-    QString m_value;
+    QByteArray m_value;
 };
 }
 
-#endif // DATABASE_TEXT_H
+#endif // DATABASE_BLOBFIELD_H

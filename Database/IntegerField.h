@@ -1,7 +1,7 @@
 /**
- * @file   Blob.h
+ * @file   IntegerField.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,34 +20,34 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_BLOB_H
-#define DATABASE_BLOB_H
+#ifndef DATABASE_INTEGERFIELD_H
+#define DATABASE_INTEGERFIELD_H
 
-#include <QtCore/QByteArray>
+#include <QtCore/QtGlobal>
+#include <QtCore/QDebug>
 
 namespace Database
 {
-
-// TODO: rename to BlobField
-
-class Blob
+class IntegerField
 {
 public:
-    Blob();
-    Blob(const QByteArray &value);
+    IntegerField();
+    IntegerField(const qlonglong value);
 
-    //operator ==
-    //operator !=
+    bool operator ==(const IntegerField& other) const;
+    bool operator !=(const IntegerField& other) const;
 
     bool isNull() const;
     void setNull();
-    QByteArray getValue() const;
-    void setValue(const QByteArray &value);
+    qlonglong getValue() const;
+    void setValue(const qlonglong value);
 
 private:
     bool m_null;
-    QByteArray m_value;
+    qlonglong m_value;
 };
 }
 
-#endif // DATABASE_BLOB_H
+QDebug operator<<(QDebug dbg, const Database::IntegerField &integer);
+
+#endif // DATABASE_INTEGERFIELD_H

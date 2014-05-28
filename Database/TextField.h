@@ -1,7 +1,7 @@
 /**
- * @file   Node.h
+ * @file   TextField.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-05-25
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,44 +20,31 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_NODE_H
-#define DATABASE_NODE_H
+#ifndef DATABASE_TEXT_H
+#define DATABASE_TEXT_H
 
-#include "Database/Integer.h"
-#include "Database/NodeType.h"
-#include <QtCore/QtDebug>
+#include <QtCore/QString>
 
 namespace Database
 {
-
-// TODO: rename to NodeRecord
-
-class Node
+class TextField
 {
 public:
-    Node();
-    Node(const Integer &id,
-         const Integer &parent,
-         const NodeType type);
+    TextField();
+    TextField(const QString &value);
 
-    bool isValid() const;
+    bool operator ==(const TextField& other) const;
+    bool operator !=(const TextField& other) const;
 
-    Integer getId() const;
-    void setId(const Integer &id);
-
-    Integer getParent() const;
-    void setParent(const Integer &parent);
-
-    NodeType getType() const;
-    void setType(const NodeType type);
+    bool isNull() const;
+    void setNull();
+    QString getValue() const;
+    void setValue(const QString &value);
 
 private:
-    Integer m_id;
-    Integer m_parent;
-    NodeType m_type;
+    bool m_null;
+    QString m_value;
 };
 }
 
-QDebug operator<<(QDebug dbg, const Database::Node &node);
-
-#endif // DATABASE_NODE_H
+#endif // DATABASE_TEXT_H

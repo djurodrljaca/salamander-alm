@@ -20,65 +20,65 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Node.h"
+#include "Database/NodeRecord.h"
 #include <QtCore/QString>
 
 using namespace Database;
 
-Node::Node()
+NodeRecord::NodeRecord()
     : m_id(),
       m_parent(),
       m_type(NodeType_Invalid)
 {
 }
 
-Node::Node(const Integer &id,
-           const Integer &parent,
-           const NodeType type)
+NodeRecord::NodeRecord(const IntegerField &id,
+                       const IntegerField &parent,
+                       const NodeType type)
     : m_id(id),
       m_parent(parent),
       m_type(type)
 {
 }
 
-bool Node::isValid() const
+bool NodeRecord::isValid() const
 {
     return isNodeTypeValid(m_type);
 }
 
-Integer Node::getId() const
+IntegerField NodeRecord::getId() const
 {
     return m_id;
 }
 
-void Node::setId(const Integer &id)
+void NodeRecord::setId(const IntegerField &id)
 {
     m_id = id;
 }
 
-Integer Node::getParent() const
+IntegerField NodeRecord::getParent() const
 {
     return m_parent;
 }
 
-void Node::setParent(const Integer &parent)
+void NodeRecord::setParent(const IntegerField &parent)
 {
     m_parent = parent;
 }
 
-NodeType Node::getType() const
+NodeType NodeRecord::getType() const
 {
     return m_type;
 }
 
-void Node::setType(const NodeType type)
+void NodeRecord::setType(const NodeType type)
 {
     m_type = type;
 }
 
-QDebug operator<<(QDebug dbg, const Node &node)
+QDebug operator<<(QDebug dbg, const NodeRecord &node)
 {
-    dbg.nospace() << "< Node: Id=" << node.getId();
+    dbg.nospace() << "< NodeRecord: Id=" << node.getId();
     dbg.nospace() << "Parent="<< node.getParent();
     dbg.nospace() << "Type=" << node.getType() << ">";
 

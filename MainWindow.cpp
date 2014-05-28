@@ -22,14 +22,14 @@
 
 #include "MainWindow.h"
 #include "ui_MainWindow.h"
-#include "Database/Integer.h"
-#include "Database/Node.h"
+#include "Database/IntegerField.h"
+#include "Database/NodeRecord.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_database()
+    m_dataModel()
 {
     ui->setupUi(this);
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
@@ -40,75 +40,69 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    m_database.disconnect();
+    m_dataModel.stop();
     delete ui;
 }
 
 void MainWindow::connectButtonPushed()
 {
-    bool success = m_database.connect();
-    qDebug() << "Database opened:" << success;
+    bool success = m_dataModel.start();
+    qDebug() << "Data model started:" << success;
 
     if (success)
     {
-        success = m_database.validate();
-        qDebug() << "Database valid:" << success;
-    }
-
-    if (!success)
-    {
-        success = m_database.create();
-        qDebug() << "Database reinitialized:" << success;
+        success = m_dataModel.load();
+        qDebug() << "Data model loaded:" << success;
     }
 }
 
 void MainWindow::addButtonPushed()
 {
-    if (m_database.isConnected())
-    {
-        using namespace Database;
-        Node node(Integer(), Integer(), NodeType_Project);
-        Integer id;
+//    if (m_database.isConnected())
+//    {
+//        using namespace Database;
+//        NodeRecord node(IntegerField(), IntegerField(), NodeType_Project);
+//        IntegerField id;
 
-        bool success = m_database.addNode(node, &id);
-        qDebug() << "MainWindow::addButtonPushed:" << success << id;
+//        bool success = m_database.addNode(node, &id);
+//        qDebug() << "MainWindow::addButtonPushed:" << success << id;
 
-        if (success)
-        {
-            node.setParent(id);
+//        if (success)
+//        {
+//            node.setParent(id);
 
-            success = m_database.addNode(node, &id);
-            qDebug() << "MainWindow::addButtonPushed:" << success << id;
-        }
-    }
+//            success = m_database.addNode(node, &id);
+//            qDebug() << "MainWindow::addButtonPushed:" << success << id;
+//        }
+//    }
 }
 
 void MainWindow::getButtonPushed()
 {
-    if (m_database.isConnected())
-    {
-        using namespace Database;
+//    if (m_database.isConnected())
+//    {
+//        using namespace Database;
 
-        bool success = false;
-        const Integer id(1);
+//        bool success = false;
+//        const IntegerField id(1);
 
-        const Node node = m_database.getNode(id, &success);
-        qDebug() << "MainWindow::getButtonPushed:" << success << id << node;
+//        const NodeRecord node = m_database.getNode(id, &success);
+//        qDebug() << "MainWindow::getButtonPushed:" << success << id << node;
 
-        const Integer parent1;
-        const QList<Node> nodeList1 = m_database.getNodes(parent1, &success);
+//        const IntegerField parent1;
+//        const QList<NodeRecord> nodeList1 = m_database.getNodes(parent1, &success);
 
-        foreach (const Node nodeItem, nodeList1)
-        {
-            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
-        }
+//        foreach (const NodeRecord nodeItem, nodeList1)
+//        {
+//            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
+//        }
 
-        const Integer parent2 = id;
-        const QList<Node> nodeList2 = m_database.getNodes(parent2, &success);
+//        const IntegerField parent2 = id;
+//        const QList<NodeRecord> nodeList2 = m_database.getNodes(parent2, &success);
 
-        foreach (const Node nodeItem, nodeList2)
-        {
-            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
-        }
-    }
+//        foreach (const NodeRecord nodeItem, nodeList2)
+//        {
+//            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
+//        }
+//    }
 }

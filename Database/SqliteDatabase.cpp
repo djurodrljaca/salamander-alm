@@ -103,6 +103,8 @@ bool SqliteDatabase::connect()
     {
         m_database.setDatabaseName(DATABASE_NAME);
         success = m_database.open();
+
+        // TODO: create database if does not exist?
     }
 
     if (success)
@@ -195,7 +197,7 @@ bool SqliteDatabase::create()
     return success;
 }
 
-bool SqliteDatabase::addNode(const Node &node, Integer *id) const
+bool SqliteDatabase::addNode(const NodeRecord &node, IntegerField *id) const
 {
     // Insert value
     static const QString insertCommand(
@@ -217,7 +219,7 @@ bool SqliteDatabase::addNode(const Node &node, Integer *id) const
 
             if (success)
             {
-                const Integer typeIntegerValue = convertNoteTypeToInteger(node.getType(), &success);
+                const IntegerField typeIntegerValue = convertNoteTypeToInteger(node.getType(), &success);
 
                 if (success)
                 {
@@ -245,9 +247,9 @@ bool SqliteDatabase::addNode(const Node &node, Integer *id) const
     return success;
 }
 
-Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
+NodeRecord SqliteDatabase::getNode(const IntegerField &id, bool *ok) const
 {
-    Node node;
+    NodeRecord node;
     bool success = false;
 
     if (!id.isNull())
@@ -291,9 +293,9 @@ Node SqliteDatabase::getNode(const Integer &id, bool *ok) const
     return node;
 }
 
-QList<Node> SqliteDatabase::getNodes(const Integer &parent, bool *ok) const
+QList<NodeRecord> SqliteDatabase::getNodes(const IntegerField &parent, bool *ok) const
 {
-    QList<Node> nodeList;
+    QList<NodeRecord> nodeList;
     bool success = false;
 
     // Get Node list from database
@@ -329,7 +331,7 @@ QList<Node> SqliteDatabase::getNodes(const Integer &parent, bool *ok) const
         {
             while (query.next() && success)
             {
-                const Node node = getNodeFromQuery(query, &success);
+                const NodeRecord node = getNodeFromQuery(query, &success);
 
                 if (success)
                 {
@@ -618,7 +620,7 @@ bool SqliteDatabase::createTable(const QString &tableName) const
     return success;
 }
 
-QVariant SqliteDatabase::convertIntegerToVariant(const Integer &integer, bool *ok) const
+QVariant SqliteDatabase::convertIntegerToVariant(const IntegerField &integer, bool *ok) const
 {
     QVariant value;
 
@@ -639,9 +641,9 @@ QVariant SqliteDatabase::convertIntegerToVariant(const Integer &integer, bool *o
     return value;
 }
 
-Integer SqliteDatabase::convertVariantToInteger(const QVariant &variant, bool *ok) const
+IntegerField SqliteDatabase::convertVariantToInteger(const QVariant &variant, bool *ok) const
 {
-    Integer integer;
+    IntegerField integer;
     bool success = variant.isValid();
 
     if (success)
@@ -683,10 +685,10 @@ Integer SqliteDatabase::convertVariantToInteger(const QVariant &variant, bool *o
     return integer;
 }
 
-Integer SqliteDatabase::getLastInsertId(const QSqlQuery &query, bool *ok) const
+IntegerField SqliteDatabase::getLastInsertId(const QSqlQuery &query, bool *ok) const
 {
     bool success = false;
-    const Integer integer = convertVariantToInteger(query.lastInsertId(), &success);
+    const IntegerField integer = convertVariantToInteger(query.lastInsertId(), &success);
 
     if (success && integer.isNull())
     {
@@ -729,16 +731,16 @@ Integer SqliteDatabase::getLastInsertId(const QSqlQuery &query, bool *ok) const
 //    return textValue;
 //}
 
-Node SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) const
+NodeRecord SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) const
 {
-    Node node;
+    NodeRecord node;
     bool success = query.isActive();
 
     // Id
     if (success)
     {
         const int index = query.record().indexOf("Id");
-        const Integer idValue = convertVariantToInteger(query.value(index), &success);
+        const IntegerField idValue = convertVariantToInteger(query.value(index), &success);
 
         if (success)
         {
@@ -757,7 +759,7 @@ Node SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) const
     if (success)
     {
         const int index = query.record().indexOf("Parent");
-        const Integer parentValue = convertVariantToInteger(query.value(index), &success);
+        const IntegerField parentValue = convertVariantToInteger(query.value(index), &success);
 
         if (success)
         {
@@ -769,7 +771,7 @@ Node SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) const
     if (success)
     {
         const int index = query.record().indexOf("Type");
-        const Integer value = convertVariantToInteger(query.value(index), &success);
+        const IntegerField value = convertVariantToInteger(query.value(index), &success);
 
         if (success)
         {

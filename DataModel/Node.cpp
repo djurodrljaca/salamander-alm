@@ -40,7 +40,7 @@ Node::Node(const Node &other)
 {
     if (other.m_parent != NULL)
     {
-        m_parent = new Node(*other.m_type);
+        m_parent = new Node(*other.m_parent);
     }
 }
 
@@ -57,7 +57,7 @@ Node &Node::operator=(const Node &other)
 
     if (other.m_parent != NULL)
     {
-        m_parent = new Node(*other.m_type);
+        m_parent = new Node(*other.m_parent);
     }
 
     return *this;
@@ -68,12 +68,12 @@ bool Node::isValid() const
     return Database::isNodeTypeValid(m_type);
 }
 
-Database::Integer Node::getId() const
+Database::IntegerField Node::getId() const
 {
     return m_id;
 }
 
-void Node::setId(const Database::Integer &id)
+void Node::setId(const Database::IntegerField &id)
 {
     m_id = id;
 }

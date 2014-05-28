@@ -1,5 +1,5 @@
 /**
- * @file   Blob.cpp
+ * @file   TextField.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,39 +20,63 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Blob.h"
+#include "Database/TextField.h"
 
 using namespace Database;
 
-Blob::Blob()
+TextField::TextField()
     : m_null(true),
       m_value()
 {
 }
 
-Blob::Blob(const QByteArray &value)
+TextField::TextField(const QString &value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool Blob::isNull() const
+bool TextField::operator ==(const TextField &other) const
+{
+    bool equal = false;
+
+    if (m_null && other.m_null)
+    {
+        equal = true;
+    }
+    else if (!m_null && !other.m_null)
+    {
+        if (m_value == other.m_value)
+        {
+            equal = true;
+        }
+    }
+
+    return equal;
+}
+
+bool TextField::operator !=(const TextField &other) const
+{
+    return !operator ==(other);
+}
+
+bool TextField::isNull() const
 {
     return m_null;
 }
 
-void Blob::setNull()
+void TextField::setNull()
 {
     m_null = true;
-    m_value = QByteArray();
+    m_value = QString();
 }
 
-QByteArray Blob::getValue() const
+QString TextField::getValue() const
 {
     return m_value;
 }
 
-void Blob::setValue(const QByteArray &value)
+void TextField::setValue(const QString &value)
 {
     m_null = false;
     m_value = value;

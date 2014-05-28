@@ -1,7 +1,7 @@
 /**
- * @file   DateTime.h
+ * @file   NodeRecord.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,34 +20,41 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_DATETIME_H
-#define DATABASE_DATETIME_H
+#ifndef DATABASE_NODERECORD_H
+#define DATABASE_NODERECORD_H
 
-#include <QtCore/QDateTime>
+#include "Database/IntegerField.h"
+#include "Database/NodeType.h"
+#include <QtCore/QtDebug>
 
 namespace Database
 {
-
-// TODO: rename to DateTimeField
-
-class DateTime
+class NodeRecord
 {
 public:
-    DateTime();
-    DateTime(const QDateTime &value);
+    NodeRecord();
+    NodeRecord(const IntegerField &id,
+               const IntegerField &parent,
+               const NodeType type);
 
-    //operator ==
-    //operator !=
+    bool isValid() const;
 
-    bool isNull() const;
-    void setNull();
-    QDateTime getValue() const;
-    void setValue(const QDateTime &value);
+    IntegerField getId() const;
+    void setId(const IntegerField &id);
+
+    IntegerField getParent() const;
+    void setParent(const IntegerField &parent);
+
+    NodeType getType() const;
+    void setType(const NodeType type);
 
 private:
-    bool m_null;
-    QDateTime m_value;
+    IntegerField m_id;
+    IntegerField m_parent;
+    NodeType m_type;
 };
 }
 
-#endif // DATABASE_DATETIME_H
+QDebug operator<<(QDebug dbg, const Database::NodeRecord &node);
+
+#endif // DATABASE_NODERECORD_H

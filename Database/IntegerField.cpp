@@ -1,7 +1,7 @@
 /**
- * @file   DateTime.cpp
+ * @file   IntegerField.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,40 +20,79 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/DateTime.h"
+#include "Database/IntegerField.h"
+#include <QtCore/QString>
 
 using namespace Database;
 
-DateTime::DateTime()
+IntegerField::IntegerField()
     : m_null(true),
-      m_value()
+      m_value(0LL)
 {
 }
 
-DateTime::DateTime(const QDateTime &value)
+IntegerField::IntegerField(const qlonglong value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool DateTime::isNull() const
+bool IntegerField::operator ==(const IntegerField &other) const
+{
+    bool equal = false;
+
+    if (m_null && other.m_null)
+    {
+        equal = true;
+    }
+    else if (!m_null && !other.m_null)
+    {
+        if (m_value == other.m_value)
+        {
+            equal = true;
+        }
+    }
+
+    return equal;
+}
+
+bool IntegerField::operator !=(const IntegerField &other) const
+{
+    return !operator ==(other);
+}
+
+bool IntegerField::isNull() const
 {
     return m_null;
 }
 
-void DateTime::setNull()
+void IntegerField::setNull()
 {
     m_null = true;
-    m_value = QDateTime();
+    m_value = 0LL;
 }
 
-QDateTime DateTime::getValue() const
+qlonglong IntegerField::getValue() const
 {
     return m_value;
 }
 
-void DateTime::setValue(const QDateTime &value)
+void IntegerField::setValue(const qlonglong value)
 {
     m_null = false;
     m_value = value;
+}
+
+QDebug operator<<(QDebug dbg, const IntegerField &integer)
+{
+    if (integer.isNull())
+    {
+        dbg.nospace() << "NULL";
+    }
+    else
+    {
+        dbg.nospace() << integer.getValue();
+    }
+
+    return dbg.space();
 }

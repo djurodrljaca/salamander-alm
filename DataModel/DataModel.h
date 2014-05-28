@@ -40,7 +40,9 @@ public:
     bool load();
 
 private:
-    bool loadNodeFromDatabase(const Database::Integer &id, Node *parent) const;
+    bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
+                              Node *node,
+                              Node *parent = NULL) const;
 
     Database::SqliteDatabase m_database;
     QList<Node> m_nodeList;

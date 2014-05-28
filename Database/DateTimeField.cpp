@@ -1,5 +1,5 @@
 /**
- * @file   Text.cpp
+ * @file   DateTimeField.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,39 +20,63 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Text.h"
+#include "Database/DateTimeField.h"
 
 using namespace Database;
 
-Text::Text()
+DateTimeField::DateTimeField()
     : m_null(true),
       m_value()
 {
 }
 
-Text::Text(const QString &value)
+DateTimeField::DateTimeField(const QDateTime &value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool Text::isNull() const
+bool DateTimeField::operator ==(const DateTimeField &other) const
+{
+    bool equal = false;
+
+    if (m_null && other.m_null)
+    {
+        equal = true;
+    }
+    else if (!m_null && !other.m_null)
+    {
+        if (m_value == other.m_value)
+        {
+            equal = true;
+        }
+    }
+
+    return equal;
+}
+
+bool DateTimeField::operator !=(const DateTimeField &other) const
+{
+    return !operator ==(other);
+}
+
+bool DateTimeField::isNull() const
 {
     return m_null;
 }
 
-void Text::setNull()
+void DateTimeField::setNull()
 {
     m_null = true;
-    m_value = QString();
+    m_value = QDateTime();
 }
 
-QString Text::getValue() const
+QDateTime DateTimeField::getValue() const
 {
     return m_value;
 }
 
-void Text::setValue(const QString &value)
+void DateTimeField::setValue(const QDateTime &value)
 {
     m_null = false;
     m_value = value;

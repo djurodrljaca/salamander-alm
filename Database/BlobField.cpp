@@ -1,5 +1,5 @@
 /**
- * @file   Boolean.cpp
+ * @file   BlobField.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-25
  * @brief  Brief description of file.
@@ -20,39 +20,63 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/Boolean.h"
+#include "Database/BlobField.h"
 
 using namespace Database;
 
-Boolean::Boolean()
+BlobField::BlobField()
     : m_null(true),
-      m_value(false)
+      m_value()
 {
 }
 
-Boolean::Boolean(const bool value)
+BlobField::BlobField(const QByteArray &value)
     : m_null(false),
       m_value(value)
 {
 }
 
-bool Boolean::isNull() const
+bool BlobField::operator ==(const BlobField &other) const
+{
+    bool equal = false;
+
+    if (m_null && other.m_null)
+    {
+        equal = true;
+    }
+    else if (!m_null && !other.m_null)
+    {
+        if (m_value == other.m_value)
+        {
+            equal = true;
+        }
+    }
+
+    return equal;
+}
+
+bool BlobField::operator !=(const BlobField &other) const
+{
+    return !operator ==(other);
+}
+
+bool BlobField::isNull() const
 {
     return m_null;
 }
 
-void Boolean::setNull()
+void BlobField::setNull()
 {
     m_null = true;
-    m_value = false;
+    m_value = QByteArray();
 }
 
-bool Boolean::getValue() const
+QByteArray BlobField::getValue() const
 {
     return m_value;
 }
 
-void Boolean::setValue(const bool value)
+void BlobField::setValue(const QByteArray &value)
 {
     m_null = false;
     m_value = value;
