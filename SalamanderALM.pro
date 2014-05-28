@@ -19,7 +19,8 @@ SOURCES += \
     Database/NodeRecord.cpp \
     Database/NodeType.cpp \
     Database/SqliteDatabase.cpp \
-    Database/TextField.cpp
+    Database/TextField.cpp \
+    View/ViewModel.cpp
 
 SOURCES += \
     DataModel/DataModel.cpp \
@@ -37,7 +38,8 @@ HEADERS  += \
     Database/NodeRecord.h \
     Database/NodeType.h \
     Database/SqliteDatabase.h \
-    Database/TextField.h
+    Database/TextField.h \
+    View/ViewModel.h
 
 HEADERS  += \
     DataModel/DataModel.h \

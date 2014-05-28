@@ -40,14 +40,17 @@ public:
 
     bool load();
 
+    int getProjectCount() const;
+    Node * getProject(const int index) const;
+    int getProjectIndex(Node *projectNode) const;
+
 private:
-    void clear();
     bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
                               Node *node,
                               Node *parent = NULL) const;
 
     Database::SqliteDatabase m_database;
-    QList<Node *> m_nodeList;
+    QList<Node *> m_projectList;
 };
 }
 

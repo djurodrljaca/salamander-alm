@@ -49,17 +49,16 @@ public:
     Node * getParent() const;
     void setParent(Node *parent);
 
-    int getChildrenCount() const;
-    bool addChild(Node *child);
+    int getChildCount() const;
     Node * getChild(const int index);
+    int getChildIndex(Node * const child) const;
+    bool addChild(Node *child);
 
 private:
-    void clear();
-
     Database::IntegerField m_id;
     Database::NodeType m_type;
     Node *m_parent;
-    QList<Node *> m_children;
+    QList<Node *> m_childList;
 };
 }
 

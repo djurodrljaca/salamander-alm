@@ -28,13 +28,13 @@ using namespace Database;
 
 DataModel::DataModel::DataModel()
     : m_database(),
-      m_nodeList()
+      m_projectList()
 {
 }
 
 DataModel::DataModel::~DataModel()
 {
-    clear();
+    qDeleteAll(m_projectList);
 }
 
 bool DataModel::DataModel::start()
@@ -79,7 +79,7 @@ bool DataModel::DataModel::load()
 
     if (success)
     {
-        // Load all root nodes
+        // Load all "Project" nodes
         const QList<NodeRecord> nodeRecordList = m_database.getNodes(IntegerField(), &success);
 
         if (success)
@@ -100,7 +100,7 @@ bool DataModel::DataModel::load()
 
                     if (success)
                     {
-                        m_nodeList.append(projectNode);
+                        m_projectList.append(projectNode);
                     }
                     else
                     {
@@ -116,14 +116,33 @@ bool DataModel::DataModel::load()
     return success;
 }
 
-void DataModel::DataModel::clear()
+int DataModel::DataModel::getProjectCount() const
 {
-    foreach (Node *node, m_nodeList)
+    return m_projectList.size();
+}
+
+Node *DataModel::DataModel::getProject(const int index) const
+{
+    Node *project = NULL;
+
+    if ((index >= 0) && (index < m_projectList.size()))
     {
-        delete node;
+        project = m_projectList[index];
     }
 
-    m_nodeList.clear();
+    return project;
+}
+
+int DataModel::DataModel::getProjectIndex(Node *projectNode) const
+{
+    int index = -1;
+
+    if (projectNode != NULL)
+    {
+        index = m_projectList.indexOf(projectNode);
+    }
+
+    return index;
 }
 
 bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,

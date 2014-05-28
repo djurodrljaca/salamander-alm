@@ -28,7 +28,7 @@ Node::Node()
     : m_id(),
       m_type(Database::NodeType_Invalid),
       m_parent(NULL),
-      m_children()
+      m_childList()
 {
 }
 
@@ -36,13 +36,13 @@ Node::Node(const Node &other)
     : m_id(other.m_id),
       m_type(other.m_type),
       m_parent(other.m_parent),
-      m_children(other.m_children)
+      m_childList(other.m_childList)
 {
 }
 
 Node::~Node()
 {
-    clear();
+    qDeleteAll(m_childList);
 }
 
 Node & Node::operator =(const Node &other)
@@ -50,7 +50,7 @@ Node & Node::operator =(const Node &other)
     m_id = other.m_id;
     m_type = other.m_type;
     m_parent = other.m_parent;
-    m_children = other.m_children;
+    m_childList = other.m_childList;
 
     return *this;
 }
@@ -90,35 +90,36 @@ void Node::setParent(Node *parent)
     m_parent = parent;
 }
 
-int Node::getChildrenCount() const
+int Node::getChildCount() const
 {
-    return m_children.size();
-}
-
-bool Node::addChild(Node *child)
-{
-    m_children.append(child);
-    return true;
+    return m_childList.size();
 }
 
 Node * Node::getChild(const int index)
 {
     Node *child = NULL;
 
-    if ((index >= 0) && (index < m_children.size()))
+    if ((index >= 0) && (index < m_childList.size()))
     {
-        child = m_children[index];
+        child = m_childList[index];
     }
 
     return child;
 }
 
-void Node::clear()
+int Node::getChildIndex(Node * const child) const
 {
-    foreach (Node *child, m_children)
+    return m_childList.indexOf(child);
+}
+
+bool Node::addChild(Node *child)
+{
+    bool success = false;
+
+    if (child != NULL)
     {
-        delete child;
+        m_childList.append(child);
     }
 
-    m_children.clear();
+    return success;
 }

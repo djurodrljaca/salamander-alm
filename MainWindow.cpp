@@ -24,6 +24,7 @@
 #include "ui_MainWindow.h"
 #include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
+#include "View/ViewModel.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -53,6 +54,12 @@ void MainWindow::connectButtonPushed()
     {
         success = m_dataModel.load();
         qDebug() << "Data model loaded:" << success;
+
+        if (success)
+        {
+            ViewModel::ViewModel *viewModel = new ViewModel::ViewModel(&m_dataModel, 0, this);
+            ui->view_treeView->setModel(viewModel);
+        }
     }
 }
 
