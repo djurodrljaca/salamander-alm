@@ -24,15 +24,10 @@
 
 using namespace DataModel;
 
-ViewModel::ViewModel::ViewModel(DataModel::DataModel *dataModel, const int projectIndex, QObject *parent)
+ViewModel::ViewModel::ViewModel(DataModel::DataModel *dataModel, QObject *parent)
     : QAbstractItemModel(parent),
-      m_dataModel(dataModel),
-      m_projectNode(NULL)
+      m_dataModel(dataModel)
 {
-    if (m_dataModel != NULL)
-    {
-        m_projectNode = m_dataModel->getProject(projectIndex);
-    }
 }
 
 ViewModel::ViewModel::~ViewModel()
@@ -75,7 +70,7 @@ Qt::ItemFlags ViewModel::ViewModel::flags(const QModelIndex &index) const
     return value;
 }
 
-QVariant ViewModel::ViewModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ViewModel::ViewModel::headerData(int, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
     {
@@ -91,25 +86,25 @@ QModelIndex ViewModel::ViewModel::index(int row, int column, const QModelIndex &
 
     if (hasIndex(row, column, parent))
     {
-        Node *parentItem = NULL;
+        Node *item = NULL;
 
         if (!parent.isValid())
         {
-            parentItem = m_projectNode;
+            item = m_dataModel->getProject(row);
         }
         else
         {
-            parentItem = static_cast<Node *>(parent.internalPointer());
+            Node *parentItem = static_cast<Node *>(parent.internalPointer());
+
+            if (parentItem != NULL)
+            {
+                item = parentItem->getChild(row);
+            }
         }
 
-        if (parentItem != NULL)
+        if (item != NULL)
         {
-            Node *childItem = parentItem->getChild(row);
-
-            if (childItem != NULL)
-            {
-                modelIndex = createIndex(row, column, childItem);
-            }
+            modelIndex = createIndex(row, column, item);
         }
     }
 
@@ -126,23 +121,23 @@ QModelIndex ViewModel::ViewModel::parent(const QModelIndex &index) const
 
         if (childItem != NULL)
         {
+            int parentRow = 0;
             Node *parentItem = childItem->getParent();
 
-            if (parentItem != m_projectNode)
+            if (parentItem != NULL)
             {
-                int row = 0;
+                Node *grandparentItem = parentItem->getParent();
 
-                if (parentItem != NULL)
+                if (grandparentItem == NULL)
                 {
-                    Node *grandparentItem = parentItem->getParent();
-
-                    if (grandparentItem != NULL)
-                    {
-                        row = grandparentItem->getChildIndex(parentItem);
-                    }
+                    parentRow = m_dataModel->getProjectIndex(parentItem);
+                }
+                else
+                {
+                    parentRow = grandparentItem->getChildIndex(parentItem);
                 }
 
-                modelIndex = createIndex(row, 0, parentItem);
+                modelIndex = createIndex(parentRow, 0, parentItem);
             }
         }
     }
@@ -152,25 +147,23 @@ QModelIndex ViewModel::ViewModel::parent(const QModelIndex &index) const
 
 int ViewModel::ViewModel::rowCount(const QModelIndex &parent) const
 {
-    Node *parentItem = NULL;
     int count = 0;
-
     const int column = parent.column();
 
     if (column <= 0)
     {
         if (!parent.isValid())
         {
-            parentItem = m_projectNode;
+            count = m_dataModel->getProjectCount();
         }
         else
         {
-            parentItem = static_cast<Node *>(parent.internalPointer());
-        }
+            Node *parentItem = static_cast<Node *>(parent.internalPointer());
 
-        if (parentItem != NULL)
-        {
-            count = parentItem->getChildCount();
+            if (parentItem != NULL)
+            {
+                count = parentItem->getChildCount();
+            }
         }
     }
 

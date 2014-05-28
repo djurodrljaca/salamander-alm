@@ -57,7 +57,7 @@ void MainWindow::connectButtonPushed()
 
         if (success)
         {
-            ViewModel::ViewModel *viewModel = new ViewModel::ViewModel(&m_dataModel, 0, this);
+            ViewModel::ViewModel *viewModel = new ViewModel::ViewModel(&m_dataModel, this);
             ui->view_treeView->setModel(viewModel);
         }
     }

@@ -33,7 +33,7 @@ class ViewModel : public QAbstractItemModel
     Q_OBJECT
 
 public:
-    ViewModel(DataModel::DataModel *dataModel, const int projectIndex, QObject *parent = 0);
+    ViewModel(DataModel::DataModel *dataModel, QObject *parent = 0);
     ~ViewModel();
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -46,7 +46,6 @@ public:
 
 private:
     DataModel::DataModel *m_dataModel;
-    DataModel::Node *m_projectNode;
 };
 }
 
