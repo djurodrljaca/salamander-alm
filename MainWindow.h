@@ -24,6 +24,7 @@
 #define MAINWINDOW_H
 
 #include "DataModel/DataModel.h"
+#include "View/ViewModel.h"
 #include <QMainWindow>
 
 namespace Ui {
@@ -46,6 +47,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     DataModel::DataModel m_dataModel;
+    ViewModel::ViewModel m_viewModel;
 };
 
 #endif // MAINWINDOW_H

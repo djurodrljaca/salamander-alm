@@ -95,7 +95,7 @@ int Node::getChildCount() const
     return m_childList.size();
 }
 
-Node * Node::getChild(const int index)
+Node * Node::getChild(const int index) const
 {
     Node *child = NULL;
 
@@ -119,6 +119,7 @@ bool Node::addChild(Node *child)
     if (child != NULL)
     {
         m_childList.append(child);
+        success = true;
     }
 
     return success;

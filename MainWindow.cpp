@@ -30,9 +30,15 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_dataModel()
+    m_dataModel(),
+    m_viewModel()
 {
     ui->setupUi(this);
+
+    m_viewModel.setDataModel(&m_dataModel);
+    ui->view_treeView->setModel(&m_viewModel);
+    ui->view_treeView->header()->hide();
+
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui->connect_pushButton, SIGNAL(clicked()), this, SLOT(connectButtonPushed()));
     connect(ui->add_pushButton, SIGNAL(clicked()), this, SLOT(addButtonPushed()));
@@ -54,34 +60,31 @@ void MainWindow::connectButtonPushed()
     {
         success = m_dataModel.load();
         qDebug() << "Data model loaded:" << success;
-
-        if (success)
-        {
-            ViewModel::ViewModel *viewModel = new ViewModel::ViewModel(&m_dataModel, this);
-            ui->view_treeView->setModel(viewModel);
-        }
     }
 }
 
 void MainWindow::addButtonPushed()
 {
-//    if (m_database.isConnected())
-//    {
-//        using namespace Database;
-//        NodeRecord node(IntegerField(), IntegerField(), NodeType_Project);
-//        IntegerField id;
+    QItemSelectionModel *selectionModel = ui->view_treeView->selectionModel();
 
-//        bool success = m_database.addNode(node, &id);
-//        qDebug() << "MainWindow::addButtonPushed:" << success << id;
+    if (selectionModel != NULL)
+    {
+        QModelIndex modelIndex = selectionModel->currentIndex();
 
-//        if (success)
-//        {
-//            node.setParent(id);
+        DataModel::Node *parent = NULL;
 
-//            success = m_database.addNode(node, &id);
-//            qDebug() << "MainWindow::addButtonPushed:" << success << id;
-//        }
-//    }
+        if (modelIndex.isValid())
+        {
+            parent = static_cast<DataModel::Node *>(modelIndex.internalPointer());
+        }
+
+        DataModel::Node node;
+        node.setParent(parent);
+        node.setType(Database::NodeType_Project);
+
+        bool success = m_dataModel.addNode(node);
+        qDebug() << "MainWindow::addButtonPushed: success:" << success;
+    }
 }
 
 void MainWindow::getButtonPushed()

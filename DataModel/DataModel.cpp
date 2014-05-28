@@ -26,8 +26,9 @@
 using namespace DataModel;
 using namespace Database;
 
-DataModel::DataModel::DataModel()
-    : m_database(),
+DataModel::DataModel::DataModel(QObject *parent)
+    : QObject(parent),
+      m_database(),
       m_projectList()
 {
 }
@@ -79,6 +80,11 @@ bool DataModel::DataModel::load()
 
     if (success)
     {
+        // Clear old data model
+        emit modelAboutToBeReset();
+        qDeleteAll(m_projectList);
+        m_projectList.clear();
+
         // Load all "Project" nodes
         const QList<NodeRecord> nodeRecordList = m_database.getNodes(IntegerField(), &success);
 
@@ -96,11 +102,12 @@ bool DataModel::DataModel::load()
                 if (success)
                 {
                     Node *projectNode = new Node();
-                    success = loadNodeFromDatabase(nodeRecordItem, projectNode);
+                    success = loadNodeFromDatabase(nodeRecordItem, NULL, projectNode);
 
                     if (success)
                     {
                         m_projectList.append(projectNode);
+                        projectNode = NULL;
                     }
                     else
                     {
@@ -111,6 +118,8 @@ bool DataModel::DataModel::load()
                 }
             }
         }
+
+        emit modelReset();
     }
 
     return success;
@@ -145,9 +154,73 @@ int DataModel::DataModel::getProjectIndex(Node *projectNode) const
     return index;
 }
 
+bool DataModel::DataModel::addNode(const Node &node)
+{
+    // Only single node items are allowed to be added
+    bool success = (node.getChildCount() == 0);
+
+    if (success)
+    {
+        Node *parent = node.getParent();
+
+        if (parent == NULL)
+        {
+            // Only "Project" nodes are allowed as root items
+            success = (node.getType() == Database::NodeType_Project);
+        }
+        else
+        {
+            // Check if the node's parent is contained in this data model
+            success = contains(parent);
+        }
+
+        // Add node
+        if (success)
+        {
+            // Prepare node record
+            IntegerField parentId;
+
+            if (parent != NULL)
+            {
+                parentId = parent->getId();
+            }
+
+            NodeRecord nodeRecord;
+            nodeRecord.setParent(parentId);
+            nodeRecord.setType(node.getType());
+
+            // Add node record to database
+            Node *insertedNode = NULL;
+            IntegerField id;
+            success = m_database.addNode(nodeRecord, &id);
+
+            if (success)
+            {
+                insertedNode = new Node(node);
+                insertedNode->setId(id);
+
+                emit nodeAboutToBeAdded(parent);
+
+                if (parent == NULL)
+                {
+                    m_projectList.append(insertedNode);
+                }
+                else
+                {
+                    parent->addChild(insertedNode);
+                }
+
+                emit nodeAdded();
+            }
+        }
+    }
+
+    return success;
+}
+
 bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
-                                                Node *node,
-                                                Node *parent) const
+                                                Node *parent,
+                                                Node *node) const
 {
     // Check if input parameters are valid
     bool success = (nodeRecord.isValid() &&
@@ -157,7 +230,8 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
     {
         // Both node record's parent and the parent node must be compatible: both have to be null or
         // both have to be not null
-        success = (nodeRecord.getParent().isNull() == (parent == NULL));
+        const bool isParentNull = (parent == NULL);
+        success = (nodeRecord.getParent().isNull() == isParentNull);
     }
 
     if (success)
@@ -176,19 +250,40 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
             {
                 // Load child node and add it to the node
                 Node *childNode = new Node();
-                success = loadNodeFromDatabase(nodeRecordItem, childNode, node);
-
+                success = loadNodeFromDatabase(nodeRecordItem, node, childNode);
 
                 if (success)
                 {
-                    node->addChild(childNode);
+                    success = node->addChild(childNode);
+                    childNode = NULL;
                 }
-                else
+
+                if (!success)
                 {
                     break;
                 }
-
             }
+        }
+    }
+
+    return success;
+}
+
+bool DataModel::DataModel::contains(Node *node) const
+{
+    bool success = false;
+
+    if (node != NULL)
+    {
+        Node *parent = node->getParent();
+
+        if (parent == NULL)
+        {
+            success = m_projectList.contains(node);
+        }
+        else
+        {
+            success = contains(parent);
         }
     }
 

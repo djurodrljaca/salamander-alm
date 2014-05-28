@@ -24,15 +24,42 @@
 
 using namespace DataModel;
 
-ViewModel::ViewModel::ViewModel(DataModel::DataModel *dataModel, QObject *parent)
+ViewModel::ViewModel::ViewModel(QObject *parent)
     : QAbstractItemModel(parent),
-      m_dataModel(dataModel)
+      m_dataModel(NULL)
 {
 }
 
 ViewModel::ViewModel::~ViewModel()
 {
-    // TODO: should the data model be deleted?
+}
+
+void ViewModel::ViewModel::setDataModel(DataModel::DataModel *dataModel)
+{
+    beginResetModel();
+
+    if (m_dataModel != NULL)
+    {
+        disconnect(this, SLOT(dataModelAboutToReset()));
+        disconnect(this, SLOT(dataModelReset()));
+
+        disconnect(this, SLOT(nodeAboutToBeAdded(DataModel::Node*)));
+        disconnect(this, SLOT(nodeAdded()));
+    }
+
+    m_dataModel = dataModel;
+
+    if (m_dataModel != NULL)
+    {
+        connect(m_dataModel, SIGNAL(modelAboutToBeReset()), this, SLOT(dataModelAboutToReset()));
+        connect(m_dataModel, SIGNAL(modelReset()), this, SLOT(dataModelReset()));
+
+        connect(m_dataModel, SIGNAL(nodeAboutToBeAdded(const Node*)),
+                this, SLOT(nodeAboutToBeAdded(DataModel::Node*)));
+        connect(m_dataModel, SIGNAL(nodeAdded()), this, SLOT(nodeAdded()));
+    }
+
+    endResetModel();
 }
 
 QVariant ViewModel::ViewModel::data(const QModelIndex &index, int role) const
@@ -42,7 +69,9 @@ QVariant ViewModel::ViewModel::data(const QModelIndex &index, int role) const
     if (index.isValid() &&
         (role == Qt::DisplayRole))
     {
-        Node *item = static_cast<Node *>(index.internalPointer());
+        // TODO: implement correctly
+
+        const Node *item = getNode(index);
 
         if (item != NULL)
         {
@@ -70,21 +99,12 @@ Qt::ItemFlags ViewModel::ViewModel::flags(const QModelIndex &index) const
     return value;
 }
 
-QVariant ViewModel::ViewModel::headerData(int, Qt::Orientation orientation, int role) const
-{
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-    {
-        return QVariant("Header");
-    }
-
-    return QVariant();
-}
-
 QModelIndex ViewModel::ViewModel::index(int row, int column, const QModelIndex &parent) const
 {
     QModelIndex modelIndex;
 
-    if (hasIndex(row, column, parent))
+    if (hasIndex(row, column, parent) &&
+        (m_dataModel != NULL))
     {
         Node *item = NULL;
 
@@ -94,7 +114,7 @@ QModelIndex ViewModel::ViewModel::index(int row, int column, const QModelIndex &
         }
         else
         {
-            Node *parentItem = static_cast<Node *>(parent.internalPointer());
+            const Node *parentItem = getNode(parent);
 
             if (parentItem != NULL)
             {
@@ -115,9 +135,10 @@ QModelIndex ViewModel::ViewModel::parent(const QModelIndex &index) const
 {
     QModelIndex modelIndex;
 
-    if (index.isValid())
+    if (index.isValid() &&
+        (m_dataModel != NULL))
     {
-        Node *childItem = static_cast<Node *>(index.internalPointer());
+        const Node *childItem = getNode(index);
 
         if (childItem != NULL)
         {
@@ -126,17 +147,7 @@ QModelIndex ViewModel::ViewModel::parent(const QModelIndex &index) const
 
             if (parentItem != NULL)
             {
-                Node *grandparentItem = parentItem->getParent();
-
-                if (grandparentItem == NULL)
-                {
-                    parentRow = m_dataModel->getProjectIndex(parentItem);
-                }
-                else
-                {
-                    parentRow = grandparentItem->getChildIndex(parentItem);
-                }
-
+                parentRow = getNodeRow(parentItem);
                 modelIndex = createIndex(parentRow, 0, parentItem);
             }
         }
@@ -150,7 +161,8 @@ int ViewModel::ViewModel::rowCount(const QModelIndex &parent) const
     int count = 0;
     const int column = parent.column();
 
-    if (column <= 0)
+    if ((column <= 0) &&
+        (m_dataModel != NULL))
     {
         if (!parent.isValid())
         {
@@ -158,7 +170,7 @@ int ViewModel::ViewModel::rowCount(const QModelIndex &parent) const
         }
         else
         {
-            Node *parentItem = static_cast<Node *>(parent.internalPointer());
+            Node *parentItem = getNode(parent);
 
             if (parentItem != NULL)
             {
@@ -172,5 +184,64 @@ int ViewModel::ViewModel::rowCount(const QModelIndex &parent) const
 
 int ViewModel::ViewModel::columnCount(const QModelIndex &) const
 {
+    // TODO: implement correctly
     return 1;
+}
+
+void ViewModel::ViewModel::dataModelAboutToReset()
+{
+    beginResetModel();
+}
+
+void ViewModel::ViewModel::dataModelReset()
+{
+    endResetModel();
+}
+
+void ViewModel::ViewModel::nodeAboutToBeAdded(Node *parent)
+{
+    // TODO: check why this makes it crashes below!
+
+    QModelIndex parentModelIndex;
+    int insertRow = 0;
+
+    if (parent != NULL)
+    {
+        int row = getNodeRow(parent);
+        parentModelIndex = createIndex(row, 0, parent);
+    }
+
+    beginInsertRows(parentModelIndex, insertRow, insertRow);
+}
+
+void ViewModel::ViewModel::nodeAdded()
+{
+    // TODO: check why it crashes here!
+    endInsertRows();
+}
+
+Node *ViewModel::ViewModel::getNode(const QModelIndex &index) const
+{
+    return static_cast<Node *>(index.internalPointer());
+}
+
+int ViewModel::ViewModel::getNodeRow(Node *node) const
+{
+    int row = 0;
+
+    if (node != NULL)
+    {
+        const Node *parentItem = node->getParent();
+
+        if (parentItem == NULL)
+        {
+            row = m_dataModel->getProjectIndex(node);
+        }
+        else
+        {
+            row = parentItem->getChildIndex(node);
+        }
+    }
+
+    return row;
 }

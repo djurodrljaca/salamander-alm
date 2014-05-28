@@ -50,7 +50,7 @@ public:
     void setParent(Node *parent);
 
     int getChildCount() const;
-    Node * getChild(const int index);
+    Node * getChild(const int index) const;
     int getChildIndex(Node * const child) const;
     bool addChild(Node *child);
 

@@ -29,10 +29,12 @@
 
 namespace DataModel
 {
-class DataModel
+class DataModel : public QObject
 {
+    Q_OBJECT
+
 public:
-    DataModel();
+    DataModel(QObject *parent = NULL);
     ~DataModel();
 
     bool start();
@@ -44,10 +46,20 @@ public:
     Node * getProject(const int index) const;
     int getProjectIndex(Node *projectNode) const;
 
+    bool addNode(const Node &node);
+
+signals:
+    void modelAboutToBeReset();
+    void modelReset();
+
+    void nodeAboutToBeAdded(const Node *parent);
+    void nodeAdded();
+
 private:
     bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
-                              Node *node,
-                              Node *parent = NULL) const;
+                              Node *parent,
+                              Node *node) const;
+    bool contains(Node *node) const;
 
     Database::SqliteDatabase m_database;
     QList<Node *> m_projectList;
