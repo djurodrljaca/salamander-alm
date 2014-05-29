@@ -30,13 +30,11 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    m_dataModel(),
-    m_viewModel()
+    m_treeViewModel(this)
 {
     ui->setupUi(this);
 
-    m_viewModel.setDataModel(&m_dataModel);
-    ui->view_treeView->setModel(&m_viewModel);
+    ui->view_treeView->setModel(&m_treeViewModel);
     ui->view_treeView->header()->hide();
 
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
@@ -47,18 +45,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    m_dataModel.stop();
+    m_treeViewModel.stop();
     delete ui;
 }
 
 void MainWindow::connectButtonPushed()
 {
-    bool success = m_dataModel.start();
+    bool success = m_treeViewModel.start();
     qDebug() << "Data model started:" << success;
 
     if (success)
     {
-        success = m_dataModel.load();
+        success = m_treeViewModel.load();
         qDebug() << "Data model loaded:" << success;
     }
 }
@@ -71,18 +69,10 @@ void MainWindow::addButtonPushed()
     {
         QModelIndex modelIndex = selectionModel->currentIndex();
 
-        DataModel::Node *parent = NULL;
-
-        if (modelIndex.isValid())
-        {
-            parent = static_cast<DataModel::Node *>(modelIndex.internalPointer());
-        }
-
         DataModel::Node node;
-        node.setParent(parent);
         node.setType(Database::NodeType_Project);
 
-        bool success = m_dataModel.addNode(node);
+        bool success = m_treeViewModel.addNode(modelIndex, node);
         qDebug() << "MainWindow::addButtonPushed: success:" << success;
     }
 }

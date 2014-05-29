@@ -1,7 +1,7 @@
 /**
- * @file   DataModel.cpp
+ * @file   TreeViewModel.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-27
+ * @date   2014-5-29
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,25 +20,23 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "DataModel/DataModel.h"
-#include "Database/NodeRecord.h"
+#include "TreeViewModel.h"
 
-using namespace DataModel;
 using namespace Database;
 
-DataModel::DataModel::DataModel(QObject *parent)
-    : QObject(parent),
+DataModel::TreeViewModel::TreeViewModel(QObject *parent)
+    : QAbstractItemModel(parent),
       m_database(),
       m_projectList()
 {
 }
 
-DataModel::DataModel::~DataModel()
+DataModel::TreeViewModel::~TreeViewModel()
 {
     qDeleteAll(m_projectList);
 }
 
-bool DataModel::DataModel::start()
+bool DataModel::TreeViewModel::start()
 {
     bool success = false;
 
@@ -66,7 +64,7 @@ bool DataModel::DataModel::start()
     return success;
 }
 
-void DataModel::DataModel::stop()
+void DataModel::TreeViewModel::stop()
 {
     if (m_database.isConnected())
     {
@@ -74,14 +72,14 @@ void DataModel::DataModel::stop()
     }
 }
 
-bool DataModel::DataModel::load()
+bool DataModel::TreeViewModel::load()
 {
     bool success = m_database.isConnected();
 
     if (success)
     {
         // Clear old data model
-        emit modelAboutToBeReset();
+        beginResetModel();
         qDeleteAll(m_projectList);
         m_projectList.clear();
 
@@ -119,51 +117,22 @@ bool DataModel::DataModel::load()
             }
         }
 
-        emit modelReset();
+        endResetModel();
     }
 
     return success;
 }
 
-int DataModel::DataModel::getProjectCount() const
-{
-    return m_projectList.size();
-}
-
-Node *DataModel::DataModel::getProject(const int index) const
-{
-    Node *project = NULL;
-
-    if ((index >= 0) && (index < m_projectList.size()))
-    {
-        project = m_projectList[index];
-    }
-
-    return project;
-}
-
-int DataModel::DataModel::getProjectIndex(Node *projectNode) const
-{
-    int index = -1;
-
-    if (projectNode != NULL)
-    {
-        index = m_projectList.indexOf(projectNode);
-    }
-
-    return index;
-}
-
-bool DataModel::DataModel::addNode(const Node &node)
+bool DataModel::TreeViewModel::addNode(const QModelIndex &parent, const DataModel::Node &node)
 {
     // Only single node items are allowed to be added
     bool success = (node.getChildCount() == 0);
 
     if (success)
     {
-        Node *parent = node.getParent();
+        Node *parentItem = getNode(parent);
 
-        if (parent == NULL)
+        if (parentItem == NULL)
         {
             // Only "Project" nodes are allowed as root items
             success = (node.getType() == Database::NodeType_Project);
@@ -171,7 +140,7 @@ bool DataModel::DataModel::addNode(const Node &node)
         else
         {
             // Check if the node's parent is contained in this data model
-            success = contains(parent);
+            success = contains(parentItem);
         }
 
         // Add node
@@ -180,9 +149,9 @@ bool DataModel::DataModel::addNode(const Node &node)
             // Prepare node record
             IntegerField parentId;
 
-            if (parent != NULL)
+            if (parentItem != NULL)
             {
-                parentId = parent->getId();
+                parentId = parentItem->getId();
             }
 
             NodeRecord nodeRecord;
@@ -194,23 +163,27 @@ bool DataModel::DataModel::addNode(const Node &node)
             IntegerField id;
             success = m_database.addNode(nodeRecord, &id);
 
+            // Create and add node to the model
             if (success)
             {
                 insertedNode = new Node(node);
                 insertedNode->setId(id);
+                insertedNode->setParent(parentItem);
 
-                emit nodeAboutToBeAdded(parent);
-
-                if (parent == NULL)
+                if (parentItem == NULL)
                 {
+                    int row = m_projectList.size();
+                    beginInsertRows(parent, row, row);
                     m_projectList.append(insertedNode);
                 }
                 else
                 {
-                    parent->addChild(insertedNode);
+                    int row = parentItem->getChildCount();
+                    beginInsertRows(parent, row, row);
+                    parentItem->addChild(insertedNode);
                 }
 
-                emit nodeAdded();
+                endInsertRows();
             }
         }
     }
@@ -218,9 +191,191 @@ bool DataModel::DataModel::addNode(const Node &node)
     return success;
 }
 
-bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
-                                                Node *parent,
-                                                Node *node) const
+QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) const
+{
+    QVariant dataValue;
+
+    if (index.isValid() &&
+        (role == Qt::DisplayRole))
+    {
+        // TODO: implement correctly
+
+        const Node *item = getNode(index);
+
+        if (item != NULL)
+        {
+            const Database::IntegerField id = item->getId();
+
+            if (!id.isNull())
+            {
+                dataValue = QVariant(QString("Project: %1").arg(id.getValue()));
+            }
+        }
+    }
+
+    return dataValue;
+}
+
+Qt::ItemFlags DataModel::TreeViewModel::flags(const QModelIndex &index) const
+{
+    Qt::ItemFlags value = 0;
+
+    if (index.isValid())
+    {
+        value = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    }
+
+    return value;
+}
+
+QModelIndex DataModel::TreeViewModel::index(int row, int column, const QModelIndex &parent) const
+{
+    QModelIndex modelIndex;
+
+    if (hasIndex(row, column, parent) &&
+        m_database.isConnected())
+    {
+        Node *item = NULL;
+
+        if (!parent.isValid())
+        {
+            item = getProject(row);
+        }
+        else
+        {
+            const Node *parentItem = getNode(parent);
+
+            if (parentItem != NULL)
+            {
+                item = parentItem->getChild(row);
+            }
+        }
+
+        if (item != NULL)
+        {
+            modelIndex = createIndex(row, column, item);
+        }
+    }
+
+    return modelIndex;
+}
+
+QModelIndex DataModel::TreeViewModel::parent(const QModelIndex &index) const
+{
+    QModelIndex modelIndex;
+
+    if (index.isValid() &&
+        m_database.isConnected())
+    {
+        const Node *childItem = getNode(index);
+
+        if (childItem != NULL)
+        {
+            int parentRow = 0;
+            Node *parentItem = childItem->getParent();
+
+            if (parentItem != NULL)
+            {
+                parentRow = getNodeRow(parentItem);
+                modelIndex = createIndex(parentRow, 0, parentItem);
+            }
+        }
+    }
+
+    return modelIndex;
+}
+
+int DataModel::TreeViewModel::rowCount(const QModelIndex &parent) const
+{
+    int count = 0;
+    const int column = parent.column();
+
+    if ((column <= 0) &&
+        m_database.isConnected())
+    {
+        if (!parent.isValid())
+        {
+            count = getProjectCount();
+        }
+        else
+        {
+            Node *parentItem = getNode(parent);
+
+            if (parentItem != NULL)
+            {
+                count = parentItem->getChildCount();
+            }
+        }
+    }
+
+    return count;
+}
+
+int DataModel::TreeViewModel::columnCount(const QModelIndex &) const
+{
+    // TODO: implement correctly
+    return 1;
+}
+
+int DataModel::TreeViewModel::getProjectCount() const
+{
+    return m_projectList.size();
+}
+
+DataModel::Node *DataModel::TreeViewModel::getProject(const int index) const
+{
+    Node *project = NULL;
+
+    if ((index >= 0) && (index < m_projectList.size()))
+    {
+        project = m_projectList[index];
+    }
+
+    return project;
+}
+
+int DataModel::TreeViewModel::getProjectIndex(DataModel::Node *projectNode) const
+{
+    int index = -1;
+
+    if (projectNode != NULL)
+    {
+        index = m_projectList.indexOf(projectNode);
+    }
+
+    return index;
+}
+
+DataModel::Node *DataModel::TreeViewModel::getNode(const QModelIndex &index) const
+{
+    return static_cast<Node *>(index.internalPointer());
+}
+
+int DataModel::TreeViewModel::getNodeRow(DataModel::Node *node) const
+{
+    // TODO: is this still needed? fix it?
+    int row = 0;
+
+    if (node != NULL)
+    {
+        const Node *parentItem = node->getParent();
+
+        if (parentItem == NULL)
+        {
+            row = getProjectIndex(node);
+        }
+        else
+        {
+            row = parentItem->getChildIndex(node);
+        }
+    }
+
+    return row;
+}
+
+bool DataModel::TreeViewModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
+                                                    DataModel::Node *parent,
+                                                    DataModel::Node *node) const
 {
     // Check if input parameters are valid
     bool success = (nodeRecord.isValid() &&
@@ -269,7 +424,7 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
     return success;
 }
 
-bool DataModel::DataModel::contains(Node *node) const
+bool DataModel::TreeViewModel::contains(DataModel::Node *node) const
 {
     bool success = false;
 

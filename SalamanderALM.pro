@@ -19,12 +19,11 @@ SOURCES += \
     Database/NodeRecord.cpp \
     Database/NodeType.cpp \
     Database/SqliteDatabase.cpp \
-    Database/TextField.cpp \
-    View/ViewModel.cpp
+    Database/TextField.cpp
 
 SOURCES += \
-    DataModel/DataModel.cpp \
-    DataModel/Node.cpp
+    DataModel/Node.cpp \
+    DataModel/TreeViewModel.cpp
 
 SOURCES += \
     main.cpp\
@@ -38,12 +37,11 @@ HEADERS  += \
     Database/NodeRecord.h \
     Database/NodeType.h \
     Database/SqliteDatabase.h \
-    Database/TextField.h \
-    View/ViewModel.h
+    Database/TextField.h
 
 HEADERS  += \
-    DataModel/DataModel.h \
-    DataModel/Node.h
+    DataModel/Node.h \
+    DataModel/TreeViewModel.h
 
 HEADERS  += \
     MainWindow.h

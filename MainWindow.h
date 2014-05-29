@@ -23,7 +23,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "DataModel/DataModel.h"
+#include "DataModel/TreeViewModel.h"
 #include "View/ViewModel.h"
 #include <QMainWindow>
 
@@ -46,8 +46,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    DataModel::DataModel m_dataModel;
-    ViewModel::ViewModel m_viewModel;
+    DataModel::TreeViewModel m_treeViewModel;
 };
 
 #endif // MAINWINDOW_H

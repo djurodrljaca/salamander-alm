@@ -1,7 +1,7 @@
 /**
- * @file   ViewModel.h
+ * @file   TreeTreeViewModel.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-28
+ * @date   2014-05-29
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,23 +20,30 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef VIEW_VIEWMODEL_H
-#define VIEW_VIEWMODEL_H
+#ifndef DATAMODEL_TREEVIEWMODEL_H
+#define DATAMODEL_TREEVIEWMODEL_H
 
-#include "DataModel/DataModel.h"
-#include <QAbstractItemModel>
+#include "Database/SqliteDatabase.h"
+#include "DataModel/Node.h"
+#include <QtCore/QList>
+#include <QtCore/QAbstractItemModel>
 
-namespace ViewModel
+namespace DataModel
 {
-class ViewModel : public QAbstractItemModel
+class TreeViewModel : public QAbstractItemModel
 {
     Q_OBJECT
 
 public:
-    ViewModel(QObject *parent = NULL);
-    ~ViewModel();
+    TreeViewModel(QObject *parent = NULL);
+    ~TreeViewModel();
 
-    void setDataModel(DataModel::DataModel *dataModel);
+    bool start();
+    void stop();
+
+    bool load();
+
+    bool addNode(const QModelIndex &parent, const Node &node);
 
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -45,19 +52,22 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-private slots:
-    void dataModelAboutToReset();
-    void dataModelReset();
-
-    void nodeAboutToBeAdded(DataModel::Node *parent);
-    void nodeAdded();
-
 private:
-    DataModel::Node *getNode(const QModelIndex &index) const;
-    int getNodeRow(DataModel::Node *node) const;
+    int getProjectCount() const;
+    Node * getProject(const int index) const;
+    int getProjectIndex(Node *projectNode) const;
 
-    DataModel::DataModel *m_dataModel;
+    Node *getNode(const QModelIndex &index) const;
+    int getNodeRow(Node *node) const;
+
+    bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
+                              Node *parent,
+                              Node *node) const;
+    bool contains(Node *node) const;
+
+    Database::SqliteDatabase m_database;
+    QList<Node *> m_projectList;
 };
 }
 
-#endif // VIEW_VIEWMODEL_H
+#endif // DATAMODEL_TREEVIEWMODEL_H
