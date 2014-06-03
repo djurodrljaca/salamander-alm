@@ -1,16 +1,2 @@
 Node
-Revision
-UserGroup
 User
-NodeName
-NodeDescription
-NodeReference
-NodeReferenceList
-NodeReferenceItem
-NodeAttachment
-NodeAttachmentList
-NodeAttachmentItem
-NodeComment
-NodeCommentList
-NodeCommentItem
-NodeAttributes

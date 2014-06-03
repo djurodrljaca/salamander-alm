@@ -24,6 +24,7 @@
 #define DATABASE_TEXT_H
 
 #include <QtCore/QString>
+#include <QtCore/QDebug>
 
 namespace Database
 {
@@ -46,5 +47,7 @@ private:
     QString m_value;
 };
 }
+
+QDebug operator<<(QDebug dbg, const Database::TextField &text);
 
 #endif // DATABASE_TEXT_H

@@ -1,7 +1,7 @@
 /**
- * @file   NodeType.cpp
+ * @file   UserType.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-24
+ * @date   2014-06-03
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,16 +20,17 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "Database/NodeType.h"
+#include "Database/UserType.h"
 #include <QtCore/QString>
 
-bool Database::isNodeTypeValid(const NodeType nodeType)
+bool Database::isUserTypeValid(const UserType userType)
 {
     bool valid = false;
 
-    switch (nodeType)
+    switch (userType)
     {
-        case NodeType_Project:
+        case UserType_Administrator:
+        case UserType_User:
         {
             valid = true;
             break;
@@ -44,14 +45,14 @@ bool Database::isNodeTypeValid(const NodeType nodeType)
     return valid;
 }
 
-Database::IntegerField Database::convertNodeTypeToInteger(const NodeType nodeType, bool *ok)
+Database::IntegerField Database::convertUserTypeToInteger(const UserType userType, bool *ok)
 {
     IntegerField integer;
     bool success = false;
 
-    if (isNodeTypeValid(nodeType))
+    if (isUserTypeValid(userType))
     {
-        integer.setValue(static_cast<qlonglong>(nodeType));
+        integer.setValue(static_cast<qlonglong>(userType));
         success = true;
     }
 
@@ -63,18 +64,18 @@ Database::IntegerField Database::convertNodeTypeToInteger(const NodeType nodeTyp
     return integer;
 }
 
-Database::NodeType Database::convertIntegerToNodeType(const IntegerField &integer, bool *ok)
+Database::UserType Database::convertIntegerToUserType(const IntegerField &integer, bool *ok)
 {
     bool success = false;
-    NodeType nodeType = NodeType_Invalid;
+    UserType userType = UserType_Invalid;
 
     if (!integer.isNull())
     {
-        const NodeType value = static_cast<NodeType>(integer.getValue());
+        const UserType value = static_cast<UserType>(integer.getValue());
 
-        if (isNodeTypeValid(value))
+        if (isUserTypeValid(value))
         {
-            nodeType = value;
+            userType = value;
             success = true;
         }
     }
@@ -84,20 +85,26 @@ Database::NodeType Database::convertIntegerToNodeType(const IntegerField &intege
         *ok = success;
     }
 
-    return nodeType;
+    return userType;
 }
 
-QDebug operator<<(QDebug dbg, const Database::NodeType nodeType)
+QDebug operator<<(QDebug dbg, const Database::UserType userType)
 {
-    switch (nodeType)
+    switch (userType)
     {
-        case Database::NodeType_Project:
+        case Database::UserType_Administrator:
         {
-            dbg.nospace() << "Project";
+            dbg.nospace() << "Administrator";
             break;
         }
 
-        case Database::NodeType_Invalid:
+        case Database::UserType_User:
+        {
+            dbg.nospace() << "User";
+            break;
+        }
+
+        case Database::UserType_Invalid:
         default:
         {
             dbg.nospace() << "Invalid";

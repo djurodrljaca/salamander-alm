@@ -24,7 +24,6 @@
 #include "ui_MainWindow.h"
 #include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
-#include "View/ViewModel.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :

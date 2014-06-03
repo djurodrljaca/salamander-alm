@@ -81,3 +81,17 @@ void TextField::setValue(const QString &value)
     m_null = false;
     m_value = value;
 }
+
+QDebug operator<<(QDebug dbg, const Database::TextField &text)
+{
+    if (text.isNull())
+    {
+        dbg.nospace() << "NULL";
+    }
+    else
+    {
+        dbg.nospace() << text.getValue();
+    }
+
+    return dbg.space();
+}

@@ -18,6 +18,40 @@ Values:
 	- ...
 
 -------------------------------------------------
+| UserType
+-------------------------------------------------
+Values:
+	- 1: Administrator
+	- 2: User
+	- ...
+
+-------------------------------------------------
+| User
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Type: integer, enum UserType
+	- Full Name: text
+	- Username: text
+	- Password: text
+
+-------------------------------------------------
+| Revision
+-------------------------------------------------
+Table:
+	- Id: integer, primary key
+	- Timestamp: datetime
+	- User: integer, forgein key to User.Id
+
+Constraints:
+	- User --> User.Id
+
+
+
+
+
+
+-------------------------------------------------
 | NodeAttributes
 -------------------------------------------------
 Table:
@@ -40,46 +74,12 @@ Constraints:
 	- Attachments --> NodeAttachmentList.Id
 	- Comments --> NodeCommentList.Id
 
--------------------------------------------------
-| Revision
--------------------------------------------------
-Table:
-	- Id: integer, primary key
-	- Timestamp: datetime
-	- User: integer, forgein key to User.Id
 
-Constraints:
-	- User --> User.Id
 
--------------------------------------------------
-| UserGroup
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Name: text
-	- Type: integer, (UserGroupType enum)
-	- Description: text + null
 
--------------------------------------------------
-| UserGroupType
--------------------------------------------------
-Values:
-	- 1: Administrator
-	- 2: User
-	- ...
 
--------------------------------------------------
-| User
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Group: integer, forgein key to UserGroup.Id
-	- Name: text
-	- Description: text + null
-	- Password: text
 
-Constraints:
-	- Group --> UserGroup.Id
+
 
 -------------------------------------------------
 | NodeName

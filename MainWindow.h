@@ -24,7 +24,6 @@
 #define MAINWINDOW_H
 
 #include "DataModel/TreeViewModel.h"
-#include "View/ViewModel.h"
 #include <QMainWindow>
 
 namespace Ui {

@@ -189,6 +189,17 @@ bool SqliteDatabase::create()
         success = validate();
     }
 
+    if (success)
+    {
+        const UserRecord user(IntegerField(),
+                              UserType_Administrator,
+                              TextField("Administrator"),
+                              TextField("admin"),
+                              TextField("admin"));
+
+        success = addUser(user);
+    }
+
     if (!initialyConnected)
     {
         disconnect();
@@ -219,7 +230,7 @@ bool SqliteDatabase::addNode(const NodeRecord &node, IntegerField *id) const
 
             if (success)
             {
-                const IntegerField typeIntegerValue = convertNoteTypeToInteger(node.getType(), &success);
+                const IntegerField typeIntegerValue = convertNodeTypeToInteger(node.getType(), &success);
 
                 if (success)
                 {
@@ -349,19 +360,155 @@ QList<NodeRecord> SqliteDatabase::getNodes(const IntegerField &parent, bool *ok)
     return nodeList;
 }
 
+bool SqliteDatabase::addUser(const UserRecord &user, IntegerField *id) const
+{
+    // Insert value
+    static const QString insertCommand(
+                "INSERT INTO `User`(`Type`, `FullName`, `Username`, `Password`)"
+                " VALUES (:Type, :FullName, :Username, :Password);"
+                );
 
+    bool success = user.isValid();
 
+    if (success)
+    {
+        QSqlQuery query;
+        success = query.prepare(insertCommand);
 
+        if (success)
+        {
+            // Prepare values
+            QVariant typeValue;
+            QVariant fullNameValue;
+            QVariant usernameValue;
+            QVariant passwordValue;
 
+            const IntegerField typeIntegerValue = convertUserTypeToInteger(user.getType(), &success);
 
+            if (success)
+            {
+                typeValue = convertIntegerToVariant(typeIntegerValue, &success);
+            }
 
+            if (success)
+            {
+                fullNameValue = convertTextToVariant(user.getFullName(), &success);
+            }
 
+            if (success)
+            {
+                usernameValue = convertTextToVariant(user.getUsername(), &success);
+            }
 
+            if (success)
+            {
+                passwordValue = convertTextToVariant(user.getPassword(), &success);
+            }
 
+            // Execute the "insert" query with the prepared values
+            if (success)
+            {
+                query.bindValue(":Type", typeValue);
+                query.bindValue(":FullName", fullNameValue);
+                query.bindValue(":Username", usernameValue);
+                query.bindValue(":Password", passwordValue);
 
+                success = query.exec();
+            }
 
+            // Get Id of the inserted User
+            if (success && (id != NULL))
+            {
+                *id = getLastInsertId(query, &success);
+            }
+        }
+    }
 
+    return success;
+}
 
+UserRecord SqliteDatabase::getUser(const IntegerField &id, bool *ok) const
+{
+    UserRecord user;
+    bool success = false;
+
+    if (!id.isNull())
+    {
+        // Get User from database
+        static const QString selectCommand("SELECT * FROM `User` WHERE `Id`=:Id");
+
+        QSqlQuery query;
+        success = query.prepare(selectCommand);
+
+        if (success)
+        {
+            // Prepare value and execute query
+            const QVariant idValue = convertIntegerToVariant(id, &success);
+
+            if (success)
+            {
+                query.bindValue(":Id", idValue);
+
+                success = query.exec();
+            }
+
+            // Get User from executed query
+            if (success)
+            {
+                success = query.first();
+
+                if (success)
+                {
+                    user = getUserFromQuery(query, &success);
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return user;
+}
+
+QList<UserRecord> SqliteDatabase::getUsers(bool *ok) const
+{
+    QList<UserRecord> userList;
+    bool success = false;
+
+    // Get Node list from database
+    static const QString selectCommand("SELECT * FROM `User`");
+
+    QSqlQuery query;
+    success = query.prepare(selectCommand);
+
+    if (success)
+    {
+        success = query.exec();
+
+        if (success)
+        {
+            while (query.next() && success)
+            {
+                const UserRecord node = getUserFromQuery(query, &success);
+
+                if (success)
+                {
+                    userList.append(node);
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return userList;
+}
 
 bool SqliteDatabase::integrityCheck() const
 {
@@ -685,6 +832,65 @@ IntegerField SqliteDatabase::convertVariantToInteger(const QVariant &variant, bo
     return integer;
 }
 
+QVariant SqliteDatabase::convertTextToVariant(const TextField &text, bool *ok) const
+{
+    QVariant value;
+
+    if (text.isNull())
+    {
+        value = QVariant(QVariant::String);
+    }
+    else
+    {
+        value = QVariant(text.getValue());
+    }
+
+    if (ok != NULL)
+    {
+        *ok = true;
+    }
+
+    return value;
+}
+
+TextField SqliteDatabase::convertVariantToText(const QVariant &variant, bool *ok) const
+{
+    TextField text;
+    bool success = variant.isValid();
+
+    if (success)
+    {
+        if (variant.isNull())
+        {
+            text.setNull();
+        }
+        else
+        {
+            switch (variant.type())
+            {
+                case QVariant::String:
+                {
+                    text.setValue(variant.toString());
+                    break;
+                }
+
+                default:
+                {
+                    success = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return text;
+}
+
 IntegerField SqliteDatabase::getLastInsertId(const QSqlQuery &query, bool *ok) const
 {
     bool success = false;
@@ -702,34 +908,6 @@ IntegerField SqliteDatabase::getLastInsertId(const QSqlQuery &query, bool *ok) c
 
     return integer;
 }
-
-//Text SqliteDatabase::convertVariantToText(const QVariant &value, bool *ok) const
-//{
-//    Text textValue;
-//    bool success = value.isValid();
-
-//    if (success)
-//    {
-//        if (value.isNull())
-//        {
-//            textValue.setNull();
-//        }
-//        else
-//        {
-//            if (value.type() == QVariant::String)
-//            {
-//                textValue.setValue(value.toString());
-//            }
-//        }
-//    }
-
-//    if (ok != NULL)
-//    {
-//        *ok = success;
-//    }
-
-//    return textValue;
-//}
 
 NodeRecord SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) const
 {
@@ -775,7 +953,7 @@ NodeRecord SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) co
 
         if (success)
         {
-            NodeType typeValue = convertIntegerToNoteType(value, &success);
+            const NodeType typeValue = convertIntegerToNodeType(value, &success);
 
             if (success)
             {
@@ -790,4 +968,89 @@ NodeRecord SqliteDatabase::getNodeFromQuery(const QSqlQuery &query, bool *ok) co
     }
 
     return node;
+}
+
+UserRecord SqliteDatabase::getUserFromQuery(const QSqlQuery &query, bool *ok) const
+{
+    UserRecord user;
+    bool success = query.isActive();
+
+    // Id
+    if (success)
+    {
+        const int index = query.record().indexOf("Id");
+        const IntegerField idValue = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            if (idValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                user.setId(idValue);
+            }
+        }
+    }
+
+    // Type
+    if (success)
+    {
+        const int index = query.record().indexOf("Type");
+        const IntegerField value = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            const UserType typeValue = convertIntegerToUserType(value, &success);
+
+            if (success)
+            {
+                user.setType(typeValue);
+            }
+        }
+    }
+
+    // Full Name
+    if (success)
+    {
+        const int index = query.record().indexOf("FullName");
+        const TextField fullNameValue = convertVariantToText(query.value(index), &success);
+
+        if (success)
+        {
+            user.setFullName(fullNameValue);
+        }
+    }
+
+    // Username
+    if (success)
+    {
+        const int index = query.record().indexOf("Username");
+        const TextField usernameValue = convertVariantToText(query.value(index), &success);
+
+        if (success)
+        {
+            user.setUsername(usernameValue);
+        }
+    }
+
+    // Password
+    if (success)
+    {
+        const int index = query.record().indexOf("Password");
+        const TextField passwordValue = convertVariantToText(query.value(index), &success);
+
+        if (success)
+        {
+            user.setPassword(passwordValue);
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return user;
 }

@@ -1,7 +1,7 @@
 /**
  * @file   NodeType.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-24
+ * @date   2014-05-24
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -29,8 +29,6 @@
 namespace Database
 {
 
-// TODO: move to DataModel?
-
 enum NodeType
 {
     NodeType_Invalid = 0,
@@ -38,8 +36,8 @@ enum NodeType
 };
 
 bool isNodeTypeValid(const NodeType nodeType);
-IntegerField convertNoteTypeToInteger(const NodeType nodeType, bool *ok = NULL);
-NodeType convertIntegerToNoteType(const IntegerField &integer, bool *ok = NULL);
+IntegerField convertNodeTypeToInteger(const NodeType nodeType, bool *ok = NULL);
+NodeType convertIntegerToNodeType(const IntegerField &integer, bool *ok = NULL);
 
 }
 

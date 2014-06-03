@@ -1,5 +1,5 @@
 /**
- * @file   Node.cpp
+ * @file   NodeRecord.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
  * @date   2014-05-24
  * @brief  Brief description of file.

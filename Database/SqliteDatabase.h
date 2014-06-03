@@ -23,8 +23,8 @@
 #ifndef DATABASE_SQLITEDATABASE_H
 #define DATABASE_SQLITEDATABASE_H
 
-#include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
+#include "Database/UserRecord.h"
 #include <QtCore/QList>
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
@@ -48,12 +48,9 @@ public:
     NodeRecord getNode(const IntegerField &id, bool *ok = NULL) const;
     QList<NodeRecord> getNodes(const IntegerField &parent, bool *ok = NULL) const;
 
-
-
-
-
-
-
+    bool addUser(const UserRecord &user, IntegerField *id = NULL) const;
+    UserRecord getUser(const IntegerField &id, bool *ok = NULL) const;
+    QList<UserRecord> getUsers(bool *ok = NULL) const;
 
 private:
     bool integrityCheck() const;
@@ -72,11 +69,13 @@ private:
     QVariant convertIntegerToVariant(const IntegerField &integer, bool *ok = NULL) const;
     IntegerField convertVariantToInteger(const QVariant &variant, bool *ok = NULL) const;
 
+    QVariant convertTextToVariant(const TextField &text, bool *ok = NULL) const;
+    TextField convertVariantToText(const QVariant &variant, bool *ok = NULL) const;
+
     IntegerField getLastInsertId(const QSqlQuery &query, bool *ok = NULL) const;
 
-//    DataTypes::Text convertVariantToText(const QVariant &value, bool *ok = NULL) const;
-
     NodeRecord getNodeFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
+    UserRecord getUserFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
 
     QSqlDatabase m_database;
 };
