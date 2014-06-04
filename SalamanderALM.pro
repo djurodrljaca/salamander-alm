@@ -21,7 +21,8 @@ SOURCES += \
     Database/SqliteDatabase.cpp \
     Database/TextField.cpp \
     Database/UserType.cpp \
-    Database/UserRecord.cpp
+    Database/UserRecord.cpp \
+    Database/RevisionRecord.cpp
 
 SOURCES += \
     DataModel/Node.cpp \
@@ -41,7 +42,8 @@ HEADERS  += \
     Database/SqliteDatabase.h \
     Database/TextField.h \
     Database/UserType.h \
-    Database/UserRecord.h
+    Database/UserRecord.h \
+    Database/RevisionRecord.h
 
 HEADERS  += \
     DataModel/Node.h \

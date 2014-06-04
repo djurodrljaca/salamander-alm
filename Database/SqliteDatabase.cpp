@@ -39,6 +39,8 @@
 #define DATABASE_TYPE QString("QSQLITE")
 #define DATABASE_NAME QString("database.db3")
 
+#define DATETIME_FORMAT QString("yyyy-MM-dd hh:mm:ss.zzz")
+
 struct PragmaItem
 {
     PragmaItem()
@@ -510,6 +512,148 @@ QList<UserRecord> SqliteDatabase::getUsers(bool *ok) const
     return userList;
 }
 
+bool SqliteDatabase::addRevision(const RevisionRecord &revision) const
+{
+    // Insert value
+    static const QString insertCommand(
+                "INSERT INTO `Revision`(`Id`, `Timestamp`, `User`) VALUES (:Id, :Timestamp, :User);"
+                );
+
+    bool success = revision.isValid();
+
+    if (success)
+    {
+        QSqlQuery query;
+        success = query.prepare(insertCommand);
+
+        if (success)
+        {
+            // Prepare values
+            QVariant idValue;
+            QVariant timestampValue;
+            QVariant userValue;
+
+            success = !revision.getId().isNull();
+
+            if (success)
+            {
+                idValue = convertIntegerToVariant(revision.getId(), &success);
+            }
+
+            if (success)
+            {
+                timestampValue = convertDateTimeToVariant(revision.getTimestamp(), &success);
+            }
+
+            if (success)
+            {
+                userValue = convertIntegerToVariant(revision.getUser(), &success);
+            }
+
+            // Execute the "insert" query with the prepared values
+            if (success)
+            {
+                query.bindValue(":Id", idValue);
+                query.bindValue(":Timestamp", timestampValue);
+                query.bindValue(":User", userValue);
+
+                success = query.exec();
+            }
+        }
+    }
+
+    return success;
+}
+
+RevisionRecord SqliteDatabase::getRevision(const IntegerField &id, bool *ok) const
+{
+    RevisionRecord revision;
+    bool success = false;
+
+    if (!id.isNull())
+    {
+        // Get Revision from database
+        static const QString selectCommand("SELECT * FROM `Revision` WHERE `Id`=:Id");
+
+        QSqlQuery query;
+        success = query.prepare(selectCommand);
+
+        if (success)
+        {
+            // Prepare value and execute query
+            const QVariant idValue = convertIntegerToVariant(id, &success);
+
+            if (success)
+            {
+                query.bindValue(":Id", idValue);
+
+                success = query.exec();
+            }
+
+            // Get User from executed query
+            if (success)
+            {
+                success = query.first();
+
+                if (success)
+                {
+                    revision = getRevisionFromQuery(query, &success);
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return revision;
+}
+
+IntegerField SqliteDatabase::getCurrentRevisionId(bool *ok) const
+{
+    IntegerField id;
+    bool success = false;
+
+    // Get Revision from database
+    static const QString selectCommand("SELECT MAX(`Id`) FROM `Revision`");
+
+    QSqlQuery query;
+    success = query.prepare(selectCommand);
+
+    if (success)
+    {
+        // Prepare value and execute query
+        const QVariant idValue = convertIntegerToVariant(id, &success);
+
+        if (success)
+        {
+            query.bindValue(":Id", idValue);
+
+            success = query.exec();
+        }
+
+        // Get User from executed query
+        if (success)
+        {
+            success = query.first();
+
+            if (success)
+            {
+                id = convertVariantToInteger(query.value(0), &success);
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return id;
+}
+
 bool SqliteDatabase::integrityCheck() const
 {
     const static QString command = "PRAGMA integrity_check;";
@@ -767,6 +911,82 @@ bool SqliteDatabase::createTable(const QString &tableName) const
     return success;
 }
 
+QVariant SqliteDatabase::convertDateTimeToVariant(const DateTimeField &dateTime, bool *ok) const
+{
+    QVariant value;
+    bool succcess = false;
+
+    if (dateTime.isNull())
+    {
+        value = QVariant(QVariant::String);
+        succcess = true;
+    }
+    else
+    {
+        const QDateTime dateTimeValue = dateTime.getValue();
+
+        if (dateTimeValue.isValid())
+        {
+            value = QVariant(dateTimeValue.toString(DATETIME_FORMAT));
+            succcess = true;
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = succcess;
+    }
+
+    return value;
+}
+
+DateTimeField SqliteDatabase::convertVariantToDateTime(const QVariant &variant, bool *ok) const
+{
+    DateTimeField dateTime;
+    bool success = variant.isValid();
+
+    if (success)
+    {
+        if (variant.isNull())
+        {
+            dateTime.setNull();
+        }
+        else
+        {
+            switch (variant.type())
+            {
+                case QVariant::String:
+                {
+                    const QString stringValue = variant.toString();
+                    const QDateTime dateTimeValue = QDateTime::fromString(stringValue,
+                                                                          DATETIME_FORMAT);
+
+                    success = dateTimeValue.isValid();
+
+                    if (success)
+                    {
+                        dateTime.setValue(dateTimeValue);
+                    }
+                    break;
+                }
+
+                default:
+                {
+                    success = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return dateTime;
+}
+
 QVariant SqliteDatabase::convertIntegerToVariant(const IntegerField &integer, bool *ok) const
 {
     QVariant value;
@@ -1019,7 +1239,14 @@ UserRecord SqliteDatabase::getUserFromQuery(const QSqlQuery &query, bool *ok) co
 
         if (success)
         {
-            user.setFullName(fullNameValue);
+            if (fullNameValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                user.setFullName(fullNameValue);
+            }
         }
     }
 
@@ -1031,7 +1258,14 @@ UserRecord SqliteDatabase::getUserFromQuery(const QSqlQuery &query, bool *ok) co
 
         if (success)
         {
-            user.setUsername(usernameValue);
+            if (usernameValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                user.setUsername(usernameValue);
+            }
         }
     }
 
@@ -1043,7 +1277,14 @@ UserRecord SqliteDatabase::getUserFromQuery(const QSqlQuery &query, bool *ok) co
 
         if (success)
         {
-            user.setPassword(passwordValue);
+            if (passwordValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                user.setPassword(passwordValue);
+            }
         }
     }
 
@@ -1053,4 +1294,74 @@ UserRecord SqliteDatabase::getUserFromQuery(const QSqlQuery &query, bool *ok) co
     }
 
     return user;
+}
+
+RevisionRecord SqliteDatabase::getRevisionFromQuery(const QSqlQuery &query, bool *ok) const
+{
+    RevisionRecord revision;
+    bool success = query.isActive();
+
+    // Id
+    if (success)
+    {
+        const int index = query.record().indexOf("Id");
+        const IntegerField idValue = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            if (idValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                revision.setId(idValue);
+            }
+        }
+    }
+
+    // Timestamp
+    if (success)
+    {
+        const int index = query.record().indexOf("Timestamp");
+        const DateTimeField timestampValue = convertVariantToDateTime(query.value(index), &success);
+
+        if (success)
+        {
+            if (timestampValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                revision.setTimestamp(timestampValue);
+            }
+        }
+    }
+
+    // User
+    if (success)
+    {
+        const int index = query.record().indexOf("User");
+        const IntegerField userValue = convertVariantToInteger(query.value(index), &success);
+
+        if (success)
+        {
+            if (userValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                revision.setUser(userValue);
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return revision;
 }

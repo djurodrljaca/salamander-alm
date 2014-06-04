@@ -1,7 +1,7 @@
 /**
- * @file   DateTimeField.h
+ * @file   RevisionRecord.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-06-04
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,34 +20,41 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_DATETIMEFIELD_H
-#define DATABASE_DATETIMEFIELD_H
+#ifndef DATABASE_REVISIONRECORD_H
+#define DATABASE_REVISIONRECORD_H
 
-#include <QtCore/QDateTime>
-#include <QtCore/QDebug>
+#include "Database/IntegerField.h"
+#include "Database/DateTimeField.h"
+#include <QtCore/QtDebug>
 
 namespace Database
 {
-class DateTimeField
+class RevisionRecord
 {
 public:
-    DateTimeField();
-    DateTimeField(const QDateTime &value);
+    RevisionRecord();
+    RevisionRecord(const IntegerField &id,
+                   const DateTimeField &timestamp,
+                   const IntegerField &user);
 
-    bool operator ==(const DateTimeField& other) const;
-    bool operator !=(const DateTimeField& other) const;
+    bool isValid() const;
 
-    bool isNull() const;
-    void setNull();
-    QDateTime getValue() const;
-    void setValue(const QDateTime &value);
+    IntegerField getId() const;
+    void setId(const IntegerField &id);
+
+    DateTimeField getTimestamp() const;
+    void setTimestamp(const DateTimeField &timestamp);
+
+    IntegerField getUser() const;
+    void setUser(const IntegerField &user);
 
 private:
-    bool m_null;
-    QDateTime m_value;
+    IntegerField m_id;
+    DateTimeField m_timestamp;
+    IntegerField m_user;
 };
 }
 
-QDebug operator<<(QDebug dbg, const Database::DateTimeField &dateTime);
+QDebug operator<<(QDebug dbg, const Database::RevisionRecord &revision);
 
-#endif // DATABASE_DATETIMEFIELD_H
+#endif // DATABASE_REVISIONRECORD_H

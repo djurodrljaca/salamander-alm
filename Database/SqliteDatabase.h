@@ -25,6 +25,7 @@
 
 #include "Database/NodeRecord.h"
 #include "Database/UserRecord.h"
+#include "Database/RevisionRecord.h"
 #include <QtCore/QList>
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
@@ -52,6 +53,10 @@ public:
     UserRecord getUser(const IntegerField &id, bool *ok = NULL) const;
     QList<UserRecord> getUsers(bool *ok = NULL) const;
 
+    bool addRevision(const RevisionRecord &revision) const;
+    RevisionRecord getRevision(const IntegerField &id, bool *ok = NULL) const;
+    IntegerField getCurrentRevisionId(bool *ok = NULL) const;
+
 private:
     bool integrityCheck() const;
     bool validatePersistentConfig() const;
@@ -66,6 +71,9 @@ private:
     QStringList getTableList() const;
     bool createTable(const QString &tableName) const;
 
+    QVariant convertDateTimeToVariant(const DateTimeField &dateTime, bool *ok = NULL) const;
+    DateTimeField convertVariantToDateTime(const QVariant &variant, bool *ok = NULL) const;
+
     QVariant convertIntegerToVariant(const IntegerField &integer, bool *ok = NULL) const;
     IntegerField convertVariantToInteger(const QVariant &variant, bool *ok = NULL) const;
 
@@ -76,6 +84,7 @@ private:
 
     NodeRecord getNodeFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
     UserRecord getUserFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
+    RevisionRecord getRevisionFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
 
     QSqlDatabase m_database;
 };

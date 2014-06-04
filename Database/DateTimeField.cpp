@@ -81,3 +81,17 @@ void DateTimeField::setValue(const QDateTime &value)
     m_null = false;
     m_value = value;
 }
+
+QDebug operator<<(QDebug dbg, const DateTimeField &dateTime)
+{
+    if (dateTime.isNull())
+    {
+        dbg.nospace() << "NULL";
+    }
+    else
+    {
+        dbg.nospace() << dateTime.getValue();
+    }
+
+    return dbg.space();
+}
