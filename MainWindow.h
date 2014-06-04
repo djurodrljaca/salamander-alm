@@ -40,8 +40,7 @@ public:
 
 private slots:
     void connectButtonPushed();
-    void addButtonPushed();
-    void getButtonPushed();
+    void addProjectButtonPushed();
 
 private:
     Ui::MainWindow *ui;

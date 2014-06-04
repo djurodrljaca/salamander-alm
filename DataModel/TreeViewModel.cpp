@@ -146,44 +146,64 @@ bool DataModel::TreeViewModel::addNode(const QModelIndex &parent, const DataMode
         // Add node
         if (success)
         {
+            // Start revision
+            IntegerField revisionId = m_database.startRevision(&success);
+
             // Prepare node record
-            IntegerField parentId;
-
-            if (parentItem != NULL)
-            {
-                parentId = parentItem->getId();
-            }
-
-            NodeRecord nodeRecord;
-            nodeRecord.setParent(parentId);
-            nodeRecord.setType(node.getType());
-
-            // Add node record to database
-            Node *insertedNode = NULL;
-            IntegerField id;
-            success = m_database.addNode(nodeRecord, &id);
-
-            // Create and add node to the model
             if (success)
             {
-                insertedNode = new Node(node);
-                insertedNode->setId(id);
-                insertedNode->setParent(parentItem);
+                IntegerField parentId;
 
-                if (parentItem == NULL)
+                if (parentItem != NULL)
                 {
-                    int row = m_projectList.size();
-                    beginInsertRows(parent, row, row);
-                    m_projectList.append(insertedNode);
+                    parentId = parentItem->getId();
+                }
+
+                NodeRecord nodeRecord;
+                nodeRecord.setParent(parentId);
+                nodeRecord.setType(node.getType());
+
+                // Add node record to database
+                Node *insertedNode = NULL;
+                IntegerField id;
+                success = m_database.addNode(nodeRecord, &id);
+
+                // Create node
+                if (success)
+                {
+                    insertedNode = new Node(node);
+                    insertedNode->setId(id);
+                    insertedNode->setParent(parentItem);
+                }
+
+                if (success)
+                {
+                    success = m_database.finishRevision();
+
+                    // Add node to the model
+                    if (parentItem == NULL)
+                    {
+                        int row = m_projectList.size();
+                        beginInsertRows(parent, row, row);
+
+                        m_projectList.append(insertedNode);
+                        insertedNode = NULL;
+                    }
+                    else
+                    {
+                        int row = parentItem->getChildCount();
+                        beginInsertRows(parent, row, row);
+
+                        parentItem->addChild(insertedNode);
+                        insertedNode = NULL;
+                    }
+
+                    endInsertRows();
                 }
                 else
                 {
-                    int row = parentItem->getChildCount();
-                    beginInsertRows(parent, row, row);
-                    parentItem->addChild(insertedNode);
+                    m_database.abortRevision();
                 }
-
-                endInsertRows();
             }
         }
     }

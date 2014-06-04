@@ -27,30 +27,17 @@
      <string>Connect</string>
     </property>
    </widget>
-   <widget class="QPushButton" name="add_pushButton">
+   <widget class="QPushButton" name="addProject_pushButton">
     <property name="geometry">
      <rect>
       <x>100</x>
       <y>10</y>
-      <width>80</width>
+      <width>171</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Add</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="get_pushButton">
-    <property name="geometry">
-     <rect>
-      <x>190</x>
-      <y>10</y>
-      <width>80</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Get</string>
+     <string>Add Project</string>
     </property>
    </widget>
    <widget class="QTreeView" name="view_treeView">

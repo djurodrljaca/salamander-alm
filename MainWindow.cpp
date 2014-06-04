@@ -38,8 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui->connect_pushButton, SIGNAL(clicked()), this, SLOT(connectButtonPushed()));
-    connect(ui->add_pushButton, SIGNAL(clicked()), this, SLOT(addButtonPushed()));
-    connect(ui->get_pushButton, SIGNAL(clicked()), this, SLOT(getButtonPushed()));
+    connect(ui->addProject_pushButton, SIGNAL(clicked()), this, SLOT(addProjectButtonPushed()));
 }
 
 MainWindow::~MainWindow()
@@ -60,7 +59,7 @@ void MainWindow::connectButtonPushed()
     }
 }
 
-void MainWindow::addButtonPushed()
+void MainWindow::addProjectButtonPushed()
 {
     QItemSelectionModel *selectionModel = ui->view_treeView->selectionModel();
 
@@ -74,34 +73,4 @@ void MainWindow::addButtonPushed()
         bool success = m_treeViewModel.addNode(modelIndex, node);
         qDebug() << "MainWindow::addButtonPushed: success:" << success;
     }
-}
-
-void MainWindow::getButtonPushed()
-{
-//    if (m_database.isConnected())
-//    {
-//        using namespace Database;
-
-//        bool success = false;
-//        const IntegerField id(1);
-
-//        const NodeRecord node = m_database.getNode(id, &success);
-//        qDebug() << "MainWindow::getButtonPushed:" << success << id << node;
-
-//        const IntegerField parent1;
-//        const QList<NodeRecord> nodeList1 = m_database.getNodes(parent1, &success);
-
-//        foreach (const NodeRecord nodeItem, nodeList1)
-//        {
-//            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
-//        }
-
-//        const IntegerField parent2 = id;
-//        const QList<NodeRecord> nodeList2 = m_database.getNodes(parent2, &success);
-
-//        foreach (const NodeRecord nodeItem, nodeList2)
-//        {
-//            qDebug() << "MainWindow::getButtonPushed:" << success << nodeItem;
-//        }
-//    }
 }

@@ -210,6 +210,61 @@ bool SqliteDatabase::create()
     return success;
 }
 
+IntegerField SqliteDatabase::startRevision(bool *ok)
+{
+    IntegerField revisionId;
+    bool success = m_database.transaction();
+
+    if (success)
+    {
+        // Prepare next revision
+        revisionId = getCurrentRevisionId(&success);
+
+        if (success)
+        {
+            if (revisionId.isNull())
+            {
+                revisionId.setValue(1LL);
+            }
+            else
+            {
+                revisionId.setValue(revisionId.getValue() + 1LL);
+            }
+        }
+
+        if (success)
+        {
+            const RevisionRecord revision(revisionId,
+                                          DateTimeField(QDateTime::currentDateTimeUtc()),
+                                          IntegerField(1LL));
+
+            success = addRevision(revision);
+        }
+
+        if (!success)
+        {
+            abortRevision();
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return revisionId;
+}
+
+bool SqliteDatabase::finishRevision()
+{
+    return m_database.commit();
+}
+
+void SqliteDatabase::abortRevision()
+{
+    m_database.rollback();
+}
+
 bool SqliteDatabase::addNode(const NodeRecord &node, IntegerField *id) const
 {
     // Insert value
@@ -624,15 +679,8 @@ IntegerField SqliteDatabase::getCurrentRevisionId(bool *ok) const
 
     if (success)
     {
-        // Prepare value and execute query
-        const QVariant idValue = convertIntegerToVariant(id, &success);
-
-        if (success)
-        {
-            query.bindValue(":Id", idValue);
-
-            success = query.exec();
-        }
+        // execute query
+        success = query.exec();
 
         // Get User from executed query
         if (success)

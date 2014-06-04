@@ -45,6 +45,10 @@ public:
     bool validate() const;
     bool create();
 
+    IntegerField startRevision(bool *ok = NULL);
+    bool finishRevision();
+    void abortRevision();
+
     bool addNode(const NodeRecord &node, IntegerField *id = NULL) const;
     NodeRecord getNode(const IntegerField &id, bool *ok = NULL) const;
     QList<NodeRecord> getNodes(const IntegerField &parent, bool *ok = NULL) const;
