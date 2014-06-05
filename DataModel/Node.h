@@ -33,21 +33,36 @@ class Node
 {
 public:
     Node();
-    Node(const Node &other);
     ~Node();
-
-    Node & operator =(const Node &other);
 
     bool isValid() const;
 
     Database::IntegerField getId() const;
     void setId(const Database::IntegerField &id);
 
+    Node * getParent() const;
+    void setParent(Node *parent);
+
     Database::NodeType getType() const;
     void setType(const Database::NodeType type);
 
-    Node * getParent() const;
-    void setParent(Node *parent);
+    Database::IntegerField getRevisionId() const;
+    void setRevisionId(const Database::IntegerField &revisionId);
+
+    QString getName() const;
+    void setName(const QString &name);
+
+    Database::IntegerField getDescriptionId() const;
+    void setDescriptionId(const Database::IntegerField &descriptionId);
+
+    Database::IntegerField getReferencesId() const;
+    void setReferencesId(const Database::IntegerField &referencesId);
+
+    Database::IntegerField getAttachmentsId() const;
+    void setAttachmentsId(const Database::IntegerField &attachmentsId);
+
+    Database::IntegerField getCommentsId() const;
+    void setCommentsId(const Database::IntegerField &commentsId);
 
     int getChildCount() const;
     Node * getChild(const int index) const;
@@ -56,8 +71,14 @@ public:
 
 private:
     Database::IntegerField m_id;
-    Database::NodeType m_type;
     Node *m_parent;
+    Database::NodeType m_type;
+    Database::IntegerField m_revisionId;
+    QString m_name;
+    Database::IntegerField m_descriptionId;
+    Database::IntegerField m_referencesId;
+    Database::IntegerField m_attachmentsId;
+    Database::IntegerField m_commentsId;
     QList<Node *> m_childList;
 };
 }

@@ -286,17 +286,19 @@ QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) cons
     if (index.isValid() &&
         (role == Qt::DisplayRole))
     {
-        // TODO: implement correctly
-
         const Node *item = getNode(index);
 
         if (item != NULL)
         {
-            const Database::IntegerField id = item->getId();
+            const QString name = item->getName();
 
-            if (!id.isNull())
+            if (name.isEmpty())
             {
-                dataValue = QVariant(QString("Project: %1").arg(id.getValue()));
+                dataValue = QVariant(QString("???"));
+            }
+            else
+            {
+                dataValue = QVariant(name);
             }
         }
     }
@@ -483,6 +485,8 @@ bool DataModel::TreeViewModel::loadNodeFromDatabase(const NodeRecord &nodeRecord
         node->setId(nodeRecord.getId());
         node->setParent(parent);
         node->setType(nodeRecord.getType());
+
+        // TODO: get note attributes!
 
         // Load child nodes and add them to the node
         const QList<NodeRecord> nodeRecordList = m_database.getNodes(nodeRecord.getId(), &success);

@@ -26,17 +26,15 @@ using namespace DataModel;
 
 Node::Node()
     : m_id(),
-      m_type(Database::NodeType_Invalid),
       m_parent(NULL),
+      m_type(Database::NodeType_Invalid),
+      m_revisionId(),
+      m_name(),
+      m_descriptionId(),
+      m_referencesId(),
+      m_attachmentsId(),
+      m_commentsId(),
       m_childList()
-{
-}
-
-Node::Node(const Node &other)
-    : m_id(other.m_id),
-      m_type(other.m_type),
-      m_parent(other.m_parent),
-      m_childList(other.m_childList)
 {
 }
 
@@ -45,19 +43,11 @@ Node::~Node()
     qDeleteAll(m_childList);
 }
 
-Node & Node::operator =(const Node &other)
-{
-    m_id = other.m_id;
-    m_type = other.m_type;
-    m_parent = other.m_parent;
-    m_childList = other.m_childList;
-
-    return *this;
-}
-
 bool Node::isValid() const
 {
-    return Database::isNodeTypeValid(m_type);
+    return (Database::isNodeTypeValid(m_type) &&
+            !m_revisionId.isNull() &&
+            !m_name.isEmpty());
 }
 
 Database::IntegerField Node::getId() const
@@ -70,6 +60,16 @@ void Node::setId(const Database::IntegerField &id)
     m_id = id;
 }
 
+Node * Node::getParent() const
+{
+    return m_parent;
+}
+
+void Node::setParent(Node *parent)
+{
+    m_parent = parent;
+}
+
 Database::NodeType Node::getType() const
 {
     return m_type;
@@ -80,14 +80,64 @@ void Node::setType(const Database::NodeType type)
     m_type = type;
 }
 
-Node * Node::getParent() const
+Database::IntegerField Node::getRevisionId() const
 {
-    return m_parent;
+    return m_revisionId;
 }
 
-void Node::setParent(Node *parent)
+void Node::setRevisionId(const Database::IntegerField &revisionId)
 {
-    m_parent = parent;
+    m_revisionId = revisionId;
+}
+
+QString Node::getName() const
+{
+    return m_name;
+}
+
+void Node::setName(const QString &name)
+{
+    m_name = name;
+}
+
+Database::IntegerField Node::getDescriptionId() const
+{
+    return m_descriptionId;
+}
+
+void Node::setDescriptionId(const Database::IntegerField &descriptionId)
+{
+    m_descriptionId = descriptionId;
+}
+
+Database::IntegerField Node::getReferencesId() const
+{
+    return m_referencesId;
+}
+
+void Node::setReferencesId(const Database::IntegerField &referencesId)
+{
+    m_referencesId = referencesId;
+}
+
+Database::IntegerField Node::getAttachmentsId() const
+{
+    return m_attachmentsId;
+}
+
+void Node::setAttachmentsId(const Database::IntegerField &attachmentsId)
+{
+    m_attachmentsId = attachmentsId;
+}
+
+Database::IntegerField Node::getCommentsId() const
+{
+    return m_commentsId;
+}
+
+void Node::setCommentsId(const Database::IntegerField &commentsId)
+{
+    m_commentsId = commentsId;
 }
 
 int Node::getChildCount() const
