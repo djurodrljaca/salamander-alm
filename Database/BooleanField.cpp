@@ -81,3 +81,17 @@ void BooleanField::setValue(const bool value)
     m_null = false;
     m_value = value;
 }
+
+QDebug operator<<(QDebug dbg, const BooleanField &boolean)
+{
+    if (boolean.isNull())
+    {
+        dbg.nospace() << "NULL";
+    }
+    else
+    {
+        dbg.nospace() << boolean.getValue();
+    }
+
+    return dbg.space();
+}

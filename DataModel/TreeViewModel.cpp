@@ -123,93 +123,161 @@ bool DataModel::TreeViewModel::load()
     return success;
 }
 
-bool DataModel::TreeViewModel::addNode(const QModelIndex &parent, const DataModel::Node &node)
+bool DataModel::TreeViewModel::addProject(const QString &name, const QString description)
 {
-    // Only single node items are allowed to be added
-    bool success = (node.getChildCount() == 0);
+    bool success = !name.isEmpty();
 
     if (success)
     {
-        Node *parentItem = getNode(parent);
+        // TODO: check if project with the same name already exists
 
-        if (parentItem == NULL)
+        // Start revision
+        IntegerField revisionId = m_database.startRevision(&success);
+
+        // Add node record
+        IntegerField nodeId;
+        NodeRecord nodeRecord;
+        nodeRecord.setParent(IntegerField());
+        nodeRecord.setType(NodeType_Project);
+
+        success = m_database.addNode(nodeRecord, &nodeId);
+
+        // Add node name
+        IntegerField nodeNameId;
+
+        if (success)
         {
-            // Only "Project" nodes are allowed as root items
-            success = (node.getType() == Database::NodeType_Project);
+            const NodeNameRecord nodeName(IntegerField(), name);
+            success = m_database.addNodeName(nodeName, &nodeNameId);
+        }
+
+        // Add node description
+        IntegerField nodeDescriptionId;
+
+        if (success && !description.isEmpty())
+        {
+            const NodeDescriptionRecord nodeDescription(IntegerField(), description);
+            success = m_database.addNodeDescription(nodeDescription, &nodeDescriptionId);
+        }
+
+        // Add node attributes
+        IntegerField nodeAttributesId;
+
+        if (success)
+        {
+            const NodeAttributesRecord nodeAttributes(IntegerField(),
+                                                      nodeId,
+                                                      revisionId,
+                                                      nodeNameId,
+                                                      nodeDescriptionId,
+                                                      IntegerField(),
+                                                      IntegerField(),
+                                                      IntegerField(),
+                                                      BooleanField(true));
+            success = m_database.addNodeAttributes(nodeAttributes, &nodeAttributesId);
+        }
+
+        if (success)
+        {
+            success = m_database.finishRevision();
+            // TODO: refresh data model (tree view)
         }
         else
         {
-            // Check if the node's parent is contained in this data model
-            success = contains(parentItem);
-        }
-
-        // Add node
-        if (success)
-        {
-            // Start revision
-            IntegerField revisionId = m_database.startRevision(&success);
-
-            // Prepare node record
-            if (success)
-            {
-                IntegerField parentId;
-
-                if (parentItem != NULL)
-                {
-                    parentId = parentItem->getId();
-                }
-
-                NodeRecord nodeRecord;
-                nodeRecord.setParent(parentId);
-                nodeRecord.setType(node.getType());
-
-                // Add node record to database
-                Node *insertedNode = NULL;
-                IntegerField id;
-                success = m_database.addNode(nodeRecord, &id);
-
-                // Create node
-                if (success)
-                {
-                    insertedNode = new Node(node);
-                    insertedNode->setId(id);
-                    insertedNode->setParent(parentItem);
-                }
-
-                if (success)
-                {
-                    success = m_database.finishRevision();
-
-                    // Add node to the model
-                    if (parentItem == NULL)
-                    {
-                        int row = m_projectList.size();
-                        beginInsertRows(parent, row, row);
-
-                        m_projectList.append(insertedNode);
-                        insertedNode = NULL;
-                    }
-                    else
-                    {
-                        int row = parentItem->getChildCount();
-                        beginInsertRows(parent, row, row);
-
-                        parentItem->addChild(insertedNode);
-                        insertedNode = NULL;
-                    }
-
-                    endInsertRows();
-                }
-                else
-                {
-                    m_database.abortRevision();
-                }
-            }
+            m_database.abortRevision();
         }
     }
 
     return success;
 }
+
+//bool DataModel::TreeViewModel::addNode(const QModelIndex &parent, const DataModel::Node &node)
+//{
+//    // Only single node items are allowed to be added
+//    bool success = (node.getChildCount() == 0);
+
+//    if (success)
+//    {
+//        Node *parentItem = getNode(parent);
+
+//        if (parentItem == NULL)
+//        {
+//            // Only "Project" nodes are allowed as root items
+//            success = (node.getType() == Database::NodeType_Project);
+//        }
+//        else
+//        {
+//            // Check if the node's parent is contained in this data model
+//            success = contains(parentItem);
+//        }
+
+//        // Add node
+//        if (success)
+//        {
+//            // Start revision
+//            IntegerField revisionId = m_database.startRevision(&success);
+
+//            // Prepare node record
+//            if (success)
+//            {
+//                IntegerField parentId;
+
+//                if (parentItem != NULL)
+//                {
+//                    parentId = parentItem->getId();
+//                }
+
+//                NodeRecord nodeRecord;
+//                nodeRecord.setParent(parentId);
+//                nodeRecord.setType(node.getType());
+
+//                // Add node record to database
+//                Node *insertedNode = NULL;
+//                IntegerField id;
+//                success = m_database.addNode(nodeRecord, &id);
+
+//                // Create node
+//                if (success)
+//                {
+//                    insertedNode = new Node(node);
+//                    insertedNode->setId(id);
+//                    insertedNode->setParent(parentItem);
+//                }
+
+//                if (success)
+//                {
+//                    success = m_database.finishRevision();
+
+//                    // Add node to the model
+//                    if (parentItem == NULL)
+//                    {
+//                        int row = m_projectList.size();
+//                        beginInsertRows(parent, row, row);
+
+//                        m_projectList.append(insertedNode);
+//                        insertedNode = NULL;
+//                    }
+//                    else
+//                    {
+//                        int row = parentItem->getChildCount();
+//                        beginInsertRows(parent, row, row);
+
+//                        parentItem->addChild(insertedNode);
+//                        insertedNode = NULL;
+//                    }
+
+//                    endInsertRows();
+//                }
+//                else
+//                {
+//                    m_database.abortRevision();
+//                }
+//            }
+//        }
+//    }
+
+//    return success;
+//}
 
 QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) const
 {

@@ -46,10 +46,19 @@ Table:
 Constraints:
 	- User --> User.Id
 
+-------------------------------------------------
+| NodeName
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Text: text
 
-
-
-
+-------------------------------------------------
+| NodeDescription
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Text: text
 
 -------------------------------------------------
 | NodeAttributes
@@ -80,20 +89,6 @@ Constraints:
 
 
 
-
--------------------------------------------------
-| NodeName
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Text: text
-
--------------------------------------------------
-| NodeDescription
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Text: text
 
 -------------------------------------------------
 | NodeReferenceList

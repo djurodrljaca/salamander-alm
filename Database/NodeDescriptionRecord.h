@@ -1,7 +1,7 @@
 /**
- * @file   BooleanField.h
+ * @file   NodeDescriptionRecord.h
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-05-25
+ * @date   2014-06-05
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -20,33 +20,36 @@
  * License along with this library.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef DATABASE_BOOLEANFIELD_H
-#define DATABASE_BOOLEANFIELD_H
+#ifndef DATABASE_NODEDESCRIPTIONRECORD_H
+#define DATABASE_NODEDESCRIPTIONRECORD_H
 
-#include <QtCore/QDebug>
+#include "Database/IntegerField.h"
+#include "Database/TextField.h"
+#include <QtCore/QtDebug>
 
 namespace Database
 {
-class BooleanField
+class NodeDescriptionRecord
 {
 public:
-    BooleanField();
-    BooleanField(const bool value);
+    NodeDescriptionRecord();
+    NodeDescriptionRecord(const IntegerField &id,
+                          const TextField &text);
 
-    bool operator ==(const BooleanField& other) const;
-    bool operator !=(const BooleanField& other) const;
+    bool isValid() const;
 
-    bool isNull() const;
-    void setNull();
-    bool getValue() const;
-    void setValue(const bool value);
+    IntegerField getId() const;
+    void setId(const IntegerField &id);
+
+    TextField getText() const;
+    void setText(const TextField &text);
 
 private:
-    bool m_null;
-    bool m_value;
+    IntegerField m_id;
+    TextField m_text;
 };
 }
 
-QDebug operator<<(QDebug dbg, const Database::BooleanField &boolean);
+QDebug operator<<(QDebug dbg, const Database::NodeDescriptionRecord &nodeDescription);
 
-#endif // DATABASE_BOOLEANFIELD_H
+#endif // DATABASE_NODEDESCRIPTIONRECORD_H

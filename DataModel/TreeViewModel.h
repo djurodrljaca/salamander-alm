@@ -43,7 +43,8 @@ public:
 
     bool load();
 
-    bool addNode(const QModelIndex &parent, const Node &node);
+    bool addProject(const QString &name, const QString description);
+    //bool addNode(const QModelIndex &parent, const Node &node);
 
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;

@@ -26,6 +26,9 @@
 #include "Database/NodeRecord.h"
 #include "Database/UserRecord.h"
 #include "Database/RevisionRecord.h"
+#include "Database/NodeNameRecord.h"
+#include "Database/NodeDescriptionRecord.h"
+#include "Database/NodeAttributesRecord.h"
 #include <QtCore/QList>
 #include <QtCore/QStringList>
 #include <QtSql/QSqlDatabase>
@@ -61,6 +64,17 @@ public:
     RevisionRecord getRevision(const IntegerField &id, bool *ok = NULL) const;
     IntegerField getCurrentRevisionId(bool *ok = NULL) const;
 
+    bool addNodeName(const NodeNameRecord &nodeName, IntegerField *id = NULL) const;
+    NodeNameRecord getNodeName(const IntegerField &id, bool *ok = NULL) const;
+
+    bool addNodeDescription(const NodeDescriptionRecord &nodeDescription,
+                            IntegerField *id = NULL) const;
+    NodeDescriptionRecord getNodeDescription(const IntegerField &id, bool *ok = NULL) const;
+
+    bool addNodeAttributes(const NodeAttributesRecord &nodeAttributes,
+                           IntegerField *id = NULL) const;
+    NodeAttributesRecord getNodeAttributes(const IntegerField &id, bool *ok = NULL) const;
+
 private:
     bool integrityCheck() const;
     bool validatePersistentConfig() const;
@@ -74,6 +88,9 @@ private:
     bool createTables() const;
     QStringList getTableList() const;
     bool createTable(const QString &tableName) const;
+
+    QVariant convertBooleanToVariant(const BooleanField &boolean, bool *ok = NULL) const;
+    BooleanField convertVariantToBoolean(const QVariant &variant, bool *ok = NULL) const;
 
     QVariant convertDateTimeToVariant(const DateTimeField &dateTime, bool *ok = NULL) const;
     DateTimeField convertVariantToDateTime(const QVariant &variant, bool *ok = NULL) const;
@@ -89,6 +106,9 @@ private:
     NodeRecord getNodeFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
     UserRecord getUserFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
     RevisionRecord getRevisionFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
+    NodeNameRecord getNodeNameFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
+    NodeDescriptionRecord getNodeDescriptionFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
+    NodeAttributesRecord getNodeAttributesFromQuery(const QSqlQuery &query, bool *ok = NULL) const;
 
     QSqlDatabase m_database;
 };

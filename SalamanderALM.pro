@@ -22,7 +22,11 @@ SOURCES += \
     Database/TextField.cpp \
     Database/UserType.cpp \
     Database/UserRecord.cpp \
-    Database/RevisionRecord.cpp
+    Database/RevisionRecord.cpp \
+    NewProjectDialog.cpp \
+    Database/NodeNameRecord.cpp \
+    Database/NodeDescriptionRecord.cpp \
+    Database/NodeAttributesRecord.cpp
 
 SOURCES += \
     DataModel/Node.cpp \
@@ -43,7 +47,11 @@ HEADERS  += \
     Database/TextField.h \
     Database/UserType.h \
     Database/UserRecord.h \
-    Database/RevisionRecord.h
+    Database/RevisionRecord.h \
+    NewProjectDialog.h \
+    Database/NodeNameRecord.h \
+    Database/NodeDescriptionRecord.h \
+    Database/NodeAttributesRecord.h
 
 HEADERS  += \
     DataModel/Node.h \
@@ -53,7 +61,8 @@ HEADERS  += \
     MainWindow.h
 
 FORMS    += \
-    MainWindow.ui
+    MainWindow.ui \
+    NewProjectDialog.ui
 
 RESOURCES += \
     Resources/Database/Database.qrc

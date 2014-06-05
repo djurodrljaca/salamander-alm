@@ -24,6 +24,7 @@
 #include "ui_MainWindow.h"
 #include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
+#include "NewProjectDialog.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -61,16 +62,29 @@ void MainWindow::connectButtonPushed()
 
 void MainWindow::addProjectButtonPushed()
 {
-    QItemSelectionModel *selectionModel = ui->view_treeView->selectionModel();
+    NewProjectDialog dialog;
 
-    if (selectionModel != NULL)
+    int result = dialog.exec();
+
+    if (result == QDialog::Accepted)
     {
-        QModelIndex modelIndex = selectionModel->currentIndex();
+        const QString name = dialog.getProjectName();
+        const QString description = dialog.getProjectDescription();
 
-        DataModel::Node node;
-        node.setType(Database::NodeType_Project);
-
-        bool success = m_treeViewModel.addNode(modelIndex, node);
-        qDebug() << "MainWindow::addButtonPushed: success:" << success;
+        bool success = m_treeViewModel.addProject(name, description);
+        qDebug() << "MainWindow::addButtonPushed: project added:" << success;
     }
+
+//    QItemSelectionModel *selectionModel = ui->view_treeView->selectionModel();
+
+//    if (selectionModel != NULL)
+//    {
+//        QModelIndex modelIndex = selectionModel->currentIndex();
+
+//        DataModel::Node node;
+//        node.setType(Database::NodeType_Project);
+
+//        bool success = m_treeViewModel.addNode(modelIndex, node);
+//        qDebug() << "MainWindow::addButtonPushed: success:" << success;
+//    }
 }

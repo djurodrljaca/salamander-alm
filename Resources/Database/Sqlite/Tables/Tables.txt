@@ -1,3 +1,9 @@
 Node
 User
 Revision
+NodeName
+NodeDescription
+NodeAttributes
+NodeReferenceList
+NodeAttachmentList
+NodeCommentList
