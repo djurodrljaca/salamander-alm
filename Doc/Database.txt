@@ -32,7 +32,7 @@ Table:
 	- Id: integer, primary key, auto-increment
 	- Type: integer, enum UserType
 	- Full Name: text
-	- Username: text
+	- Username: text, unique
 	- Password: text
 
 -------------------------------------------------

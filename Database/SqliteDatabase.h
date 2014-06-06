@@ -58,6 +58,7 @@ public:
 
     bool addUser(const UserRecord &user, IntegerField *id = NULL) const;
     UserRecord getUser(const IntegerField &id, bool *ok = NULL) const;
+    UserRecord getUser(const QString &username, bool *ok = NULL) const;
     QList<UserRecord> getUsers(bool *ok = NULL) const;
 
     bool addRevision(const RevisionRecord &revision) const;

@@ -11,6 +11,11 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = SalamanderALM
 TEMPLATE = app
 
+# ---- Main ----
+SOURCES += \
+    main.cpp \
+
+# ---- Database ----
 SOURCES += \
     Database/BlobField.cpp \
     Database/BooleanField.cpp \
@@ -23,19 +28,9 @@ SOURCES += \
     Database/UserType.cpp \
     Database/UserRecord.cpp \
     Database/RevisionRecord.cpp \
-    NewProjectDialog.cpp \
     Database/NodeNameRecord.cpp \
     Database/NodeDescriptionRecord.cpp \
-    Database/NodeAttributesRecord.cpp \
-    DisplayNodeDialog.cpp
-
-SOURCES += \
-    DataModel/Node.cpp \
-    DataModel/TreeViewModel.cpp
-
-SOURCES += \
-    main.cpp\
-    MainWindow.cpp
+    Database/NodeAttributesRecord.cpp
 
 HEADERS  += \
     Database/BlobField.h \
@@ -49,23 +44,37 @@ HEADERS  += \
     Database/UserType.h \
     Database/UserRecord.h \
     Database/RevisionRecord.h \
-    NewProjectDialog.h \
     Database/NodeNameRecord.h \
     Database/NodeDescriptionRecord.h \
-    Database/NodeAttributesRecord.h \
-    DisplayNodeDialog.h
+    Database/NodeAttributesRecord.h
 
+# ---- Data Model ----
 HEADERS  += \
+    DataModel/DataModel.h \
     DataModel/Node.h \
     DataModel/TreeViewModel.h
 
+SOURCES += \
+    DataModel/DataModel.cpp \
+    DataModel/Node.cpp \
+    DataModel/TreeViewModel.cpp
+
+# ---- GUI ----
 HEADERS  += \
-    MainWindow.h
+    DisplayNodeDialog.h \
+    MainWindow.h \
+    NewProjectDialog.h
+
+SOURCES += \
+    DisplayNodeDialog.cpp \
+    MainWindow.cpp \
+    NewProjectDialog.cpp
 
 FORMS    += \
     MainWindow.ui \
     NewProjectDialog.ui \
     DisplayNodeDialog.ui
 
+# ---- Resources ----
 RESOURCES += \
     Resources/Database/Database.qrc

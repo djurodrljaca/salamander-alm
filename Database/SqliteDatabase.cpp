@@ -530,6 +530,52 @@ UserRecord SqliteDatabase::getUser(const IntegerField &id, bool *ok) const
     return user;
 }
 
+UserRecord SqliteDatabase::getUser(const QString &username, bool *ok) const
+{
+    UserRecord user;
+    bool success = false;
+
+    if (!username.isEmpty())
+    {
+        // Get User from database
+        static const QString selectCommand("SELECT * FROM `User` WHERE `Username`=:Username;");
+
+        QSqlQuery query;
+        success = query.prepare(selectCommand);
+
+        if (success)
+        {
+            // Prepare value and execute query
+            const QVariant usernameValue = convertTextToVariant(TextField(username), &success);
+
+            if (success)
+            {
+                query.bindValue(":Username", usernameValue);
+
+                success = query.exec();
+            }
+
+            // Get User from executed query
+            if (success)
+            {
+                success = query.first();
+
+                if (success)
+                {
+                    user = getUserFromQuery(query, &success);
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return user;
+}
+
 QList<UserRecord> SqliteDatabase::getUsers(bool *ok) const
 {
     QList<UserRecord> userList;
