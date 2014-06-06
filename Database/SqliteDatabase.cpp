@@ -323,7 +323,7 @@ NodeRecord SqliteDatabase::getNode(const IntegerField &id, bool *ok) const
     if (!id.isNull())
     {
         // Get Node from database
-        static const QString selectCommand("SELECT * FROM `Node` WHERE `Id`=:Id");
+        static const QString selectCommand("SELECT * FROM `Node` WHERE `Id`=:Id;");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -367,8 +367,8 @@ QList<NodeRecord> SqliteDatabase::getNodes(const IntegerField &parent, bool *ok)
     bool success = false;
 
     // Get Node list from database
-    static const QString selectCommandNull("SELECT * FROM `Node` WHERE `Parent` IS NULL");
-    static const QString selectCommandValue("SELECT * FROM `Node` WHERE `Parent`=:Parent");
+    static const QString selectCommandNull("SELECT * FROM `Node` WHERE `Parent` IS NULL;");
+    static const QString selectCommandValue("SELECT * FROM `Node` WHERE `Parent`=:Parent;");
 
     QSqlQuery query;
 
@@ -492,7 +492,7 @@ UserRecord SqliteDatabase::getUser(const IntegerField &id, bool *ok) const
     if (!id.isNull())
     {
         // Get User from database
-        static const QString selectCommand("SELECT * FROM `User` WHERE `Id`=:Id");
+        static const QString selectCommand("SELECT * FROM `User` WHERE `Id`=:Id;");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -536,7 +536,7 @@ QList<UserRecord> SqliteDatabase::getUsers(bool *ok) const
     bool success = false;
 
     // Get Node list from database
-    static const QString selectCommand("SELECT * FROM `User`");
+    static const QString selectCommand("SELECT * FROM `User`;");
 
     QSqlQuery query;
     success = query.prepare(selectCommand);
@@ -584,16 +584,9 @@ bool SqliteDatabase::addRevision(const RevisionRecord &revision) const
         if (success)
         {
             // Prepare values
-            QVariant idValue;
+            QVariant idValue = convertIntegerToVariant(revision.getId(), &success);
             QVariant timestampValue;
             QVariant userValue;
-
-            success = !revision.getId().isNull();
-
-            if (success)
-            {
-                idValue = convertIntegerToVariant(revision.getId(), &success);
-            }
 
             if (success)
             {
@@ -628,7 +621,7 @@ RevisionRecord SqliteDatabase::getRevision(const IntegerField &id, bool *ok) con
     if (!id.isNull())
     {
         // Get Revision from database
-        static const QString selectCommand("SELECT * FROM `Revision` WHERE `Id`=:Id");
+        static const QString selectCommand("SELECT * FROM `Revision` WHERE `Id`=:Id;");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -672,7 +665,7 @@ IntegerField SqliteDatabase::getCurrentRevisionId(bool *ok) const
     bool success = false;
 
     // Get Revision from database
-    static const QString selectCommand("SELECT MAX(`Id`) FROM `Revision`");
+    static const QString selectCommand("SELECT MAX(`Id`) FROM `Revision`;");
 
     QSqlQuery query;
     success = query.prepare(selectCommand);
@@ -746,7 +739,7 @@ NodeNameRecord SqliteDatabase::getNodeName(const IntegerField &id, bool *ok) con
     if (!id.isNull())
     {
         // Get NodeName from database
-        static const QString selectCommand("SELECT * FROM `NodeName` WHERE `Id`=:Id");
+        static const QString selectCommand("SELECT * FROM `NodeName` WHERE `Id`=:Id;");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -829,7 +822,7 @@ NodeDescriptionRecord SqliteDatabase::getNodeDescription(const IntegerField &id,
     if (!id.isNull())
     {
         // Get NodeDescription from database
-        static const QString selectCommand("SELECT * FROM `NodeDescription` WHERE `Id`=:Id");
+        static const QString selectCommand("SELECT * FROM `NodeDescription` WHERE `Id`=:Id;");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -969,7 +962,7 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributes(const IntegerField &id, b
     if (!id.isNull())
     {
         // Get NodeAttributes from database
-        static const QString selectCommand("SELECT * FROM `NodeAttributes` WHERE `Id`=:Id");
+        static const QString selectCommand("SELECT * FROM `NodeAttributes` WHERE `Id`=:Id;");
 
         QSqlQuery query;
         success = query.prepare(selectCommand);
@@ -1005,6 +998,66 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributes(const IntegerField &id, b
     }
 
     return nodeAttributes;
+}
+
+IntegerField SqliteDatabase::getNodeAttributesId(const IntegerField &nodeId,
+                                                 const IntegerField &revisionId,
+                                                 bool *ok) const
+{
+    IntegerField nodeAttributesId;
+    bool success = false;
+
+    if (!nodeId.isNull() &&
+        !revisionId.isNull())
+    {
+        // Get NodeAttributes's ID from database
+        static const QString selectCommand(
+                    "SELECT `Id`, MAX(`Revision`)"
+                    " FROM `NodeAttributes`"
+                    " WHERE (`Node`=:Node) AND (`Revision`<=:Revision);"
+                    );
+
+        QSqlQuery query;
+        success = query.prepare(selectCommand);
+
+        if (success)
+        {
+            // Prepare value and execute query
+            QVariant nodeIdValue = convertIntegerToVariant(nodeId, &success);
+            QVariant revisionIdValue = convertIntegerToVariant(revisionId, &success);
+
+            if (success)
+            {
+                query.bindValue(":Node", nodeIdValue);
+                query.bindValue(":Revision", revisionIdValue);
+
+                success = query.exec();
+            }
+
+            // Get NodeAttributes from executed query
+            if (success)
+            {
+                success = query.first();
+
+                if (success)
+                {
+                    nodeAttributesId = convertVariantToInteger(query.value(0), &success);
+
+                    if (success && nodeAttributesId.isNull())
+                    {
+                        success = false;
+                    }
+                }
+            }
+        }
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return nodeAttributesId;
 }
 
 bool SqliteDatabase::integrityCheck() const
@@ -1988,14 +2041,7 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributesFromQuery(const QSqlQuery 
 
         if (success)
         {
-            if (descriptionValue.isNull())
-            {
-                success = false;
-            }
-            else
-            {
-                nodeAttributes.setDescription(descriptionValue);
-            }
+            nodeAttributes.setDescription(descriptionValue);
         }
     }
 
@@ -2007,14 +2053,7 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributesFromQuery(const QSqlQuery 
 
         if (success)
         {
-            if (referencesValue.isNull())
-            {
-                success = false;
-            }
-            else
-            {
-                nodeAttributes.setReferences(referencesValue);
-            }
+            nodeAttributes.setReferences(referencesValue);
         }
     }
 
@@ -2026,14 +2065,7 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributesFromQuery(const QSqlQuery 
 
         if (success)
         {
-            if (attachmentsValue.isNull())
-            {
-                success = false;
-            }
-            else
-            {
-                nodeAttributes.setAttachments(attachmentsValue);
-            }
+            nodeAttributes.setAttachments(attachmentsValue);
         }
     }
 
@@ -2045,14 +2077,7 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributesFromQuery(const QSqlQuery 
 
         if (success)
         {
-            if (commentsValue.isNull())
-            {
-                success = false;
-            }
-            else
-            {
-                nodeAttributes.setComments(commentsValue);
-            }
+            nodeAttributes.setComments(commentsValue);
         }
     }
 

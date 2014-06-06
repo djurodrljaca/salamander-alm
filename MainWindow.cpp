@@ -25,6 +25,7 @@
 #include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
 #include "NewProjectDialog.h"
+#include "DisplayNodeDialog.h"
 #include <QtCore/QtDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -37,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->view_treeView->setModel(&m_treeViewModel);
     ui->view_treeView->header()->hide();
 
+    connect(ui->view_treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(displayNode(QModelIndex)));
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui->connect_pushButton, SIGNAL(clicked()), this, SLOT(connectButtonPushed()));
     connect(ui->addProject_pushButton, SIGNAL(clicked()), this, SLOT(addProjectButtonPushed()));
@@ -46,6 +48,23 @@ MainWindow::~MainWindow()
 {
     m_treeViewModel.stop();
     delete ui;
+}
+
+void MainWindow::displayNode(QModelIndex modelIndex)
+{
+    const DataModel::Node *node = m_treeViewModel.getNode(modelIndex);
+
+    if (node != NULL)
+    {
+        DisplayNodeDialog dialog;
+        dialog.setProjectName(node->getName());
+
+        // TODO: det description from database
+        //node->getDescriptionId()
+        //dialog.setProjectDescription();
+
+        dialog.exec();
+    }
 }
 
 void MainWindow::connectButtonPushed()

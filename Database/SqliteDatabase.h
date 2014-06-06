@@ -74,6 +74,9 @@ public:
     bool addNodeAttributes(const NodeAttributesRecord &nodeAttributes,
                            IntegerField *id = NULL) const;
     NodeAttributesRecord getNodeAttributes(const IntegerField &id, bool *ok = NULL) const;
+    IntegerField getNodeAttributesId(const IntegerField &nodeId,
+                                     const IntegerField &revisionId,
+                                     bool *ok = NULL) const;
 
 private:
     bool integrityCheck() const;

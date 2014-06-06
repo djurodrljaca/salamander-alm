@@ -26,7 +26,8 @@ SOURCES += \
     NewProjectDialog.cpp \
     Database/NodeNameRecord.cpp \
     Database/NodeDescriptionRecord.cpp \
-    Database/NodeAttributesRecord.cpp
+    Database/NodeAttributesRecord.cpp \
+    DisplayNodeDialog.cpp
 
 SOURCES += \
     DataModel/Node.cpp \
@@ -51,7 +52,8 @@ HEADERS  += \
     NewProjectDialog.h \
     Database/NodeNameRecord.h \
     Database/NodeDescriptionRecord.h \
-    Database/NodeAttributesRecord.h
+    Database/NodeAttributesRecord.h \
+    DisplayNodeDialog.h
 
 HEADERS  += \
     DataModel/Node.h \
@@ -62,7 +64,8 @@ HEADERS  += \
 
 FORMS    += \
     MainWindow.ui \
-    NewProjectDialog.ui
+    NewProjectDialog.ui \
+    DisplayNodeDialog.ui
 
 RESOURCES += \
     Resources/Database/Database.qrc

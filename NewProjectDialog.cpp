@@ -1,11 +1,11 @@
 #include "NewProjectDialog.h"
 #include "ui_NewProjectDialog.h"
 
-NewProjectDialog::NewProjectDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::NewProjectDialog),
-    m_projectName(),
-    m_projectDescription()
+NewProjectDialog::NewProjectDialog(QWidget *parent)
+    : QDialog(parent),
+      ui(new Ui::NewProjectDialog),
+      m_projectName(),
+      m_projectDescription()
 {
     ui->setupUi(this);
 }

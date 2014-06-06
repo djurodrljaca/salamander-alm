@@ -39,6 +39,7 @@ public:
     ~MainWindow();
 
 private slots:
+    void displayNode(QModelIndex modelIndex);
     void connectButtonPushed();
     void addProjectButtonPushed();
 

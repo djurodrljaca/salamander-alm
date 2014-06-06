@@ -85,6 +85,12 @@ bool DataModel::TreeViewModel::load()
 
         // Load all "Project" nodes
         const QList<NodeRecord> nodeRecordList = m_database.getNodes(IntegerField(), &success);
+        IntegerField currentRevisionId;
+
+        if (success)
+        {
+            currentRevisionId = m_database.getCurrentRevisionId(&success);
+        }
 
         if (success)
         {
@@ -100,11 +106,25 @@ bool DataModel::TreeViewModel::load()
                 if (success)
                 {
                     Node *projectNode = new Node();
-                    success = loadNodeFromDatabase(nodeRecordItem, NULL, projectNode);
+                    bool isActive = false;
+
+                    success = loadNodeFromDatabase(nodeRecordItem,
+                                                   currentRevisionId,
+                                                   NULL,
+                                                   projectNode,
+                                                   &isActive);
 
                     if (success)
                     {
-                        m_projectList.append(projectNode);
+                        if (isActive)
+                        {
+                            m_projectList.append(projectNode);
+                        }
+                        else
+                        {
+                            delete projectNode;
+                        }
+
                         projectNode = NULL;
                     }
                     else
@@ -279,6 +299,11 @@ bool DataModel::TreeViewModel::addProject(const QString &name, const QString des
 //    return success;
 //}
 
+DataModel::Node *DataModel::TreeViewModel::getNode(const QModelIndex &index) const
+{
+    return static_cast<Node *>(index.internalPointer());
+}
+
 QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) const
 {
     QVariant dataValue;
@@ -436,11 +461,6 @@ int DataModel::TreeViewModel::getProjectIndex(DataModel::Node *projectNode) cons
     return index;
 }
 
-DataModel::Node *DataModel::TreeViewModel::getNode(const QModelIndex &index) const
-{
-    return static_cast<Node *>(index.internalPointer());
-}
-
 int DataModel::TreeViewModel::getNodeRow(DataModel::Node *node) const
 {
     // TODO: is this still needed? fix it?
@@ -464,12 +484,15 @@ int DataModel::TreeViewModel::getNodeRow(DataModel::Node *node) const
 }
 
 bool DataModel::TreeViewModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
+                                                    const IntegerField &revisionId,
                                                     DataModel::Node *parent,
-                                                    DataModel::Node *node) const
+                                                    DataModel::Node *node,
+                                                    bool *isActive) const
 {
     // Check if input parameters are valid
     bool success = (nodeRecord.isValid() &&
-                    (node != NULL));
+                    (node != NULL) &&
+                    (isActive != NULL));
 
     if (success)
     {
@@ -481,33 +504,91 @@ bool DataModel::TreeViewModel::loadNodeFromDatabase(const NodeRecord &nodeRecord
 
     if (success)
     {
-        // Set node parameters
-        node->setId(nodeRecord.getId());
-        node->setParent(parent);
-        node->setType(nodeRecord.getType());
-
-        // TODO: get note attributes!
-
-        // Load child nodes and add them to the node
-        const QList<NodeRecord> nodeRecordList = m_database.getNodes(nodeRecord.getId(), &success);
+        // Get note attributes
+        const IntegerField nodeAttributesId = m_database.getNodeAttributesId(nodeRecord.getId(),
+                                                                             revisionId,
+                                                                             &success);
 
         if (success)
         {
-            foreach (const Database::NodeRecord nodeRecordItem, nodeRecordList)
+            const NodeAttributesRecord nodeAttributesRecord =
+                    m_database.getNodeAttributes(nodeAttributesId, &success);
+
+            if (success)
             {
-                // Load child node and add it to the node
-                Node *childNode = new Node();
-                success = loadNodeFromDatabase(nodeRecordItem, node, childNode);
+                success = nodeAttributesRecord.isValid();
+            }
 
-                if (success)
+            if (success)
+            {
+                *isActive = nodeAttributesRecord.getIsActive().getValue();
+
+                if (*isActive)
                 {
-                    success = node->addChild(childNode);
-                    childNode = NULL;
+                    // Get node name
+                    const NodeNameRecord nodeNameRecord =
+                            m_database.getNodeName(nodeAttributesRecord.getName(), &success);
+
+                    if (success)
+                    {
+                        success = nodeNameRecord.isValid();
+                    }
+
+                    // Set node parameters
+                    if (success)
+                    {
+                        node->setId(nodeRecord.getId());
+                        node->setParent(parent);
+                        node->setType(nodeRecord.getType());
+
+                        node->setRevisionId(nodeAttributesRecord.getRevision());
+                        node->setName(nodeNameRecord.getText().getValue());
+                        node->setDescriptionId(nodeAttributesRecord.getDescription());
+                        node->setReferencesId(nodeAttributesRecord.getReferences());
+                        node->setAttachmentsId(nodeAttributesRecord.getAttachments());
+                        node->setCommentsId(nodeAttributesRecord.getComments());
+                    }
                 }
+            }
+        }
 
-                if (!success)
+        // Load child nodes and add them to the node
+        if (success && *isActive)
+        {
+            const QList<NodeRecord> nodeRecordList = m_database.getNodes(nodeRecord.getId(), &success);
+
+            if (success)
+            {
+                foreach (const Database::NodeRecord nodeRecordItem, nodeRecordList)
                 {
-                    break;
+                    // Load child node and add it to the node
+                    Node *childNode = new Node();
+                    bool isChildActive = false;
+
+                    success = loadNodeFromDatabase(nodeRecordItem,
+                                                   revisionId,
+                                                   node,
+                                                   childNode,
+                                                   &isChildActive);
+
+                    if (success)
+                    {
+                        if (isChildActive)
+                        {
+                            success = node->addChild(childNode);
+                        }
+                        else
+                        {
+                            delete childNode;
+                        }
+
+                        childNode = NULL;
+                    }
+
+                    if (!success)
+                    {
+                        break;
+                    }
                 }
             }
         }
