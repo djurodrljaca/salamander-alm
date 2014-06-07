@@ -48,6 +48,7 @@ public:
     DataModelItem * getRootItem(const int index) const;
     int getRootItemIndex(DataModelItem *item) const;
 
+    DataModelItem * getItem(const Database::IntegerField &id) const;
     bool addItem(const Database::IntegerField &parentId,
                  const Database::NodeType nodeType,
                  const QString &name,
@@ -55,8 +56,10 @@ public:
 
     Database::IntegerField getItemId(DataModelItem *item) const;
     Node getNode(const Database::IntegerField &id) const;
+    bool updateNode(const Node &node);
 
 private:
+    bool loadRootDataModelItemsFromDatabase(const Database::IntegerField &revisionId);
     bool loadDataModelItemFromDatabase(const Database::NodeRecord &nodeRecord,
                                        const Database::IntegerField &revisionId,
                                        DataModelItem *parent,

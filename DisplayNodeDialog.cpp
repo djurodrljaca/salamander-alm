@@ -32,3 +32,8 @@ void DisplayNodeDialog::setProjectDescription(const QString &projectDescription)
 {
     ui->description_plainTextEdit->setPlainText(projectDescription);
 }
+
+bool DisplayNodeDialog::getRemoveNode() const
+{
+    return ui->remove_checkBox->isChecked();
+}

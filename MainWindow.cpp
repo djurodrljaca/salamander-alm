@@ -38,7 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->view_treeView->setModel(&m_treeViewModel);
     ui->view_treeView->header()->hide();
 
-    connect(ui->view_treeView, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(displayNode(QModelIndex)));
+    connect(ui->view_treeView, SIGNAL(doubleClicked(QModelIndex)),
+            this, SLOT(editNode(QModelIndex)));
     connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui->connect_pushButton, SIGNAL(clicked()), this, SLOT(connectButtonPushed()));
     connect(ui->addProject_pushButton, SIGNAL(clicked()), this, SLOT(addProjectButtonPushed()));
@@ -50,9 +51,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::displayNode(QModelIndex modelIndex)
+void MainWindow::editNode(QModelIndex modelIndex)
 {
-    const DataModel::Node node = m_treeViewModel.getNode(modelIndex);
+    DataModel::Node node = m_treeViewModel.getNode(modelIndex);
 
     if (node.isValid())
     {
@@ -60,7 +61,36 @@ void MainWindow::displayNode(QModelIndex modelIndex)
         dialog.setProjectName(node.getName());
         dialog.setProjectDescription(node.getDescription());
 
-        dialog.exec();
+        int result = dialog.exec();
+
+        if (result == QDialog::Accepted)
+        {
+            // Check if any of the node properties changed
+            const QString name = dialog.getProjectName();
+
+            if (name != node.getName())
+            {
+                node.setName(name);
+            }
+
+            const QString description = dialog.getProjectDescription();
+
+            if (description != node.getDescription())
+            {
+                node.setDescription(description);
+            }
+
+            if (dialog.getRemoveNode())
+            {
+                node.setActive(false);
+            }
+
+            // Updated changed properties
+            if (node.hasChanged())
+            {
+                m_treeViewModel.updateNode(node);
+            }
+        }
     }
 }
 

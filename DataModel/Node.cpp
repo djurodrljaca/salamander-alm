@@ -29,8 +29,40 @@ Node::Node()
     : m_id(),
       m_type(NodeType_Invalid),
       m_name(),
-      m_description()
+      m_nameChanged(false),
+      m_description(),
+      m_descriptionChanged(false),
+      m_active(false),
+      m_activeChanged(false)
 {
+}
+
+Node::Node(const IntegerField &id,
+           const NodeType type,
+           const QString &name,
+           const QString &description,
+           const bool active)
+    : m_id(id),
+      m_type(type),
+      m_name(name),
+      m_nameChanged(false),
+      m_description(description),
+      m_descriptionChanged(false),
+      m_active(active),
+      m_activeChanged(false)
+{
+}
+
+void Node::clear()
+{
+    m_id = IntegerField();
+    m_type = NodeType_Invalid;
+    m_name = QString();
+    m_nameChanged = false;
+    m_description = QString();
+    m_descriptionChanged = false;
+    m_active = false;
+    m_activeChanged = false;
 }
 
 bool Node::isValid() const
@@ -40,24 +72,28 @@ bool Node::isValid() const
             !m_name.isEmpty());
 }
 
+bool Node::hasChanged() const
+{
+    return (m_nameChanged ||
+            m_descriptionChanged ||
+            m_activeChanged);
+}
+
+void Node::acceptChanges()
+{
+    m_nameChanged = false;
+    m_descriptionChanged = false;
+    m_activeChanged = false;
+}
+
 IntegerField Node::getId() const
 {
     return m_id;
 }
 
-void Node::setId(const IntegerField &id)
-{
-    m_id = id;
-}
-
 NodeType Node::getType() const
 {
     return m_type;
-}
-
-void Node::setType(const NodeType type)
-{
-    m_type = type;
 }
 
 QString Node::getName() const
@@ -67,7 +103,16 @@ QString Node::getName() const
 
 void Node::setName(const QString &name)
 {
-    m_name = name;
+    if (m_name != name)
+    {
+        m_name = name;
+        m_nameChanged = true;
+    }
+}
+
+bool Node::nameChanged() const
+{
+    return m_nameChanged;
 }
 
 QString Node::getDescription() const
@@ -77,5 +122,33 @@ QString Node::getDescription() const
 
 void Node::setDescription(const QString &description)
 {
-    m_description = description;
+    if (m_description != description)
+    {
+        m_description = description;
+        m_descriptionChanged = true;
+    }
+}
+
+bool Node::descriptionChanged() const
+{
+    return m_descriptionChanged;
+}
+
+bool Node::getActive() const
+{
+    return m_active;
+}
+
+void Node::setActive(const bool active)
+{
+    if (m_active != active)
+    {
+        m_active = active;
+        m_activeChanged = true;
+    }
+}
+
+bool Node::activeChanged() const
+{
+    return m_activeChanged;
 }

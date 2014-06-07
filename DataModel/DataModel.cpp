@@ -91,104 +91,54 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
 
         if (success)
         {
-            if (currentRevisionId.isNull())
-            {
-                success = false;
-            }
-        }
-
-        // Get revision ID
-        IntegerField revisionId;
-
-        if (success)
-        {
-            if (requestedRevisionId.isNull())
-            {
-                // Selected the current revision of the database
-                revisionId = currentRevisionId;
-            }
-            else if (requestedRevisionId.getValue() <= currentRevisionId.getValue())
-            {
-                // Selected the requested revision
-                revisionId = requestedRevisionId;
-            }
-            else
-            {
-                // Invalid revision was requested
-                success = false;
-            }
-        }
-
-        // Clear old data model
-        if (success)
-        {
-            qDeleteAll(m_itemList);
-            m_itemList.clear();
-            m_itemMap.clear();
-        }
-
-        // Load all root nodes that belong to the selected revision
-        if (success)
-        {
-            const QList<NodeRecord> rootNodeRecordList = m_database.getNodes(IntegerField(),
-                                                                             &success);
+            // Get revision ID
+            IntegerField revisionId;
 
             if (success)
             {
-                // Load each root node from the list
-                foreach (const NodeRecord rootNodeRecordItem, rootNodeRecordList)
+                if (currentRevisionId.isNull())
                 {
-                    // Load root node from the database
-                    DataModelItem *rootNode = new DataModelItem();
-                    success = loadDataModelItemFromDatabase(rootNodeRecordItem,
-                                                            revisionId,
-                                                            NULL,
-                                                            rootNode);
-
-                    if (success)
-                    {
-                        // Add only valid root nodes to the list
-                        if (rootNode->isValid())
-                        {
-                            // Root node is active, try to add it to the list
-                            const qlonglong id = rootNode->getId().getValue();
-
-                            if (m_itemMap.contains(id))
-                            {
-                                // Error, a node with the same ID is already in the model
-                                success = false;
-                            }
-                            else
-                            {
-                                // Add root node to the list
-                                m_itemList.append(rootNode);
-                                m_itemMap.insert(id, rootNode);
-                                rootNode = NULL;
-                            }
-                        }
-                        else
-                        {
-                            // Root node is inactive, skip it
-                            delete rootNode;
-                            rootNode = NULL;
-                        }
-                    }
-
-                    if (!success)
-                    {
-                        // Error
-                        delete rootNode;
-                        rootNode = NULL;
-                        break;
-                    }
+                    // Empty database, just continue
+                }
+                else if (requestedRevisionId.isNull())
+                {
+                    // Selected the current revision of the database
+                    revisionId = currentRevisionId;
+                }
+                else if (requestedRevisionId.getValue() <= currentRevisionId.getValue())
+                {
+                    // Selected the requested revision
+                    revisionId = requestedRevisionId;
+                }
+                else
+                {
+                    // Invalid revision was requested
+                    success = false;
                 }
             }
-        }
 
-        // Set the data model revision
-        if (success)
-        {
-            m_revisionId = revisionId;
+            // Clear old data model
+            if (success)
+            {
+                qDeleteAll(m_itemList);
+                m_itemList.clear();
+                m_itemMap.clear();
+            }
+
+            // Load all root nodes that belong to the selected revision
+            if (success)
+            {
+                if (!revisionId.isNull())
+                {
+                    success = loadRootDataModelItemsFromDatabase(revisionId);
+                }
+            }
+
+            // Set the data model revision
+            if (success)
+            {
+                m_revisionId = revisionId;
+            }
         }
     }
 
@@ -258,6 +208,18 @@ int DataModel::DataModel::getRootItemIndex(DataModelItem *item) const
     }
 
     return index;
+}
+
+DataModelItem * DataModel::DataModel::getItem(const IntegerField &id) const
+{
+    DataModelItem *item = NULL;
+
+    if (!id.isNull())
+    {
+        item = m_itemMap.value(id.getValue(), NULL);
+    }
+
+    return item;
 }
 
 bool DataModel::DataModel::addItem(const IntegerField &parentId,
@@ -464,11 +426,7 @@ Node DataModel::DataModel::getNode(const IntegerField &id) const
                 QString description;
                 IntegerField descriptionId = item->getDescriptionId();
 
-                if (descriptionId.isNull())
-                {
-                    node.setDescription(QString());
-                }
-                else
+                if (!descriptionId.isNull())
                 {
                     const NodeDescriptionRecord nodeDescriptionRecord =
                             m_database.getNodeDescription(descriptionId, &success);
@@ -482,16 +440,232 @@ Node DataModel::DataModel::getNode(const IntegerField &id) const
                 // Set the node's basic parameters
                 if (success)
                 {
-                    node.setId(item->getId());
-                    node.setType(item->getType());
-                    node.setName(item->getName());
-                    node.setDescription(description);
+                    node = Node(item->getId(),
+                                item->getType(),
+                                item->getName(),
+                                description);
                 }
             }
         }
     }
 
     return node;
+}
+
+bool DataModel::DataModel::updateNode(const Node &node)
+{
+    bool success = node.isValid();
+
+    if (success && node.hasChanged())
+    {
+        IntegerField revisionId = m_database.startRevision(&success);
+
+        // Get original node attribute record
+        NodeAttributesRecord originalNodeAttributesRecord;
+
+        if (success)
+        {
+            const IntegerField originalNodeAttributesRecordId =
+                    m_database.getNodeAttributesId(node.getId(), m_revisionId, &success);
+
+            if (success)
+            {
+                originalNodeAttributesRecord =
+                        m_database.getNodeAttributes(originalNodeAttributesRecordId, &success);
+            }
+        }
+
+        // Create new node attribute record with updated content
+        NodeAttributesRecord newNodeAttributesRecord;
+
+        if (success)
+        {
+            newNodeAttributesRecord.setNode(node.getId());
+            newNodeAttributesRecord.setRevision(revisionId);
+
+            // Name
+            if (node.nameChanged())
+            {
+                // Name changed, create new node name record
+                NodeNameRecord nodeNameRecord(IntegerField(),
+                                              node.getName());
+
+                IntegerField id;
+                success = m_database.addNodeName(nodeNameRecord, &id);
+
+                if (success)
+                {
+                    newNodeAttributesRecord.setName(id);
+                }
+            }
+            else
+            {
+                newNodeAttributesRecord.setName(originalNodeAttributesRecord.getName());
+            }
+
+            // Description
+            if (success)
+            {
+                if (node.descriptionChanged())
+                {
+                    // Description changed, create new node description record
+                    if (node.getDescription().isEmpty())
+                    {
+                        newNodeAttributesRecord.setDescription(IntegerField());
+                    }
+                    else
+                    {
+                        NodeDescriptionRecord nodeDescriptionRecord(IntegerField(),
+                                                                    node.getDescription());
+                        IntegerField id;
+                        success = m_database.addNodeDescription(nodeDescriptionRecord, &id);
+
+                        if (success)
+                        {
+                            newNodeAttributesRecord.setDescription(id);
+                        }
+                    }
+                }
+                else
+                {
+                    newNodeAttributesRecord.setDescription(
+                                originalNodeAttributesRecord.getDescription());
+                }
+            }
+
+            // Active
+            if (success)
+            {
+                if (node.activeChanged())
+                {
+                    // Active changed, set new value
+                    newNodeAttributesRecord.setActive(BooleanField(node.getActive()));
+                }
+                else
+                {
+                    newNodeAttributesRecord.setActive(originalNodeAttributesRecord.getActive());
+                }
+            }
+
+            // Add new node attributes record
+            if (success)
+            {
+                success = m_database.addNodeAttributes(newNodeAttributesRecord);
+            }
+        }
+
+        // Finish revision
+        if (success)
+        {
+            success = m_database.finishRevision();
+        }
+        else
+        {
+            m_database.abortRevision();
+        }
+
+        // Update the node in the data model
+        if (success)
+        {
+            const qlonglong id = node.getId().getValue();
+            DataModelItem *item = m_itemMap.value(id, NULL);
+
+            if (item != NULL)
+            {
+                if (node.getActive())
+                {
+                    if (node.nameChanged())
+                    {
+                        item->setName(node.getName());
+                    }
+
+                    if (node.descriptionChanged())
+                    {
+                        item->setDescriptionId(newNodeAttributesRecord.getDescription());
+                    }
+                }
+                else
+                {
+                    // Remove item
+                    DataModelItem *parentItem = item->getParent();
+
+                    if (parentItem == NULL)
+                    {
+                        m_itemList.removeOne(item);
+                    }
+                    else
+                    {
+                        parentItem->removeChild(item);
+                    }
+
+                    m_itemMap.remove(id);
+                }
+            }
+        }
+    }
+
+    return success;
+}
+
+bool DataModel::DataModel::loadRootDataModelItemsFromDatabase(const IntegerField &revisionId)
+{
+    bool success = false;
+    const QList<NodeRecord> rootNodeRecordList = m_database.getNodes(IntegerField(),
+                                                                     &success);
+
+    if (success)
+    {
+        // Load each root node from the list
+        foreach (const NodeRecord rootNodeRecordItem, rootNodeRecordList)
+        {
+            // Load root node from the database
+            DataModelItem *rootNode = new DataModelItem();
+            success = loadDataModelItemFromDatabase(rootNodeRecordItem,
+                                                    revisionId,
+                                                    NULL,
+                                                    rootNode);
+
+            if (success)
+            {
+                // Add only valid and active root nodes to the list
+                if (rootNode->isValid() &&
+                    rootNode->getActive())
+                {
+                    // Root node is active, try to add it to the list
+                    const qlonglong id = rootNode->getId().getValue();
+
+                    if (m_itemMap.contains(id))
+                    {
+                        // Error, a node with the same ID is already in the model
+                        success = false;
+                    }
+                    else
+                    {
+                        // Add root node to the list
+                        m_itemList.append(rootNode);
+                        m_itemMap.insert(id, rootNode);
+                        rootNode = NULL;
+                    }
+                }
+                else
+                {
+                    // Root node is inactive, skip it
+                    delete rootNode;
+                    rootNode = NULL;
+                }
+            }
+
+            if (!success)
+            {
+                // Error
+                delete rootNode;
+                rootNode = NULL;
+                break;
+            }
+        }
+    }
+
+    return success;
 }
 
 bool DataModel::DataModel::loadDataModelItemFromDatabase(const NodeRecord &nodeRecord,
@@ -549,41 +723,32 @@ bool DataModel::DataModel::loadDataModelItemFromDatabase(const NodeRecord &nodeR
 
             if (success)
             {
-                const bool isActive = nodeAttributesRecord.getIsActive().getValue();
+                // Get node name
+                const NodeNameRecord nodeNameRecord =
+                        m_database.getNodeName(nodeAttributesRecord.getName(), &success);
 
-                if (isActive)
+                if (success)
                 {
-                    // Get node name
-                    const NodeNameRecord nodeNameRecord =
-                            m_database.getNodeName(nodeAttributesRecord.getName(), &success);
-
-                    if (success)
-                    {
-                        success = nodeNameRecord.isValid();
-                    }
-
-                    // Set output node's parameters
-                    if (success)
-                    {
-                        node->setId(nodeRecord.getId());
-                        node->setParent(parent);
-                        node->setType(nodeRecord.getType());
-
-                        node->setRevisionId(nodeAttributesRecord.getRevision());
-                        node->setName(nodeNameRecord.getText().getValue());
-                        node->setDescriptionId(nodeAttributesRecord.getDescription());
-                        node->setReferencesId(nodeAttributesRecord.getReferences());
-                        node->setAttachmentsId(nodeAttributesRecord.getAttachments());
-                        node->setCommentsId(nodeAttributesRecord.getComments());
-
-                        // Load child nodes
-                        success = loadDataModelItemChildrenFromDatabase(revisionId, node);
-                    }
+                    success = nodeNameRecord.isValid();
                 }
-                else
+
+                // Set output node's parameters
+                if (success)
                 {
-                    // Node is inactive, make sure the output node is invalidated
-                    node->setId(IntegerField());
+                    node->setId(nodeRecord.getId());
+                    node->setParent(parent);
+                    node->setType(nodeRecord.getType());
+
+                    node->setRevisionId(nodeAttributesRecord.getRevision());
+                    node->setName(nodeNameRecord.getText().getValue());
+                    node->setDescriptionId(nodeAttributesRecord.getDescription());
+                    node->setReferencesId(nodeAttributesRecord.getReferences());
+                    node->setAttachmentsId(nodeAttributesRecord.getAttachments());
+                    node->setCommentsId(nodeAttributesRecord.getComments());
+                    node->setActive(nodeAttributesRecord.getActive().getValue());
+
+                    // Load child nodes
+                    success = loadDataModelItemChildrenFromDatabase(revisionId, node);
                 }
             }
         }
@@ -610,8 +775,9 @@ bool DataModel::DataModel::loadDataModelItemChildrenFromDatabase(const IntegerFi
 
             if (success)
             {
-                // Add only valid child nodes to the parent
-                if (child->isValid())
+                // Add only valid and active child nodes to the parent
+                if (child->isValid() &&
+                    child->getActive())
                 {
                     // Child node is active, try to add it to the parent
                     const qlonglong id = child->getId().getValue();

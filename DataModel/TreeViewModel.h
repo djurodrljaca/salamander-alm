@@ -48,8 +48,7 @@ public:
                  const Database::NodeType nodeType,
                  const QString &name,
                  const QString &description);
-    //bool addNode(const QModelIndex &parent, const Node &node);
-
+    bool updateNode(const Node &node);
     Node getNode(const QModelIndex &index) const;
 
     QVariant data(const QModelIndex &index, int role) const;
@@ -60,6 +59,7 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
+    QModelIndex parent(DataModelItem *item) const;
     DataModelItem *getDataModelItem(const QModelIndex &index) const;
     int getItemRow(DataModelItem *item) const;
 

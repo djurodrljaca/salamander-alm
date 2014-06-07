@@ -21,6 +21,8 @@ public:
     QString getProjectDescription() const;
     void setProjectDescription(const QString &projectDescription);
 
+    bool getRemoveNode() const;
+
 private:
     Ui::DisplayNodeDialog *ui;
 };

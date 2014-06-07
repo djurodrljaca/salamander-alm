@@ -7,7 +7,7 @@ CREATE TABLE `NodeAttributes` (
     `References`	INTEGER,
     `Attachments`	INTEGER,
     `Comments`	INTEGER,
-    `IsActive`	INTEGER NOT NULL CHECK(`IsActive` IN (0, 1)),
+    `Active`	INTEGER NOT NULL CHECK(`Active` IN (0, 1)),
     FOREIGN KEY(`Node`) REFERENCES `Node`(`Id`),
     FOREIGN KEY(`Revision`) REFERENCES `Revision`(`Id`),
     FOREIGN KEY(`Name`) REFERENCES `NodeName`(`Id`),

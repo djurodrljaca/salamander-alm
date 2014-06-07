@@ -41,7 +41,7 @@ public:
                          const IntegerField &references,
                          const IntegerField &attachments,
                          const IntegerField &comments,
-                         const BooleanField &isActive);
+                         const BooleanField &active);
 
     bool isValid() const;
 
@@ -69,8 +69,8 @@ public:
     IntegerField getComments() const;
     void setComments(const IntegerField &comments);
 
-    BooleanField getIsActive() const;
-    void setIsActive(const BooleanField &isActive);
+    BooleanField getActive() const;
+    void setActive(const BooleanField &active);
 
 private:
     IntegerField m_id;
@@ -81,7 +81,7 @@ private:
     IntegerField m_references;
     IntegerField m_attachments;
     IntegerField m_comments;
-    BooleanField m_isActive;
+    BooleanField m_active;
 };
 }
 

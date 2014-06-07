@@ -24,6 +24,7 @@
 #define DATAMODEL_DATAMODELITEM_H
 
 #include "Database/IntegerField.h"
+#include "Database/BooleanField.h"
 #include "Database/NodeType.h"
 #include <QtCore/QList>
 
@@ -64,10 +65,14 @@ public:
     Database::IntegerField getCommentsId() const;
     void setCommentsId(const Database::IntegerField &commentsId);
 
+    bool getActive() const;
+    void setActive(const bool active);
+
     int getChildCount() const;
     DataModelItem * getChild(const int index) const;
     int getChildIndex(DataModelItem * const child) const;
     bool addChild(DataModelItem *child);
+    bool removeChild(DataModelItem *child);
 
 private:
     Database::IntegerField m_id;
@@ -79,6 +84,7 @@ private:
     Database::IntegerField m_referencesId;
     Database::IntegerField m_attachmentsId;
     Database::IntegerField m_commentsId;
+    bool m_active;
     QList<DataModelItem *> m_childList;
 };
 }

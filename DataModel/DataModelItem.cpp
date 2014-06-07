@@ -35,6 +35,7 @@ DataModelItem::DataModelItem()
       m_referencesId(),
       m_attachmentsId(),
       m_commentsId(),
+      m_active(false),
       m_childList()
 {
 }
@@ -142,6 +143,16 @@ void DataModelItem::setCommentsId(const IntegerField &commentsId)
     m_commentsId = commentsId;
 }
 
+bool DataModelItem::getActive() const
+{
+    return m_active;
+}
+
+void DataModelItem::setActive(const bool active)
+{
+    m_active = active;
+}
+
 int DataModelItem::getChildCount() const
 {
     return m_childList.size();
@@ -172,6 +183,18 @@ bool DataModelItem::addChild(DataModelItem *child)
     {
         m_childList.append(child);
         success = true;
+    }
+
+    return success;
+}
+
+bool DataModelItem::removeChild(DataModelItem *child)
+{
+    bool success = false;
+
+    if (child != NULL)
+    {
+        success = m_childList.removeOne(child);
     }
 
     return success;

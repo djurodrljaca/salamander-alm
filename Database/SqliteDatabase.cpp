@@ -913,9 +913,9 @@ bool SqliteDatabase::addNodeAttributes(const NodeAttributesRecord &nodeAttribute
     static const QString insertCommand(
                 "INSERT INTO `NodeAttributes`"
                 "(`Node`, `Revision`, `Name`, `Description`, `References`, `Attachments`,"
-                " `Comments`, `IsActive`)"
+                " `Comments`, `Active`)"
                 " VALUES (:Node, :Revision, :Name, :Description, :References, :Attachments,"
-                " :Comments, :IsActive);"
+                " :Comments, :Active);"
                 );
 
     bool success = nodeAttributes.isValid();
@@ -935,7 +935,7 @@ bool SqliteDatabase::addNodeAttributes(const NodeAttributesRecord &nodeAttribute
             QVariant referencesValue;
             QVariant attachmentsValue;
             QVariant commentsValue;
-            QVariant isActiveValue;
+            QVariant activeValue;
 
             if (success)
             {
@@ -971,7 +971,7 @@ bool SqliteDatabase::addNodeAttributes(const NodeAttributesRecord &nodeAttribute
 
             if (success)
             {
-                isActiveValue = convertBooleanToVariant(nodeAttributes.getIsActive(), &success);
+                activeValue = convertBooleanToVariant(nodeAttributes.getActive(), &success);
             }
 
             // Execute the "insert" query with the prepared values
@@ -984,7 +984,7 @@ bool SqliteDatabase::addNodeAttributes(const NodeAttributesRecord &nodeAttribute
                 query.bindValue(":References", referencesValue);
                 query.bindValue(":Attachments", attachmentsValue);
                 query.bindValue(":Comments", commentsValue);
-                query.bindValue(":IsActive", isActiveValue);
+                query.bindValue(":Active", activeValue);
 
                 success = query.exec();
             }
@@ -2134,21 +2134,21 @@ NodeAttributesRecord SqliteDatabase::getNodeAttributesFromQuery(const QSqlQuery 
         }
     }
 
-    // IsActive
+    // Active
     if (success)
     {
-        const int index = query.record().indexOf("IsActive");
-        const BooleanField isActiveValue = convertVariantToBoolean(query.value(index), &success);
+        const int index = query.record().indexOf("Active");
+        const BooleanField activeValue = convertVariantToBoolean(query.value(index), &success);
 
         if (success)
         {
-            if (isActiveValue.isNull())
+            if (activeValue.isNull())
             {
                 success = false;
             }
             else
             {
-                nodeAttributes.setIsActive(isActiveValue);
+                nodeAttributes.setActive(activeValue);
             }
         }
     }

@@ -34,7 +34,7 @@ NodeAttributesRecord::NodeAttributesRecord()
       m_references(),
       m_attachments(),
       m_comments(),
-      m_isActive()
+      m_active()
 {
 }
 
@@ -46,7 +46,7 @@ NodeAttributesRecord::NodeAttributesRecord(const IntegerField &id,
                                            const IntegerField &references,
                                            const IntegerField &attachments,
                                            const IntegerField &comments,
-                                           const BooleanField &isActive)
+                                           const BooleanField &active)
     : m_id(id),
       m_node(node),
       m_revision(revision),
@@ -55,7 +55,7 @@ NodeAttributesRecord::NodeAttributesRecord(const IntegerField &id,
       m_references(references),
       m_attachments(attachments),
       m_comments(comments),
-      m_isActive(isActive)
+      m_active(active)
 {
 }
 
@@ -64,7 +64,7 @@ bool NodeAttributesRecord::isValid() const
     return (!m_node.isNull() &&
             !m_revision.isNull() &&
             !m_name.isNull() &&
-            !m_isActive.isNull());
+            !m_active.isNull());
 }
 
 IntegerField NodeAttributesRecord::getId() const
@@ -147,14 +147,14 @@ void NodeAttributesRecord::setComments(const IntegerField &comments)
     m_comments = comments;
 }
 
-BooleanField NodeAttributesRecord::getIsActive() const
+BooleanField NodeAttributesRecord::getActive() const
 {
-    return m_isActive;
+    return m_active;
 }
 
-void NodeAttributesRecord::setIsActive(const BooleanField &isActive)
+void NodeAttributesRecord::setActive(const BooleanField &active)
 {
-    m_isActive = isActive;
+    m_active = active;
 }
 
 QDebug operator<<(QDebug dbg, const NodeAttributesRecord &nodeAttributes)
@@ -167,7 +167,7 @@ QDebug operator<<(QDebug dbg, const NodeAttributesRecord &nodeAttributes)
     dbg.nospace() << "References="<< nodeAttributes.getReferences();
     dbg.nospace() << "Attachments="<< nodeAttributes.getAttachments();
     dbg.nospace() << "Comments="<< nodeAttributes.getComments();
-    dbg.nospace() << "IsActive=" << nodeAttributes.getIsActive() << ">";
+    dbg.nospace() << "Active=" << nodeAttributes.getActive() << ">";
 
     return dbg.space();
 }

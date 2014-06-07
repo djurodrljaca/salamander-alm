@@ -33,26 +33,42 @@ class Node
 {
 public:
     Node();
+    Node(const Database::IntegerField &id,
+         const Database::NodeType type,
+         const QString &name = QString(),
+         const QString &description = QString(),
+         const bool active = true);
 
+    void clear();
     bool isValid() const;
+    bool hasChanged() const;
+    void acceptChanges();
 
     Database::IntegerField getId() const;
-    void setId(const Database::IntegerField &id);
 
     Database::NodeType getType() const;
-    void setType(const Database::NodeType type);
 
     QString getName() const;
     void setName(const QString &name);
+    bool nameChanged() const;
 
     QString getDescription() const;
     void setDescription(const QString &description);
+    bool descriptionChanged() const;
+
+    bool getActive() const;
+    void setActive(const bool active);
+    bool activeChanged() const;
 
 private:
     Database::IntegerField m_id;
     Database::NodeType m_type;
     QString m_name;
+    bool m_nameChanged;
     QString m_description;
+    bool m_descriptionChanged;
+    bool m_active;
+    bool m_activeChanged;
 };
 }
 

@@ -98,6 +98,51 @@ bool TreeViewModel::addItem(const QModelIndex &index,
     return success;
 }
 
+bool TreeViewModel::updateNode(const Node &node)
+{
+    bool success = node.isValid();
+
+    if (success)
+    {
+        DataModelItem *originalItem = m_dataModel.getItem(node.getId());
+        success = (originalItem != NULL);
+
+        if (success)
+        {
+            const int parentRow = getItemRow(originalItem);
+            const QModelIndex parentIndex = parent(originalItem);
+
+            success = m_dataModel.updateNode(node);
+
+            if (success)
+            {
+                DataModelItem *item = m_dataModel.getItem(node.getId());
+
+                if (item == NULL)
+                {
+                    // Item was removed
+                    beginRemoveRows(parentIndex, parentRow, parentRow);
+                    endRemoveRows();
+                }
+                else if (item == originalItem)
+                {
+                    // Notify the view that the data was changed
+                    const QModelIndex itemIndex = index(parentRow, 0, parentIndex);
+
+                    emit dataChanged(itemIndex, itemIndex);
+                }
+                else
+                {
+                    // TODO: remove?
+                    qFatal("TreeViewModel::updateNode: item pointer changed for unknown reason!");
+                }
+            }
+        }
+    }
+
+    return success;
+}
+
 Node TreeViewModel::getNode(const QModelIndex &index) const
 {
     Node node;
@@ -292,29 +337,16 @@ QModelIndex DataModel::TreeViewModel::index(int row, int column, const QModelInd
 QModelIndex DataModel::TreeViewModel::parent(const QModelIndex &index) const
 {
     // Get a parent model index from the selected model index
-    QModelIndex modelIndex;
+    QModelIndex parentIndex;
 
     if (index.isValid())
     {
         // Get the (child) data model item from the selected index
-        const DataModelItem *childItem = getDataModelItem(index);
-
-        if (childItem != NULL)
-        {
-            // Get the parent model item from its child model item
-            int parentRow = 0;
-            DataModelItem *parentItem = childItem->getParent();
-
-            if (parentItem != NULL)
-            {
-                // Child model item has a parent, create a model index for it
-                parentRow = getItemRow(parentItem);
-                modelIndex = createIndex(parentRow, 0, parentItem);
-            }
-        }
+        DataModelItem *childItem = getDataModelItem(index);
+        parentIndex = parent(childItem);
     }
 
-    return modelIndex;
+    return parentIndex;
 }
 
 int DataModel::TreeViewModel::rowCount(const QModelIndex &parent) const
@@ -348,6 +380,27 @@ int DataModel::TreeViewModel::columnCount(const QModelIndex &) const
 {
     // We only have one column in this view
     return 1;
+}
+
+QModelIndex TreeViewModel::parent(DataModelItem *item) const
+{
+    QModelIndex parentIndex;
+
+    if (item != NULL)
+    {
+        // Get the parent model item from its child model item
+        int parentRow = 0;
+        DataModelItem *parentItem = item->getParent();
+
+        if (parentItem != NULL)
+        {
+            // Child model item has a parent, create a model index for it
+            parentRow = getItemRow(parentItem);
+            parentIndex = createIndex(parentRow, 0, parentItem);
+        }
+    }
+
+    return parentIndex;
 }
 
 DataModelItem *DataModel::TreeViewModel::getDataModelItem(const QModelIndex &index) const
