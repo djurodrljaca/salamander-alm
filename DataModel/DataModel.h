@@ -26,6 +26,7 @@
 #include "Database/SqliteDatabase.h"
 #include "DataModel/DataModelItem.h"
 #include <QtCore/QList>
+#include <QtCore/QMap>
 
 namespace DataModel
 {
@@ -42,6 +43,16 @@ public:
 
     bool login(const QString &username, const QString &password);
 
+    int getRootItemCount() const;
+    DataModelItem * getRootItem(const int index) const;
+    int getRootItemIndex(DataModelItem *item) const;
+
+    bool addItem(const Database::IntegerField parentId,
+                 const Database::NodeType nodeType,
+                 const QString &name,
+                 const QString &description);
+
+
 private:
     bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
                               const Database::IntegerField &revisionId,
@@ -52,6 +63,7 @@ private:
 
     Database::SqliteDatabase m_database;
     QList<DataModelItem *> m_itemList;
+    QMap<qlonglong, DataModelItem *> m_itemMap;
     Database::IntegerField m_revisionId;
     Database::IntegerField m_userId;
 };

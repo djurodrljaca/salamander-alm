@@ -1,7 +1,7 @@
 /**
  * @file   TreeViewModel.cpp
  * @author Djuro Drljaca (djurodrljaca@gmail.com)
- * @date   2014-5-29
+ * @date   2014-05-29
  * @brief  Brief description of file.
  *
  * Copyright 2014  Djuro Drljaca (djurodrljaca@gmail.com)
@@ -23,190 +23,60 @@
 #include "TreeViewModel.h"
 
 using namespace Database;
+using namespace DataModel;
 
-DataModel::TreeViewModel::TreeViewModel(QObject *parent)
+TreeViewModel::TreeViewModel(QObject *parent)
     : QAbstractItemModel(parent),
-      m_database(),
-      m_projectList()
+      m_dataModel()
 {
 }
 
-DataModel::TreeViewModel::~TreeViewModel()
+TreeViewModel::~TreeViewModel()
 {
-    qDeleteAll(m_projectList);
 }
 
 bool DataModel::TreeViewModel::start()
 {
-    bool success = false;
-
-    if (m_database.isConnected() == false)
-    {
-        success = m_database.connect();
-
-        if (success)
-        {
-            success = m_database.validate();
-
-            if (!success)
-            {
-                // TODO: this probably needs to be removed later
-                success = m_database.create();
-
-                if (!success)
-                {
-                    m_database.disconnect();
-                }
-            }
-        }
-    }
-
-    return success;
+    return m_dataModel.start();
 }
 
 void DataModel::TreeViewModel::stop()
 {
-    if (m_database.isConnected())
-    {
-        m_database.disconnect();
-    }
+    m_dataModel.stop();
 }
 
 bool DataModel::TreeViewModel::load()
 {
-    bool success = m_database.isConnected();
+    // Notify the view that the data model will be reset
+    beginResetModel();
 
-    if (success)
-    {
-        // Clear old data model
-        beginResetModel();
-        qDeleteAll(m_projectList);
-        m_projectList.clear();
+    // Load data model
+    bool success = m_dataModel.load(); // TODO: add a parameter for loading a specific revision?
 
-        // Load all "Project" nodes
-        const QList<NodeRecord> nodeRecordList = m_database.getNodes(IntegerField(), &success);
-        IntegerField currentRevisionId;
-
-        if (success)
-        {
-            currentRevisionId = m_database.getCurrentRevisionId(&success);
-        }
-
-        if (success)
-        {
-            foreach (const NodeRecord nodeRecordItem, nodeRecordList)
-            {
-                // Only "Project" nodes are allwed as root node
-                if (nodeRecordItem.getType() != NodeType_Project)
-                {
-                    success = false;
-                }
-
-                // Load each found "Project" node
-                if (success)
-                {
-                    Node *projectNode = new Node();
-                    bool isActive = false;
-
-                    success = loadNodeFromDatabase(nodeRecordItem,
-                                                   currentRevisionId,
-                                                   NULL,
-                                                   projectNode,
-                                                   &isActive);
-
-                    if (success)
-                    {
-                        if (isActive)
-                        {
-                            m_projectList.append(projectNode);
-                        }
-                        else
-                        {
-                            delete projectNode;
-                        }
-
-                        projectNode = NULL;
-                    }
-                    else
-                    {
-                        delete projectNode;
-                        projectNode = NULL;
-                        break;
-                    }
-                }
-            }
-        }
-
-        endResetModel();
-    }
+    // Notify the view that the data model reset has finished
+    endResetModel();
 
     return success;
 }
 
-bool DataModel::TreeViewModel::addProject(const QString &name, const QString description)
+bool TreeViewModel::login(const QString &username, const QString &password)
 {
-    bool success = !name.isEmpty();
+    return m_dataModel.login(username, password);
+}
 
-    if (success)
-    {
-        // TODO: check if project with the same name already exists
+bool TreeViewModel::addProject(const QString &name, const QString &description)
+{
+    // Notify the view that a row is about to be inserted
+    int row = m_dataModel.getRootItemCount();
+    beginInsertRows(QModelIndex(), row, row);
 
-        // Start revision
-        IntegerField revisionId = m_database.startRevision(&success);
+    // Add node to the model
+    bool success = m_dataModel.addItem(IntegerField(), NodeType_Project, name, description);
 
-        // Add node record
-        IntegerField nodeId;
-        NodeRecord nodeRecord;
-        nodeRecord.setParent(IntegerField());
-        nodeRecord.setType(NodeType_Project);
+    row = m_dataModel.getRootItemCount();
 
-        success = m_database.addNode(nodeRecord, &nodeId);
-
-        // Add node name
-        IntegerField nodeNameId;
-
-        if (success)
-        {
-            const NodeNameRecord nodeName(IntegerField(), name);
-            success = m_database.addNodeName(nodeName, &nodeNameId);
-        }
-
-        // Add node description
-        IntegerField nodeDescriptionId;
-
-        if (success && !description.isEmpty())
-        {
-            const NodeDescriptionRecord nodeDescription(IntegerField(), description);
-            success = m_database.addNodeDescription(nodeDescription, &nodeDescriptionId);
-        }
-
-        // Add node attributes
-        IntegerField nodeAttributesId;
-
-        if (success)
-        {
-            const NodeAttributesRecord nodeAttributes(IntegerField(),
-                                                      nodeId,
-                                                      revisionId,
-                                                      nodeNameId,
-                                                      nodeDescriptionId,
-                                                      IntegerField(),
-                                                      IntegerField(),
-                                                      IntegerField(),
-                                                      BooleanField(true));
-            success = m_database.addNodeAttributes(nodeAttributes, &nodeAttributesId);
-        }
-
-        if (success)
-        {
-            success = m_database.finishRevision();
-            // TODO: refresh data model (tree view)
-        }
-        else
-        {
-            m_database.abortRevision();
-        }
-    }
+    // Notify the view that row insertion has finished
+    endInsertRows();
 
     return success;
 }
@@ -299,9 +169,9 @@ bool DataModel::TreeViewModel::addProject(const QString &name, const QString des
 //    return success;
 //}
 
-DataModel::Node *DataModel::TreeViewModel::getNode(const QModelIndex &index) const
+DataModelItem *DataModel::TreeViewModel::getDataModelItem(const QModelIndex &index) const
 {
-    return static_cast<Node *>(index.internalPointer());
+    return static_cast<DataModelItem *>(index.internalPointer());
 }
 
 QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) const
@@ -311,7 +181,8 @@ QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) cons
     if (index.isValid() &&
         (role == Qt::DisplayRole))
     {
-        const Node *item = getNode(index);
+        // Set the data value to the item's name
+        const DataModelItem *item = getDataModelItem(index);
 
         if (item != NULL)
         {
@@ -345,27 +216,32 @@ Qt::ItemFlags DataModel::TreeViewModel::flags(const QModelIndex &index) const
 
 QModelIndex DataModel::TreeViewModel::index(int row, int column, const QModelIndex &parent) const
 {
+    // Create model index
     QModelIndex modelIndex;
 
-    if (hasIndex(row, column, parent) &&
-        m_database.isConnected())
+    if (hasIndex(row, column, parent))
     {
-        Node *item = NULL;
+        // Get item from the data model
+        DataModelItem *item = NULL;
 
         if (!parent.isValid())
         {
-            item = getProject(row);
+            // Parent model index is invalid, return a root item with index "row"
+            item = m_dataModel.getRootItem(row);
         }
         else
         {
-            const Node *parentItem = getNode(parent);
+            // Get parent data model item from the parent model index
+            const DataModelItem *parentItem = getDataModelItem(parent);
 
             if (parentItem != NULL)
             {
+                // Parent data model item is valid, return a child item with index "row"
                 item = parentItem->getChild(row);
             }
         }
 
+        // Create model index if item is valid
         if (item != NULL)
         {
             modelIndex = createIndex(row, column, item);
@@ -377,21 +253,24 @@ QModelIndex DataModel::TreeViewModel::index(int row, int column, const QModelInd
 
 QModelIndex DataModel::TreeViewModel::parent(const QModelIndex &index) const
 {
+    // Get a parent model index from the selected model index
     QModelIndex modelIndex;
 
-    if (index.isValid() &&
-        m_database.isConnected())
+    if (index.isValid())
     {
-        const Node *childItem = getNode(index);
+        // Get the (child) data model item from the selected index
+        const DataModelItem *childItem = getDataModelItem(index);
 
         if (childItem != NULL)
         {
+            // Get the parent model item from its child model item
             int parentRow = 0;
-            Node *parentItem = childItem->getParent();
+            DataModelItem *parentItem = childItem->getParent();
 
             if (parentItem != NULL)
             {
-                parentRow = getNodeRow(parentItem);
+                // Child model item has a parent, create a model index for it
+                parentRow = getItemRow(parentItem);
                 modelIndex = createIndex(parentRow, 0, parentItem);
             }
         }
@@ -405,16 +284,17 @@ int DataModel::TreeViewModel::rowCount(const QModelIndex &parent) const
     int count = 0;
     const int column = parent.column();
 
-    if ((column <= 0) &&
-        m_database.isConnected())
+    if (column <= 0)
     {
         if (!parent.isValid())
         {
-            count = getProjectCount();
+            // Number of root items was requested
+            count = m_dataModel.getRootItemCount();
         }
         else
         {
-            Node *parentItem = getNode(parent);
+            // Number of children for the selected parent was requested
+            DataModelItem *parentItem = getDataModelItem(parent);
 
             if (parentItem != NULL)
             {
@@ -428,192 +308,27 @@ int DataModel::TreeViewModel::rowCount(const QModelIndex &parent) const
 
 int DataModel::TreeViewModel::columnCount(const QModelIndex &) const
 {
-    // TODO: implement correctly
+    // We only have one column in this view
     return 1;
 }
 
-int DataModel::TreeViewModel::getProjectCount() const
+int TreeViewModel::getItemRow(DataModelItem *item) const
 {
-    return m_projectList.size();
-}
-
-DataModel::Node *DataModel::TreeViewModel::getProject(const int index) const
-{
-    Node *project = NULL;
-
-    if ((index >= 0) && (index < m_projectList.size()))
-    {
-        project = m_projectList[index];
-    }
-
-    return project;
-}
-
-int DataModel::TreeViewModel::getProjectIndex(DataModel::Node *projectNode) const
-{
-    int index = -1;
-
-    if (projectNode != NULL)
-    {
-        index = m_projectList.indexOf(projectNode);
-    }
-
-    return index;
-}
-
-int DataModel::TreeViewModel::getNodeRow(DataModel::Node *node) const
-{
-    // TODO: is this still needed? fix it?
     int row = 0;
 
-    if (node != NULL)
+    if (item != NULL)
     {
-        const Node *parentItem = node->getParent();
+        const DataModelItem *parentItem = item->getParent();
 
         if (parentItem == NULL)
         {
-            row = getProjectIndex(node);
+            row = m_dataModel.getRootItemIndex(item);
         }
         else
         {
-            row = parentItem->getChildIndex(node);
+            row = parentItem->getChildIndex(item);
         }
     }
 
     return row;
-}
-
-bool DataModel::TreeViewModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
-                                                    const IntegerField &revisionId,
-                                                    DataModel::Node *parent,
-                                                    DataModel::Node *node,
-                                                    bool *isActive) const
-{
-    // Check if input parameters are valid
-    bool success = (nodeRecord.isValid() &&
-                    (node != NULL) &&
-                    (isActive != NULL));
-
-    if (success)
-    {
-        // Both node record's parent and the parent node must be compatible: both have to be null or
-        // both have to be not null
-        const bool isParentNull = (parent == NULL);
-        success = (nodeRecord.getParent().isNull() == isParentNull);
-    }
-
-    if (success)
-    {
-        // Get note attributes
-        const IntegerField nodeAttributesId = m_database.getNodeAttributesId(nodeRecord.getId(),
-                                                                             revisionId,
-                                                                             &success);
-
-        if (success)
-        {
-            const NodeAttributesRecord nodeAttributesRecord =
-                    m_database.getNodeAttributes(nodeAttributesId, &success);
-
-            if (success)
-            {
-                success = nodeAttributesRecord.isValid();
-            }
-
-            if (success)
-            {
-                *isActive = nodeAttributesRecord.getIsActive().getValue();
-
-                if (*isActive)
-                {
-                    // Get node name
-                    const NodeNameRecord nodeNameRecord =
-                            m_database.getNodeName(nodeAttributesRecord.getName(), &success);
-
-                    if (success)
-                    {
-                        success = nodeNameRecord.isValid();
-                    }
-
-                    // Set node parameters
-                    if (success)
-                    {
-                        node->setId(nodeRecord.getId());
-                        node->setParent(parent);
-                        node->setType(nodeRecord.getType());
-
-                        node->setRevisionId(nodeAttributesRecord.getRevision());
-                        node->setName(nodeNameRecord.getText().getValue());
-                        node->setDescriptionId(nodeAttributesRecord.getDescription());
-                        node->setReferencesId(nodeAttributesRecord.getReferences());
-                        node->setAttachmentsId(nodeAttributesRecord.getAttachments());
-                        node->setCommentsId(nodeAttributesRecord.getComments());
-                    }
-                }
-            }
-        }
-
-        // Load child nodes and add them to the node
-        if (success && *isActive)
-        {
-            const QList<NodeRecord> nodeRecordList = m_database.getNodes(nodeRecord.getId(), &success);
-
-            if (success)
-            {
-                foreach (const Database::NodeRecord nodeRecordItem, nodeRecordList)
-                {
-                    // Load child node and add it to the node
-                    Node *childNode = new Node();
-                    bool isChildActive = false;
-
-                    success = loadNodeFromDatabase(nodeRecordItem,
-                                                   revisionId,
-                                                   node,
-                                                   childNode,
-                                                   &isChildActive);
-
-                    if (success)
-                    {
-                        if (isChildActive)
-                        {
-                            success = node->addChild(childNode);
-                        }
-                        else
-                        {
-                            delete childNode;
-                        }
-
-                        childNode = NULL;
-                    }
-
-                    if (!success)
-                    {
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    return success;
-}
-
-bool DataModel::TreeViewModel::contains(DataModel::Node *node) const
-{
-    bool success = false;
-
-    if (node != NULL)
-    {
-        Node *parent = node->getParent();
-
-        if (parent == NULL)
-        {
-            success = m_projectList.contains(node);
-        }
-        else
-        {
-            success = contains(parent);
-        }
-    }
-
-    return success;
 }

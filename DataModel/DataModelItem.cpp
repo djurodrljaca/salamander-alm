@@ -46,7 +46,8 @@ DataModelItem::~DataModelItem()
 
 bool DataModelItem::isValid() const
 {
-    return (isNodeTypeValid(m_type) &&
+    return (!m_id.isNull() &&
+            isNodeTypeValid(m_type) &&
             !m_revisionId.isNull() &&
             !m_name.isEmpty());
 }

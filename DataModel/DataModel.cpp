@@ -28,6 +28,7 @@ using namespace DataModel;
 DataModel::DataModel::DataModel()
     : m_database(),
       m_itemList(),
+      m_itemMap(),
       m_revisionId(),
       m_userId()
 {
@@ -145,16 +146,31 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
                         // Add only valid root nodes to the list
                         if (rootNode->isValid())
                         {
-                            m_itemList.append(rootNode);
+                            // Root node is active, try to add it to the list
+                            const qlonglong id = rootNode->getId().getValue();
+
+                            if (m_itemMap.contains(id))
+                            {
+                                // Error, a node with the same ID is already in the model
+                                success = false;
+                            }
+                            else
+                            {
+                                // Add root node to the list
+                                m_itemList.append(rootNode);
+                                m_itemMap.insert(id, rootNode);
+                                rootNode = NULL;
+                            }
                         }
                         else
                         {
+                            // Root node is inactive, skip it
                             delete rootNode;
+                            rootNode = NULL;
                         }
-
-                        rootNode = NULL;
                     }
-                    else
+
+                    if (!success)
                     {
                         // Error
                         delete rootNode;
@@ -204,6 +220,201 @@ bool DataModel::DataModel::login(const QString &username, const QString &passwor
             {
                 // Error, invalid username or password
                 success = false;
+            }
+        }
+    }
+
+    return success;
+}
+
+int DataModel::DataModel::getRootItemCount() const
+{
+    return m_itemList.size();
+}
+
+DataModelItem *DataModel::DataModel::getRootItem(const int index) const
+{
+    DataModelItem *rootItem = NULL;
+
+    if ((index >= 0) && (index < m_itemList.size()))
+    {
+        rootItem = m_itemList[index];
+    }
+
+    return rootItem;
+}
+
+int DataModel::DataModel::getRootItemIndex(DataModelItem *item) const
+{
+    int index = -1;
+
+    if (item != NULL)
+    {
+        index = m_itemList.indexOf(item);
+    }
+
+    return index;
+}
+
+bool DataModel::DataModel::addItem(const IntegerField parentId,
+                                   const NodeType nodeType,
+                                   const QString &name,
+                                   const QString &description)
+{
+    bool success = false;
+
+    // Check if parent ID is valid
+    if (parentId.isNull())
+    {
+        // Root item
+        success = true;
+    }
+    else
+    {
+        // An item with the parent ID must already be in the model
+        success = m_itemMap.contains(parentId.getValue());
+    }
+
+    // Check node type and name
+    if (success)
+    {
+        success = (isNodeTypeValid(nodeType) &&
+                   !name.isEmpty());
+    }
+
+    // Add item to the database
+    if (success)
+    {
+        // Start revision
+        IntegerField revisionId = m_database.startRevision(&success);
+
+        // Add node record
+        NodeRecord nodeRecord;
+
+        if (success)
+        {
+            IntegerField nodeId;
+            nodeRecord.setParent(parentId);
+            nodeRecord.setType(nodeType);
+
+            success = m_database.addNode(nodeRecord, &nodeId);
+
+            if (success)
+            {
+                nodeRecord.setId(nodeId);
+            }
+        }
+
+        // Add node name
+        IntegerField nodeNameId;
+
+        if (success)
+        {
+            const NodeNameRecord nodeName(IntegerField(), name);
+            success = m_database.addNodeName(nodeName, &nodeNameId);
+        }
+
+        // Add node description
+        IntegerField nodeDescriptionId;
+
+        if (success && !description.isEmpty())
+        {
+            const NodeDescriptionRecord nodeDescription(IntegerField(), description);
+            success = m_database.addNodeDescription(nodeDescription, &nodeDescriptionId);
+        }
+
+        // Add node attributes
+        IntegerField nodeAttributesId;
+
+        if (success)
+        {
+            const NodeAttributesRecord nodeAttributes(IntegerField(),
+                                                      nodeRecord.getId(),
+                                                      revisionId,
+                                                      nodeNameId,
+                                                      nodeDescriptionId,
+                                                      IntegerField(),
+                                                      IntegerField(),
+                                                      IntegerField(),
+                                                      BooleanField(true));
+            success = m_database.addNodeAttributes(nodeAttributes, &nodeAttributesId);
+        }
+
+        if (success)
+        {
+            success = m_database.finishRevision();
+        }
+        else
+        {
+            m_database.abortRevision();
+        }
+
+        // Load the inserted item
+        if (success)
+        {
+            // Get parent item
+            DataModelItem *parent = NULL;
+
+            if (!parentId.isNull())
+            {
+                parent = m_itemMap.value(parentId.getValue(), NULL);
+                success = (parent != NULL);
+            }
+
+            // Load the new item from the database and add it to the parent
+            if (success)
+            {
+                DataModelItem *newItem = new DataModelItem();
+                success = loadNodeFromDatabase(nodeRecord, revisionId, parent, newItem);
+
+                if (success)
+                {
+                    // Add only valid nodes to the list
+                    if (newItem->isValid())
+                    {
+                        // Node is active, try to add it to the list
+                        const qlonglong id = newItem->getId().getValue();
+
+                        if (m_itemMap.contains(id))
+                        {
+                            // Error, a node with the same ID is already in the model
+                            success = false;
+                        }
+                        else
+                        {
+                            if (parent == NULL)
+                            {
+                                // Add root node to the list
+                                m_itemList.append(newItem);
+                                m_itemMap.insert(id, newItem);
+                                newItem = NULL;
+                            }
+                            else
+                            {
+                                // Add child node to the parent
+                                success = parent->addChild(newItem);
+
+                                if (success)
+                                {
+                                    m_itemMap.insert(id, newItem);
+                                    newItem = NULL;
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Error, node is inactive
+                        success = false;
+                    }
+                }
+
+                if (!success)
+                {
+                    // Error
+                    delete newItem;
+                    newItem = NULL;
+                }
             }
         }
     }
@@ -330,14 +541,32 @@ bool DataModel::DataModel::loadChildNodesFromDatabase(const IntegerField &revisi
                 // Add only valid child nodes to the parent
                 if (child->isValid())
                 {
-                    success = parent->addChild(child);
+                    // Child node is active, try to add it to the parent
+                    const qlonglong id = child->getId().getValue();
+
+                    if (m_itemMap.contains(id))
+                    {
+                        // Error, a node with the same ID is already in the model
+                        success = false;
+                    }
+                    else
+                    {
+                        // Add child node to the parent
+                        success = parent->addChild(child);
+
+                        if (success)
+                        {
+                            m_itemMap.insert(id, child);
+                            child = NULL;
+                        }
+                    }
                 }
                 else
                 {
+                    // Root node is inactive, skip it
                     delete child;
+                    child = NULL;
                 }
-
-                child = NULL;
             }
 
             if (!success)

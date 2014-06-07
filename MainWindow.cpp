@@ -52,12 +52,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::displayNode(QModelIndex modelIndex)
 {
-    const DataModel::Node *node = m_treeViewModel.getNode(modelIndex);
+    const DataModel::DataModelItem *item = m_treeViewModel.getDataModelItem(modelIndex);
 
-    if (node != NULL)
+    if (item != NULL)
     {
         DisplayNodeDialog dialog;
-        dialog.setProjectName(node->getName());
+        dialog.setProjectName(item->getName());
 
         // TODO: det description from database
         //node->getDescriptionId()

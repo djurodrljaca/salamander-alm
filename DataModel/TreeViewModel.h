@@ -23,9 +23,7 @@
 #ifndef DATAMODEL_TREEVIEWMODEL_H
 #define DATAMODEL_TREEVIEWMODEL_H
 
-#include "Database/SqliteDatabase.h"
-#include "DataModel/Node.h"
-#include <QtCore/QList>
+#include "DataModel/DataModel.h"
 #include <QtCore/QAbstractItemModel>
 
 namespace DataModel
@@ -43,10 +41,12 @@ public:
 
     bool load();
 
-    bool addProject(const QString &name, const QString description);
+    bool login(const QString &username, const QString &password);
+
+    bool addProject(const QString &name, const QString &description);
     //bool addNode(const QModelIndex &parent, const Node &node);
 
-    Node *getNode(const QModelIndex &index) const;
+    DataModelItem *getDataModelItem(const QModelIndex &index) const;
 
     QVariant data(const QModelIndex &index, int role) const;
     Qt::ItemFlags flags(const QModelIndex &index) const;
@@ -56,21 +56,9 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
 private:
-    int getProjectCount() const;
-    Node * getProject(const int index) const;
-    int getProjectIndex(Node *projectNode) const;
+    int getItemRow(DataModelItem *item) const;
 
-    int getNodeRow(Node *node) const;
-
-    bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
-                              const Database::IntegerField &revisionId,
-                              Node *parent,
-                              Node *node,
-                              bool *isActive) const;
-    bool contains(Node *node) const;
-
-    Database::SqliteDatabase m_database;
-    QList<Node *> m_projectList;
+    DataModel m_dataModel;
 };
 }
 
