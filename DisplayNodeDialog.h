@@ -15,13 +15,14 @@ public:
     explicit DisplayNodeDialog(QWidget *parent = 0);
     ~DisplayNodeDialog();
 
+    QString getProjectName() const;
     void setProjectName(const QString &projectName);
+
+    QString getProjectDescription() const;
     void setProjectDescription(const QString &projectDescription);
 
 private:
     Ui::DisplayNodeDialog *ui;
-    QString m_projectName;
-    QString m_projectDescription;
 };
 
 #endif // DISPLAYNODEDIALOG_H

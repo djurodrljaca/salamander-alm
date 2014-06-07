@@ -24,7 +24,7 @@
 #include "ui_MainWindow.h"
 #include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
-#include "NewProjectDialog.h"
+#include "NewNodeDialog.h"
 #include "DisplayNodeDialog.h"
 #include <QtCore/QtDebug>
 
@@ -78,7 +78,7 @@ void MainWindow::connectButtonPushed()
 
 void MainWindow::addProjectButtonPushed()
 {
-    NewProjectDialog dialog;
+    NewNodeDialog dialog;
 
     int result = dialog.exec();
 

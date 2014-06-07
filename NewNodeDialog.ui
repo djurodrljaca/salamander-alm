@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>NewProjectDialog</class>
- <widget class="QDialog" name="NewProjectDialog">
+ <class>NewNodeDialog</class>
+ <widget class="QDialog" name="NewNodeDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>New Project</string>
+   <string>New Node</string>
   </property>
   <layout class="QFormLayout" name="formLayout">
    <item row="0" column="0">
@@ -46,12 +46,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>name_lineEdit</tabstop>
+  <tabstop>description_plainTextEdit</tabstop>
+  <tabstop>buttonBox</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>NewProjectDialog</receiver>
+   <receiver>NewNodeDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -67,7 +72,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>NewProjectDialog</receiver>
+   <receiver>NewNodeDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

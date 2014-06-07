@@ -13,8 +13,7 @@ TEMPLATE = app
 
 # ---- Main ----
 SOURCES += \
-    main.cpp \
-    DataModel/DataModelItem.cpp
+    main.cpp
 
 # ---- Database ----
 SOURCES += \
@@ -58,6 +57,7 @@ HEADERS  += \
 
 SOURCES += \
     DataModel/DataModel.cpp \
+    DataModel/DataModelItem.cpp \
     DataModel/Node.cpp \
     DataModel/TreeViewModel.cpp
 
@@ -65,17 +65,17 @@ SOURCES += \
 HEADERS  += \
     DisplayNodeDialog.h \
     MainWindow.h \
-    NewProjectDialog.h
+    NewNodeDialog.h
 
 SOURCES += \
     DisplayNodeDialog.cpp \
     MainWindow.cpp \
-    NewProjectDialog.cpp
+    NewNodeDialog.cpp
 
 FORMS    += \
     MainWindow.ui \
-    NewProjectDialog.ui \
-    DisplayNodeDialog.ui
+    DisplayNodeDialog.ui \
+    NewNodeDialog.ui
 
 # ---- Resources ----
 RESOURCES += \
