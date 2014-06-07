@@ -52,16 +52,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::displayNode(QModelIndex modelIndex)
 {
-    const DataModel::DataModelItem *item = m_treeViewModel.getDataModelItem(modelIndex);
+    const DataModel::Node node = m_treeViewModel.getNode(modelIndex);
 
-    if (item != NULL)
+    if (node.isValid())
     {
         DisplayNodeDialog dialog;
-        dialog.setProjectName(item->getName());
-
-        // TODO: det description from database
-        //node->getDescriptionId()
-        //dialog.setProjectDescription();
+        dialog.setProjectName(node.getName());
+        dialog.setProjectDescription(node.getDescription());
 
         dialog.exec();
     }
@@ -90,20 +87,10 @@ void MainWindow::addProjectButtonPushed()
         const QString name = dialog.getProjectName();
         const QString description = dialog.getProjectDescription();
 
-        bool success = m_treeViewModel.addProject(name, description);
+        bool success = m_treeViewModel.addItem(QModelIndex(),
+                                               Database::NodeType_Project,
+                                               name,
+                                               description);
         qDebug() << "MainWindow::addButtonPushed: project added:" << success;
     }
-
-//    QItemSelectionModel *selectionModel = ui->view_treeView->selectionModel();
-
-//    if (selectionModel != NULL)
-//    {
-//        QModelIndex modelIndex = selectionModel->currentIndex();
-
-//        DataModel::Node node;
-//        node.setType(Database::NodeType_Project);
-
-//        bool success = m_treeViewModel.addNode(modelIndex, node);
-//        qDebug() << "MainWindow::addButtonPushed: success:" << success;
-//    }
 }

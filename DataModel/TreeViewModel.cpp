@@ -64,21 +64,64 @@ bool TreeViewModel::login(const QString &username, const QString &password)
     return m_dataModel.login(username, password);
 }
 
-bool TreeViewModel::addProject(const QString &name, const QString &description)
+bool TreeViewModel::addItem(const QModelIndex &index,
+                            const NodeType nodeType,
+                            const QString &name,
+                            const QString &description)
 {
-    // Notify the view that a row is about to be inserted
-    int row = m_dataModel.getRootItemCount();
-    beginInsertRows(QModelIndex(), row, row);
+    bool success = false;
 
-    // Add node to the model
-    bool success = m_dataModel.addItem(IntegerField(), NodeType_Project, name, description);
+    if (index.isValid())
+    {
+        // Add child item to the model
 
-    row = m_dataModel.getRootItemCount();
+        // Get id of the selected node
+        // TODO: implement
+    }
+    else
+    {
+        // Add root item to the model
 
-    // Notify the view that row insertion has finished
-    endInsertRows();
+        // Notify the view that a row is about to be inserted
+        int row = m_dataModel.getRootItemCount();
+        beginInsertRows(QModelIndex(), row, row);
+
+        // Add item to the model
+        success = m_dataModel.addItem(IntegerField(), nodeType, name, description);
+
+        row = m_dataModel.getRootItemCount();
+
+        // Notify the view that row insertion has finished
+        endInsertRows();
+    }
 
     return success;
+}
+
+Node TreeViewModel::getNode(const QModelIndex &index) const
+{
+    Node node;
+
+    // Get node item
+    if (index.isValid())
+    {
+        // Get the selected node's ID
+        IntegerField id;
+        DataModelItem *item = getDataModelItem(index);
+
+        if (item != NULL)
+        {
+            id = m_dataModel.getItemId(item);
+        }
+
+        // Get node from the selected ID
+        if (!id.isNull())
+        {
+            node = m_dataModel.getNode(id);
+        }
+    }
+
+    return node;
 }
 
 //bool DataModel::TreeViewModel::addNode(const QModelIndex &parent, const DataModel::Node &node)
@@ -168,11 +211,6 @@ bool TreeViewModel::addProject(const QString &name, const QString &description)
 
 //    return success;
 //}
-
-DataModelItem *DataModel::TreeViewModel::getDataModelItem(const QModelIndex &index) const
-{
-    return static_cast<DataModelItem *>(index.internalPointer());
-}
 
 QVariant DataModel::TreeViewModel::data(const QModelIndex &index, int role) const
 {
@@ -310,6 +348,11 @@ int DataModel::TreeViewModel::columnCount(const QModelIndex &) const
 {
     // We only have one column in this view
     return 1;
+}
+
+DataModelItem *DataModel::TreeViewModel::getDataModelItem(const QModelIndex &index) const
+{
+    return static_cast<DataModelItem *>(index.internalPointer());
 }
 
 int TreeViewModel::getItemRow(DataModelItem *item) const

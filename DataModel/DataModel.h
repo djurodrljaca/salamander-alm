@@ -25,6 +25,7 @@
 
 #include "Database/SqliteDatabase.h"
 #include "DataModel/DataModelItem.h"
+#include "DataModel/Node.h"
 #include <QtCore/QList>
 #include <QtCore/QMap>
 
@@ -47,19 +48,21 @@ public:
     DataModelItem * getRootItem(const int index) const;
     int getRootItemIndex(DataModelItem *item) const;
 
-    bool addItem(const Database::IntegerField parentId,
+    bool addItem(const Database::IntegerField &parentId,
                  const Database::NodeType nodeType,
                  const QString &name,
                  const QString &description);
 
+    Database::IntegerField getItemId(DataModelItem *item) const;
+    Node getNode(const Database::IntegerField &id) const;
 
 private:
-    bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
-                              const Database::IntegerField &revisionId,
-                              DataModelItem *parent,
-                              DataModelItem *node);
-    bool loadChildNodesFromDatabase(const Database::IntegerField &revisionId,
-                                    DataModelItem *parent);
+    bool loadDataModelItemFromDatabase(const Database::NodeRecord &nodeRecord,
+                                       const Database::IntegerField &revisionId,
+                                       DataModelItem *parent,
+                                       DataModelItem *node);
+    bool loadDataModelItemChildrenFromDatabase(const Database::IntegerField &revisionId,
+                                               DataModelItem *parent);
 
     Database::SqliteDatabase m_database;
     QList<DataModelItem *> m_itemList;

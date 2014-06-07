@@ -120,10 +120,11 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
         }
 
         // Clear old data model
-        if (success && !m_itemList.isEmpty())
+        if (success)
         {
             qDeleteAll(m_itemList);
             m_itemList.clear();
+            m_itemMap.clear();
         }
 
         // Load all root nodes that belong to the selected revision
@@ -139,7 +140,10 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
                 {
                     // Load root node from the database
                     DataModelItem *rootNode = new DataModelItem();
-                    success = loadNodeFromDatabase(rootNodeRecordItem, revisionId, NULL, rootNode);
+                    success = loadDataModelItemFromDatabase(rootNodeRecordItem,
+                                                            revisionId,
+                                                            NULL,
+                                                            rootNode);
 
                     if (success)
                     {
@@ -256,7 +260,7 @@ int DataModel::DataModel::getRootItemIndex(DataModelItem *item) const
     return index;
 }
 
-bool DataModel::DataModel::addItem(const IntegerField parentId,
+bool DataModel::DataModel::addItem(const IntegerField &parentId,
                                    const NodeType nodeType,
                                    const QString &name,
                                    const QString &description)
@@ -365,7 +369,7 @@ bool DataModel::DataModel::addItem(const IntegerField parentId,
             if (success)
             {
                 DataModelItem *newItem = new DataModelItem();
-                success = loadNodeFromDatabase(nodeRecord, revisionId, parent, newItem);
+                success = loadDataModelItemFromDatabase(nodeRecord, revisionId, parent, newItem);
 
                 if (success)
                 {
@@ -422,10 +426,78 @@ bool DataModel::DataModel::addItem(const IntegerField parentId,
     return success;
 }
 
-bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
-                                                const IntegerField &revisionId,
-                                                DataModelItem *parent,
-                                                DataModelItem *node)
+IntegerField DataModel::DataModel::getItemId(DataModelItem *item) const
+{
+    IntegerField id;
+
+    if (item != NULL)
+    {
+        const qlonglong idValue = m_itemMap.key(item, -1LL);
+
+        if (idValue >= 0)
+        {
+            id.setValue(idValue);
+        }
+    }
+
+    return id;
+}
+
+Node DataModel::DataModel::getNode(const IntegerField &id) const
+{
+    Node node;
+    bool success = !id.isNull();
+
+    if (success)
+    {
+        // Get data model item from ID
+        DataModelItem *item = m_itemMap.value(id.getValue(), NULL);
+        success = (item != NULL);
+
+        if (success)
+        {
+            success = item->isValid();
+
+            if (success)
+            {
+                // Get node's description
+                QString description;
+                IntegerField descriptionId = item->getDescriptionId();
+
+                if (descriptionId.isNull())
+                {
+                    node.setDescription(QString());
+                }
+                else
+                {
+                    const NodeDescriptionRecord nodeDescriptionRecord =
+                            m_database.getNodeDescription(descriptionId, &success);
+
+                    if (success)
+                    {
+                        description = nodeDescriptionRecord.getText().getValue();
+                    }
+                }
+
+                // Set the node's basic parameters
+                if (success)
+                {
+                    node.setId(item->getId());
+                    node.setType(item->getType());
+                    node.setName(item->getName());
+                    node.setDescription(description);
+                }
+            }
+        }
+    }
+
+    return node;
+}
+
+bool DataModel::DataModel::loadDataModelItemFromDatabase(const NodeRecord &nodeRecord,
+                                                         const IntegerField &revisionId,
+                                                         DataModelItem *parent,
+                                                         DataModelItem *node)
 {
     // Check if input parameters are valid
     bool success = (nodeRecord.isValid() &&
@@ -505,7 +577,7 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
                         node->setCommentsId(nodeAttributesRecord.getComments());
 
                         // Load child nodes
-                        success = loadChildNodesFromDatabase(revisionId, node);
+                        success = loadDataModelItemChildrenFromDatabase(revisionId, node);
                     }
                 }
                 else
@@ -520,8 +592,8 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
     return success;
 }
 
-bool DataModel::DataModel::loadChildNodesFromDatabase(const IntegerField &revisionId,
-                                                      DataModelItem *parent)
+bool DataModel::DataModel::loadDataModelItemChildrenFromDatabase(const IntegerField &revisionId,
+                                                                 DataModelItem *parent)
 {
     bool success = false;
 
@@ -534,7 +606,7 @@ bool DataModel::DataModel::loadChildNodesFromDatabase(const IntegerField &revisi
         {
             // Load child node from the database and add it to the parent node
             DataModelItem *child = new DataModelItem();
-            success = loadNodeFromDatabase(childNodeRecordItem, revisionId, parent, child);
+            success = loadDataModelItemFromDatabase(childNodeRecordItem, revisionId, parent, child);
 
             if (success)
             {

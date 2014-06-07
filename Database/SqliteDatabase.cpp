@@ -1986,7 +1986,14 @@ NodeDescriptionRecord SqliteDatabase::getNodeDescriptionFromQuery(const QSqlQuer
 
         if (success)
         {
-            nodeDescription.setText(textValue);
+            if (textValue.isNull())
+            {
+                success = false;
+            }
+            else
+            {
+                nodeDescription.setText(textValue);
+            }
         }
     }
 
