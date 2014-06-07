@@ -14,6 +14,7 @@ TEMPLATE = app
 # ---- Main ----
 SOURCES += \
     main.cpp \
+    DataModel/DataModelItem.cpp
 
 # ---- Database ----
 SOURCES += \
@@ -46,7 +47,8 @@ HEADERS  += \
     Database/RevisionRecord.h \
     Database/NodeNameRecord.h \
     Database/NodeDescriptionRecord.h \
-    Database/NodeAttributesRecord.h
+    Database/NodeAttributesRecord.h \
+    DataModel/DataModelItem.h
 
 # ---- Data Model ----
 HEADERS  += \

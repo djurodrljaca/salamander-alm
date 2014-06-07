@@ -27,7 +27,7 @@ using namespace DataModel;
 
 DataModel::DataModel::DataModel()
     : m_database(),
-      m_nodeList(),
+      m_itemList(),
       m_revisionId(),
       m_userId()
 {
@@ -35,8 +35,8 @@ DataModel::DataModel::DataModel()
 
 DataModel::DataModel::~DataModel()
 {
-    // Delete all items in the node list
-    qDeleteAll(m_nodeList);
+    // Delete all items in the list
+    qDeleteAll(m_itemList);
 }
 
 bool DataModel::DataModel::start()
@@ -119,10 +119,10 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
         }
 
         // Clear old data model
-        if (success && !m_nodeList.isEmpty())
+        if (success && !m_itemList.isEmpty())
         {
-            qDeleteAll(m_nodeList);
-            m_nodeList.clear();
+            qDeleteAll(m_itemList);
+            m_itemList.clear();
         }
 
         // Load all root nodes that belong to the selected revision
@@ -137,7 +137,7 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
                 foreach (const NodeRecord rootNodeRecordItem, rootNodeRecordList)
                 {
                     // Load root node from the database
-                    Node *rootNode = new Node();
+                    DataModelItem *rootNode = new DataModelItem();
                     success = loadNodeFromDatabase(rootNodeRecordItem, revisionId, NULL, rootNode);
 
                     if (success)
@@ -145,7 +145,7 @@ bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
                         // Add only valid root nodes to the list
                         if (rootNode->isValid())
                         {
-                            m_nodeList.append(rootNode);
+                            m_itemList.append(rootNode);
                         }
                         else
                         {
@@ -213,8 +213,8 @@ bool DataModel::DataModel::login(const QString &username, const QString &passwor
 
 bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
                                                 const IntegerField &revisionId,
-                                                Node *parent,
-                                                Node *node)
+                                                DataModelItem *parent,
+                                                DataModelItem *node)
 {
     // Check if input parameters are valid
     bool success = (nodeRecord.isValid() &&
@@ -309,7 +309,8 @@ bool DataModel::DataModel::loadNodeFromDatabase(const NodeRecord &nodeRecord,
     return success;
 }
 
-bool DataModel::DataModel::loadChildNodesFromDatabase(const IntegerField &revisionId, Node *parent)
+bool DataModel::DataModel::loadChildNodesFromDatabase(const IntegerField &revisionId,
+                                                      DataModelItem *parent)
 {
     bool success = false;
 
@@ -321,7 +322,7 @@ bool DataModel::DataModel::loadChildNodesFromDatabase(const IntegerField &revisi
         foreach (const Database::NodeRecord childNodeRecordItem, childNodeRecordList)
         {
             // Load child node from the database and add it to the parent node
-            Node *child = new Node();
+            DataModelItem *child = new DataModelItem();
             success = loadNodeFromDatabase(childNodeRecordItem, revisionId, parent, child);
 
             if (success)

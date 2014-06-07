@@ -24,7 +24,7 @@
 #define DATAMODEL_DATAMODEL_H
 
 #include "Database/SqliteDatabase.h"
-#include "DataModel/Node.h"
+#include "DataModel/DataModelItem.h"
 #include <QtCore/QList>
 
 namespace DataModel
@@ -45,12 +45,13 @@ public:
 private:
     bool loadNodeFromDatabase(const Database::NodeRecord &nodeRecord,
                               const Database::IntegerField &revisionId,
-                              Node *parent,
-                              Node *node);
-    bool loadChildNodesFromDatabase(const Database::IntegerField &revisionId, Node *parent);
+                              DataModelItem *parent,
+                              DataModelItem *node);
+    bool loadChildNodesFromDatabase(const Database::IntegerField &revisionId,
+                                    DataModelItem *parent);
 
     Database::SqliteDatabase m_database;
-    QList<Node *> m_nodeList; // TODO: replace with DataModelItem list?
+    QList<DataModelItem *> m_itemList;
     Database::IntegerField m_revisionId;
     Database::IntegerField m_userId;
 };
