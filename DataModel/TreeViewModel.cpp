@@ -35,14 +35,40 @@ TreeViewModel::~TreeViewModel()
 {
 }
 
+bool TreeViewModel::isStarted() const
+{
+    return m_dataModel.isStarted();
+}
+
 bool DataModel::TreeViewModel::start()
 {
-    return m_dataModel.start();
+    bool success = false;
+
+    if (!m_dataModel.isStarted())
+    {
+        // Notify the view that the data model will be reset
+        beginResetModel();
+
+        // Start data model
+        success = m_dataModel.start();
+
+        // Notify the view that the data model reset has finished
+        endResetModel();
+    }
+
+    return success;
 }
 
 void DataModel::TreeViewModel::stop()
 {
+    // Notify the view that the data model will be reset
+    beginResetModel();
+
+    // Stop data model
     m_dataModel.stop();
+
+    // Notify the view that the data model reset has finished
+    endResetModel();
 }
 
 bool DataModel::TreeViewModel::load()

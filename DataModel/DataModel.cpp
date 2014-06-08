@@ -40,12 +40,17 @@ DataModel::DataModel::~DataModel()
     qDeleteAll(m_itemList);
 }
 
+bool DataModel::DataModel::isStarted() const
+{
+    return m_database.isConnected();
+}
+
 bool DataModel::DataModel::start()
 {
-    // Connect to the database
-    bool success = m_database.isConnected();
+    bool success = false;
 
-    if (!success)
+    // Connect to the database
+    if (!m_database.isConnected())
     {
         success = m_database.connect();
     }
@@ -78,6 +83,10 @@ void DataModel::DataModel::stop()
     {
         m_database.disconnect();
     }
+
+    qDeleteAll(m_itemList);
+    m_itemList.clear();
+    m_itemMap.clear();
 }
 
 bool DataModel::DataModel::load(const IntegerField &requestedRevisionId)
@@ -227,6 +236,8 @@ bool DataModel::DataModel::addItem(const IntegerField &parentId,
                                    const QString &name,
                                    const QString &description)
 {
+    // TODO: refresh everything after adding an item?
+
     bool success = false;
 
     // Check if parent ID is valid
@@ -454,6 +465,8 @@ Node DataModel::DataModel::getNode(const IntegerField &id) const
 
 bool DataModel::DataModel::updateNode(const Node &node)
 {
+    // TODO: refresh everything after an update?
+
     bool success = node.isValid();
 
     if (success && node.hasChanged())
@@ -466,7 +479,7 @@ bool DataModel::DataModel::updateNode(const Node &node)
         if (success)
         {
             const IntegerField originalNodeAttributesRecordId =
-                    m_database.getNodeAttributesId(node.getId(), m_revisionId, &success);
+                    m_database.getNodeAttributesId(node.getId(), revisionId, &success);
 
             if (success)
             {

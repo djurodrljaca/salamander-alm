@@ -25,24 +25,32 @@
 #include "Database/IntegerField.h"
 #include "Database/NodeRecord.h"
 #include "NewNodeDialog.h"
-#include "DisplayNodeDialog.h"
 #include <QtCore/QtDebug>
 
-MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    m_treeViewModel(this)
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+      ui(new Ui::MainWindow),
+      m_treeViewModel(this)
 {
     ui->setupUi(this);
 
     ui->view_treeView->setModel(&m_treeViewModel);
     ui->view_treeView->header()->hide();
 
-    connect(ui->view_treeView, SIGNAL(doubleClicked(QModelIndex)),
-            this, SLOT(editNode(QModelIndex)));
-    connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->connect_pushButton, SIGNAL(clicked()), this, SLOT(connectButtonPushed()));
-    connect(ui->addProject_pushButton, SIGNAL(clicked()), this, SLOT(addProjectButtonPushed()));
+    connect(ui->view_treeView, SIGNAL(clicked(QModelIndex)),
+            this, SLOT(loadNode(QModelIndex)));
+    connect(ui->action_Quit, SIGNAL(triggered()),
+            this, SLOT(close()));
+    connect(ui->connect_pushButton, SIGNAL(clicked()),
+            this, SLOT(connectToModel()));
+    connect(ui->addProject_pushButton, SIGNAL(clicked()),
+            this, SLOT(addProject()));
+    connect(ui->saveNode_pushButton, SIGNAL(clicked()),
+            this, SLOT(saveNode()));
+    connect(ui->revertNode_pushButton, SIGNAL(clicked()),
+            this, SLOT(revertNode()));
+    connect(ui->removeNode_pushButton, SIGNAL(clicked()),
+            this, SLOT(removeNode()));
 }
 
 MainWindow::~MainWindow()
@@ -51,38 +59,104 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::editNode(QModelIndex modelIndex)
+void MainWindow::loadNode(QModelIndex modelIndex)
 {
-    DataModel::Node node = m_treeViewModel.getNode(modelIndex);
+    DataModel::Node node;
+
+    if (modelIndex.isValid())
+    {
+        node = m_treeViewModel.getNode(modelIndex);
+    }
 
     if (node.isValid())
     {
-        DisplayNodeDialog dialog;
-        dialog.setProjectName(node.getName());
-        dialog.setProjectDescription(node.getDescription());
+        ui->nodeName_lineEdit->setText(node.getName());
+        ui->nodeName_lineEdit->setEnabled(true);
+        ui->nodeName_lineEdit->setReadOnly(false);
 
-        int result = dialog.exec();
+        ui->nodeDescription_plainTextEdit->setPlainText(node.getDescription());
+        ui->nodeDescription_plainTextEdit->setEnabled(true);
+        ui->nodeDescription_plainTextEdit->setReadOnly(false);
 
-        if (result == QDialog::Accepted)
+        ui->removeNode_pushButton->setEnabled(true);
+        ui->saveNode_pushButton->setEnabled(true);
+        ui->revertNode_pushButton->setEnabled(true);
+    }
+    else
+    {
+        clearNodeView();
+    }
+}
+
+void MainWindow::connectToModel()
+{
+    if (m_treeViewModel.isStarted())
+    {
+        m_treeViewModel.stop();
+        ui->connect_pushButton->setText("Connect");
+    }
+    else
+    {
+        bool success = m_treeViewModel.start();
+
+        if (success)
+        {
+            success = m_treeViewModel.load();
+        }
+
+        if (success)
+        {
+            ui->connect_pushButton->setText("Disconnect");
+        }
+        else
+        {
+            m_treeViewModel.stop();
+        }
+    }
+
+    clearNodeView();
+}
+
+void MainWindow::addProject()
+{
+    NewNodeDialog dialog;
+    int result = dialog.exec();
+
+    if (result == QDialog::Accepted)
+    {
+        const QString name = dialog.getProjectName();
+        const QString description = dialog.getProjectDescription();
+
+        m_treeViewModel.addItem(QModelIndex(),
+                                Database::NodeType_Project,
+                                name,
+                                description);
+    }
+}
+
+void MainWindow::saveNode()
+{
+    const QModelIndex modelIndex = getSelectedNodeModelIndex();
+
+    if (modelIndex.isValid())
+    {
+        DataModel::Node node = m_treeViewModel.getNode(modelIndex);
+
+        if (node.isValid())
         {
             // Check if any of the node properties changed
-            const QString name = dialog.getProjectName();
+            const QString name = ui->nodeName_lineEdit->text();
 
             if (name != node.getName())
             {
                 node.setName(name);
             }
 
-            const QString description = dialog.getProjectDescription();
+            const QString description = ui->nodeDescription_plainTextEdit->toPlainText();
 
             if (description != node.getDescription())
             {
                 node.setDescription(description);
-            }
-
-            if (dialog.getRemoveNode())
-            {
-                node.setActive(false);
             }
 
             // Updated changed properties
@@ -94,33 +168,75 @@ void MainWindow::editNode(QModelIndex modelIndex)
     }
 }
 
-void MainWindow::connectButtonPushed()
+void MainWindow::revertNode()
 {
-    bool success = m_treeViewModel.start();
-    qDebug() << "Data model started:" << success;
+    const QModelIndex modelIndex = getSelectedNodeModelIndex();
 
-    if (success)
+    if (modelIndex.isValid())
     {
-        success = m_treeViewModel.load();
-        qDebug() << "Data model loaded:" << success;
+        DataModel::Node node = m_treeViewModel.getNode(modelIndex);
+
+        if (node.isValid())
+        {
+            ui->nodeName_lineEdit->setText(node.getName());
+            ui->nodeDescription_plainTextEdit->setPlainText(node.getDescription());
+        }
     }
 }
 
-void MainWindow::addProjectButtonPushed()
+void MainWindow::removeNode()
 {
-    NewNodeDialog dialog;
+    const QModelIndex modelIndex = getSelectedNodeModelIndex();
 
-    int result = dialog.exec();
-
-    if (result == QDialog::Accepted)
+    if (modelIndex.isValid())
     {
-        const QString name = dialog.getProjectName();
-        const QString description = dialog.getProjectDescription();
+        DataModel::Node node = m_treeViewModel.getNode(modelIndex);
 
-        bool success = m_treeViewModel.addItem(QModelIndex(),
-                                               Database::NodeType_Project,
-                                               name,
-                                               description);
-        qDebug() << "MainWindow::addButtonPushed: project added:" << success;
+        if (node.isValid())
+        {
+            // Deactivate node
+            node.setActive(false);
+
+            if (node.hasChanged())
+            {
+                if (m_treeViewModel.updateNode(node))
+                {
+                    clearNodeView();
+                }
+            }
+        }
     }
+}
+
+void MainWindow::clearNodeView()
+{
+    ui->nodeName_lineEdit->clear();
+    ui->nodeName_lineEdit->setEnabled(false);
+    ui->nodeName_lineEdit->setReadOnly(true);
+
+    ui->nodeDescription_plainTextEdit->clear();
+    ui->nodeDescription_plainTextEdit->setEnabled(false);
+    ui->nodeDescription_plainTextEdit->setReadOnly(true);
+
+    ui->removeNode_pushButton->setEnabled(false);
+    ui->saveNode_pushButton->setEnabled(false);
+    ui->revertNode_pushButton->setEnabled(false);
+}
+
+QModelIndex MainWindow::getSelectedNodeModelIndex() const
+{
+    QModelIndex modelIndex;
+    QItemSelectionModel *selectionModel = ui->view_treeView->selectionModel();
+
+    if (selectionModel != NULL)
+    {
+        QModelIndexList modelIndexList = selectionModel->selectedIndexes();
+
+        if (!modelIndexList.isEmpty())
+        {
+            modelIndex = modelIndexList.at(0);
+        }
+    }
+
+    return modelIndex;
 }

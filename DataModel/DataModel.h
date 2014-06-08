@@ -37,6 +37,7 @@ public:
     DataModel();
     ~DataModel();
 
+    bool isStarted() const;
     bool start();
     void stop();
 

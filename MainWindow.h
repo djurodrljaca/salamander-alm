@@ -39,11 +39,17 @@ public:
     ~MainWindow();
 
 private slots:
-    void editNode(QModelIndex modelIndex);
-    void connectButtonPushed();
-    void addProjectButtonPushed();
+    void loadNode(QModelIndex modelIndex);
+    void connectToModel();
+    void addProject();
+    void saveNode();
+    void revertNode();
+    void removeNode();
 
 private:
+    void clearNodeView();
+    QModelIndex getSelectedNodeModelIndex() const;
+
     Ui::MainWindow *ui;
     DataModel::TreeViewModel m_treeViewModel;
 };

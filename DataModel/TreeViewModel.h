@@ -37,6 +37,7 @@ public:
     TreeViewModel(QObject *parent = NULL);
     ~TreeViewModel();
 
+    bool isStarted() const;
     bool start();
     void stop();
 

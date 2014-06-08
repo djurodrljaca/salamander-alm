@@ -63,18 +63,15 @@ SOURCES += \
 
 # ---- GUI ----
 HEADERS  += \
-    DisplayNodeDialog.h \
     MainWindow.h \
     NewNodeDialog.h
 
 SOURCES += \
-    DisplayNodeDialog.cpp \
     MainWindow.cpp \
     NewNodeDialog.cpp
 
 FORMS    += \
     MainWindow.ui \
-    DisplayNodeDialog.ui \
     NewNodeDialog.ui
 
 # ---- Resources ----

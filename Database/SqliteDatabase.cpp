@@ -1070,7 +1070,12 @@ IntegerField SqliteDatabase::getNodeAttributesId(const IntegerField &nodeId,
         {
             // Prepare value and execute query
             QVariant nodeIdValue = convertIntegerToVariant(nodeId, &success);
-            QVariant revisionIdValue = convertIntegerToVariant(revisionId, &success);
+            QVariant revisionIdValue;
+
+            if (success)
+            {
+                revisionIdValue = convertIntegerToVariant(revisionId, &success);
+            }
 
             if (success)
             {
