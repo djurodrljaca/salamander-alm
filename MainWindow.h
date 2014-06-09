@@ -41,7 +41,7 @@ public:
 private slots:
     void loadNode(QModelIndex modelIndex);
     void connectToModel();
-    void addProject();
+    void addNode();
     void saveNode();
     void revertNode();
     void removeNode();

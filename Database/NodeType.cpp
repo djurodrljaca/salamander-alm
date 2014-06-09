@@ -23,6 +23,8 @@
 #include "Database/NodeType.h"
 #include <QtCore/QString>
 
+using namespace Database;
+
 bool Database::isNodeTypeValid(const NodeType nodeType)
 {
     bool valid = false;
@@ -30,6 +32,7 @@ bool Database::isNodeTypeValid(const NodeType nodeType)
     switch (nodeType)
     {
         case NodeType_Project:
+        case NodeType_Requirement:
         {
             valid = true;
             break;
@@ -44,7 +47,7 @@ bool Database::isNodeTypeValid(const NodeType nodeType)
     return valid;
 }
 
-Database::IntegerField Database::convertNodeTypeToInteger(const NodeType nodeType, bool *ok)
+IntegerField Database::convertNodeTypeToInteger(const NodeType nodeType, bool *ok)
 {
     IntegerField integer;
     bool success = false;
@@ -63,7 +66,7 @@ Database::IntegerField Database::convertNodeTypeToInteger(const NodeType nodeTyp
     return integer;
 }
 
-Database::NodeType Database::convertIntegerToNodeType(const IntegerField &integer, bool *ok)
+NodeType Database::convertIntegerToNodeType(const IntegerField &integer, bool *ok)
 {
     bool success = false;
     NodeType nodeType = NodeType_Invalid;
@@ -80,6 +83,7 @@ Database::NodeType Database::convertIntegerToNodeType(const IntegerField &intege
     }
 
     if (ok != NULL)
+        success = true;
     {
         *ok = success;
     }
@@ -87,23 +91,73 @@ Database::NodeType Database::convertIntegerToNodeType(const IntegerField &intege
     return nodeType;
 }
 
-QDebug operator<<(QDebug dbg, const Database::NodeType nodeType)
+QDebug operator<<(QDebug dbg, const NodeType nodeType)
 {
+    dbg.nospace() << convertNodeTypeToString(nodeType);
+    return dbg.space();
+}
+
+QString Database::convertNodeTypeToString(const NodeType nodeType, bool *ok)
+{
+    bool success = false;
+    QString value;
+
     switch (nodeType)
     {
-        case Database::NodeType_Project:
+        case NodeType_Project:
         {
-            dbg.nospace() << "Project";
+            value = "Project";
+            success = true;
             break;
         }
 
-        case Database::NodeType_Invalid:
+        case NodeType_Requirement:
+        {
+            value = "Requirement";
+            success = true;
+            break;
+        }
+
+        case NodeType_Invalid:
         default:
         {
-            dbg.nospace() << "Invalid";
+            value = "Invalid";
             break;
         }
     }
 
-    return dbg.space();
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return value;
+}
+
+NodeType Database::convertStringToNodeType(const QString &value, bool *ok)
+{
+    bool success = false;
+    NodeType nodeType;
+
+    if (value == QString("Project"))
+    {
+        nodeType = NodeType_Project;
+        success = true;
+    }
+    else if (value == QString("Requirement"))
+    {
+        nodeType = NodeType_Requirement;
+        success = true;
+    }
+    else
+    {
+        nodeType = NodeType_Invalid;
+    }
+
+    if (ok != NULL)
+    {
+        *ok = success;
+    }
+
+    return nodeType;
 }

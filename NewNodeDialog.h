@@ -1,6 +1,7 @@
 #ifndef NEWPROJECTDIALOG_H
 #define NEWPROJECTDIALOG_H
 
+#include "Database/NodeType.h"
 #include <QDialog>
 
 namespace Ui {
@@ -15,6 +16,7 @@ public:
     explicit NewNodeDialog(QWidget *parent = 0);
     ~NewNodeDialog();
 
+    Database::NodeType getType() const;
     QString getProjectName() const;
     QString getProjectDescription() const;
 

@@ -102,20 +102,34 @@ bool TreeViewModel::addItem(const QModelIndex &index,
         // Add child item to the model
 
         // Get id of the selected node
-        // TODO: implement
+        DataModelItem *item = getDataModelItem(index);
+        success = (item != NULL);
+
+        if (success)
+        {
+            IntegerField parentId = item->getId();
+
+            // Notify the view that a row is about to be inserted
+            const int row = item->getChildCount();
+            beginInsertRows(index, row, row);
+
+            // Add item to the model
+            success = m_dataModel.addItem(parentId, nodeType, name, description);
+
+            // Notify the view that row insertion has finished
+            endInsertRows();
+        }
     }
     else
     {
         // Add root item to the model
 
         // Notify the view that a row is about to be inserted
-        int row = m_dataModel.getRootItemCount();
+        const int row = m_dataModel.getRootItemCount();
         beginInsertRows(QModelIndex(), row, row);
 
         // Add item to the model
         success = m_dataModel.addItem(IntegerField(), nodeType, name, description);
-
-        row = m_dataModel.getRootItemCount();
 
         // Notify the view that row insertion has finished
         endInsertRows();

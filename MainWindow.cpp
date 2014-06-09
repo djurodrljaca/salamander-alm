@@ -43,8 +43,8 @@ MainWindow::MainWindow(QWidget *parent)
             this, SLOT(close()));
     connect(ui->connect_pushButton, SIGNAL(clicked()),
             this, SLOT(connectToModel()));
-    connect(ui->addProject_pushButton, SIGNAL(clicked()),
-            this, SLOT(addProject()));
+    connect(ui->addNode_pushButton, SIGNAL(clicked()),
+            this, SLOT(addNode()));
     connect(ui->saveNode_pushButton, SIGNAL(clicked()),
             this, SLOT(saveNode()));
     connect(ui->revertNode_pushButton, SIGNAL(clicked()),
@@ -70,6 +70,8 @@ void MainWindow::loadNode(QModelIndex modelIndex)
 
     if (node.isValid())
     {
+        ui->nodeType_lineEdit->setText(Database::convertNodeTypeToString(node.getType()));
+
         ui->nodeName_lineEdit->setText(node.getName());
         ui->nodeName_lineEdit->setEnabled(true);
         ui->nodeName_lineEdit->setReadOnly(false);
@@ -117,20 +119,26 @@ void MainWindow::connectToModel()
     clearNodeView();
 }
 
-void MainWindow::addProject()
+void MainWindow::addNode()
 {
     NewNodeDialog dialog;
     int result = dialog.exec();
 
     if (result == QDialog::Accepted)
     {
+        const QModelIndex modelIndex = getSelectedNodeModelIndex();
+        const Database::NodeType nodeType = dialog.getType();
         const QString name = dialog.getProjectName();
         const QString description = dialog.getProjectDescription();
 
-        m_treeViewModel.addItem(QModelIndex(),
-                                Database::NodeType_Project,
-                                name,
-                                description);
+        if (modelIndex.isValid())
+        {
+            m_treeViewModel.addItem(modelIndex, nodeType, name, description);
+        }
+        else
+        {
+            m_treeViewModel.addItem(QModelIndex(), nodeType, name, description);
+        }
     }
 }
 
@@ -210,6 +218,8 @@ void MainWindow::removeNode()
 
 void MainWindow::clearNodeView()
 {
+    ui->nodeType_lineEdit->clear();
+
     ui->nodeName_lineEdit->clear();
     ui->nodeName_lineEdit->setEnabled(false);
     ui->nodeName_lineEdit->setReadOnly(true);

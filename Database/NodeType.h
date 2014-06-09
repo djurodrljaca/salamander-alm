@@ -32,12 +32,16 @@ namespace Database
 enum NodeType
 {
     NodeType_Invalid = 0,
-    NodeType_Project
+    NodeType_Project,
+    NodeType_Requirement
 };
 
 bool isNodeTypeValid(const NodeType nodeType);
 IntegerField convertNodeTypeToInteger(const NodeType nodeType, bool *ok = NULL);
 NodeType convertIntegerToNodeType(const IntegerField &integer, bool *ok = NULL);
+
+QString convertNodeTypeToString(const NodeType nodeType, bool *ok = NULL);
+NodeType convertStringToNodeType(const QString &value, bool *ok = NULL);
 
 }
 
