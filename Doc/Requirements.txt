@@ -2,22 +2,43 @@
 
 Main part of the ALM shall be projects.
 
-1.1 Project identification
 
-TODO (id, name, description etc.)
+1.1. Project information
+
+Projects shall contain this information:
+- Project identification number that is unique over all projects
+- A name (short text)
+- A desctiption (text)
+
+
+1.2 Project trackers
+
+A project shall be able to contain any number of trackers. Projects are free to decide how many trackers they need as well as the structure of of each tracker.
+
 
 2. Trackers
 
 Each project shall be able to contain trackers.
 
-2.1. Artifacts
+
+2.1. Tracker information
+
+Trackers shall contain this information:
+- Tracker identification number that is unique over all trackers in all projects
+- A name (short text)
+- A desctiption (text)
+- A label that shall be used for referencing artifacts of this tracker
+
+
+2.2. Artifacts
 
 Trackers shall contain artifacts. An artifact is a collection of (data) fields.
 
-2.2. Fixed fields in artifacts
+
+2.3. Fixed fields in artifacts
 
 Trackers shall have a small set of fields that shall be present in each artifact:
-- Identification number that is unique over all projects and trackers ("globaly" unique)
+- Artifact identification number that is unique over all artifacts in all projects and trackers
 - A name (short text)
 - ID of the user that created the artifact
 - Timestamp when artifact was created
@@ -25,9 +46,56 @@ Trackers shall have a small set of fields that shall be present in each artifact
 - Timestamp when artifact was last updated
 - State of the artifact (active or deleted)
 
-2.3. Custom fields in artifacts
+
+2.4. Custom fields in artifacts
 
 Trackers shall be able to contain a custom set of fields in each artifact for a specific tracker.
 
-Each of these custom fields shall contain these basic information:
-- TODO (id, name, description etc.)
+Each of these custom fields shall contain the following attributes:
+- Field identification number that is unique over all fields in all projects and trackers
+- A name (short text)
+- A description (text)
+- Other attributes that are specific to the field's type
+
+
+2.5. Comments
+
+Each artifact shall be able to contain comments. Comments shall contain the following information:
+- User identification that posted the comment
+- Timestamp when the comment was submitted
+- Comment text
+
+
+2.6. Editing comments
+
+Comment could be edited. It has to be clear who edited the comment and when. It shall be possible to access all versions of the comment (from the original to the latest).
+
+
+2.7. File attachments
+
+TODO
+
+
+2.8. Links between artifacts
+
+TODO
+
+
+2.9. Field layout
+
+TODO
+
+
+2.10. Tracker reports
+
+TODO (filtering of artifacts)
+
+
+3. Users and user groups
+
+
+4. Access control
+
+
+5. Version control
+
