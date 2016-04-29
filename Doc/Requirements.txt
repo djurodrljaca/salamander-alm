@@ -88,22 +88,22 @@ A tracker shall contain information regarding layout of fields in a tracker.
 
 2.10. Tracker reports
 
-TODO (filtering of artifacts)
+Trackers shall be able to list all artifacts of a tracker that match a specified filter. It shall be possible to define a set of filters and a relationship between them (AND, OR, NOT, <=, <, >, >=).
 
 
 2.11. Workflow
 
-TODO (allowed transitions between different values)
+Trackers shall be able to define transitions from one value of a field to another value of the same field. It shall also be possible to allow the transitions for specific users or user groups.
 
 
 2.12. Actions on specific events
 
-TODO
+Trackers shall be able to define an action for some events. For example in transitions of a workflow.
 
 
 2.13. Locking of and artifact
 
-TODO
+It shall be possible to lock an artifact so that it can no longer be updated untile the lock is released. This can be useful for protection of an artifact from accidental or unauthorised changes.
 
 
 3. Users and user groups
@@ -113,4 +113,7 @@ TODO
 
 
 5. Version control
+
+TODO: revisions
+TODO: tagging, branching trackers
 
