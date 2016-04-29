@@ -73,22 +73,37 @@ Comment could be edited. It has to be clear who edited the comment and when. It 
 
 2.7. File attachments
 
-TODO
+There should be a possibility for attaching files to an artifact.
 
 
 2.8. Links between artifacts
 
-TODO
+It shall be possible to link one artifact to another. Additionaly it shall be possible to define only a specific set of trackers where to which links can be made. The direction of linking shall be available.
 
 
-2.9. Field layout
+2.9. Layout of fields in a tracker
 
-TODO
+A tracker shall contain information regarding layout of fields in a tracker.
 
 
 2.10. Tracker reports
 
 TODO (filtering of artifacts)
+
+
+2.11. Workflow
+
+TODO (allowed transitions between different values)
+
+
+2.12. Actions on specific events
+
+TODO
+
+
+2.13. Locking of and artifact
+
+TODO
 
 
 3. Users and user groups
