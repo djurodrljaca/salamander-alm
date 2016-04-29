@@ -1,0 +1,33 @@
+1. Projects
+
+Main part of the ALM shall be projects.
+
+1.1 Project identification
+
+TODO (id, name, description etc.)
+
+2. Trackers
+
+Each project shall be able to contain trackers.
+
+2.1. Artifacts
+
+Trackers shall contain artifacts. An artifact is a collection of (data) fields.
+
+2.2. Fixed fields in artifacts
+
+Trackers shall have a small set of fields that shall be present in each artifact:
+- Identification number that is unique over all projects and trackers ("globaly" unique)
+- A name (short text)
+- ID of the user that created the artifact
+- Timestamp when artifact was created
+- ID of the last user that updated the artifact
+- Timestamp when artifact was last updated
+- State of the artifact (active or deleted)
+
+2.3. Custom fields in artifacts
+
+Trackers shall be able to contain a custom set of fields in each artifact for a specific tracker.
+
+Each of these custom fields shall contain these basic information:
+- TODO (id, name, description etc.)
