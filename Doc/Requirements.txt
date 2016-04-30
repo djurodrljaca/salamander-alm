@@ -95,7 +95,7 @@ Trackers shall be able to list all artifacts of a tracker that match a specified
 
 2.11. Workflow
 
-Trackers shall be able to define transitions from one value of a field to another value of the same field. It shall also be possible to allow the transitions for specific users or user groups.
+Trackers shall be able to define transitions from one value of a field to another value of the same field. It shall also be possible to allow the transitions only if defined conditions are met (for example only specific users and user groups can make a transition, transition can be made only if a specific set of fields contains a specific set or range of values).
 
 
 2.12. Actions on specific events
@@ -140,16 +140,16 @@ Each user group shall have the following information:
 General user groups shall be available to all projects, but project user groups shall only be available to a specific project.
 
 
-3.3. Builtin users
+3.3. Built-in users
 
-There shall be only one builtin user "Administrator" that is part of the "Administrators" user group.
+There shall be only one built-in user "Administrator" that is part of the "Administrators" user group.
 
 "Administrator" shall be used at least for initial administration until other administrators are added, but it shall not be possible to disable this user.
 
 
-3.4. Builtin general user groups
+3.4. Built-in general user groups
 
-There shall be these builtin general user groups:
+There shall be these built-in general user groups:
 - Administrators
 - Users
 
@@ -160,11 +160,11 @@ There shall be these builtin general user groups:
 All general user groups shall be available to all projects.
 
 
-3.5. Builtin project user groups
+3.5. Built-in project user groups
 
 Each project shall contain its own project user group.
 
-There shall be these builtin general user groups:
+There shall be these built-in general user groups:
 - Project administrators
 - Project users
 
@@ -175,7 +175,34 @@ There shall be these builtin general user groups:
 
 4. Access control
 
-TODO
+System shall allow access to certain parts of the system only to authorised users and user groups.
+
+There shall be different access permissions:
+- Read (can only read data)
+- Write (can read and write data)
+
+
+4.1. Access to project
+
+System shall limit access to project data only to the users in "Project administrators" user group and to users and user groups that are explicitly allowed access to project data.
+
+Project data represents:
+- Project information
+- Trackers
+
+Users with read access to the project shall be able to read the project information and access the list of trackers, but users with write access shall be able to modify the project information and create, delete (disable), and configure trackers.
+
+Users in "Project administrators" user group shall have write access to the project and users in "Project users" user group shall have read access to the project.
+
+
+4.2. Access to trackers
+
+System shall allow granting read or write access to specific fields in a tracker to a specific set of users and user groups.
+
+
+4.3. Access to specific artifacts
+
+System shall allow granting read or write access to specific artifacts in a tracker to a specific set of users and user groups.
 
 
 5. Version control
@@ -215,3 +242,35 @@ It shall be possible to create a read-only snapshot of a project - a "tag".
 It shall be possible to create branch (or a clone) of a specific historical state of a project to a new project.
 
 For example all trackers and artifacts from that specific historical state of a project shall be copied to a new project. New IDs shall be creadted for all data that contains an ID and all references to these IDs in the new project shall be replaced with their new references while keeping the information of where it was copied from.
+
+
+6. Integration with other systems
+
+It shall be possible to integrate this system with other systems.
+
+
+6.1. Integration with version control systems
+
+It shall be possible to integrate a version control system (VCS, for example Subversion, Git etc.) with this system. Special "hooks" shall be required for integration.
+
+For example a hook can be created to allow committing of a change in the VCS only if it is referencing an existing and active artifact in a tracker in a specific project and if the reference is valid then the reference can be linked to that artifact.
+
+6.2. Integration with a user authentication system
+
+TODO: for example LDAP
+
+
+6.3. Integration with a file storage system
+
+TODO: for example local storage, FTP, Samba, NFS etc.
+
+
+6.4. Integration with a documentation system
+
+TODO: for example wiki
+
+
+6.5. Integration with a continous integration system
+
+TODO: for example Jenkins
+
