@@ -132,12 +132,12 @@ Each user group shall have the following information:
 - User group identification number that is unique over all projects
 - User group name
 - Display name
-- Type of a user group (general, project)
+- Type of a user group (system, project)
 - State of the user group (active or inactive/deleted/disabled)
 - List of users that belong to a specific group
 - Project ID to which a specific user group belongs to (only for project user groups)
 
-General user groups shall be available to all projects, but project user groups shall only be available to a specific project.
+System user groups shall be available to all projects, but project user groups shall only be available to a specific project.
 
 
 3.3. Built-in users
@@ -147,9 +147,9 @@ There shall be only one built-in user "Administrator" that is part of the "Admin
 "Administrator" shall be used at least for initial administration until other administrators are added, but it shall not be possible to disable this user.
 
 
-3.4. Built-in general user groups
+3.4. Built-in system user groups
 
-There shall be these built-in general user groups:
+There shall be these built-in system user groups:
 - Administrators
 - Users
 
@@ -157,14 +157,14 @@ There shall be these built-in general user groups:
 
 "Users" user group shall cotain all users that are registered on the system. All users shall be automatically added to this user group at regstration and it shall not be possible to remove them from this user group. They shall not have access to the core part of the system, but only to the projects they are added to.
 
-All general user groups shall be available to all projects.
+All system user groups shall be available to all projects.
 
 
 3.5. Built-in project user groups
 
 Each project shall contain its own project user group.
 
-There shall be these built-in general user groups:
+There shall be these built-in system user groups:
 - Project administrators
 - Project users
 
@@ -273,4 +273,3 @@ TODO: for example wiki
 6.5. Integration with a continous integration system
 
 TODO: for example Jenkins
-

@@ -1,208 +1,189 @@
 -------------------------------------------------
-| Node
+| Revision
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-	- Parent: integer + null, forgein key to Node.Id
-	- Type: integer (NodeType enum)
+    - Id: integer, primary key, auto-increment
+    - Timestamp: datetime
+    - UserId: integer
 
 Constraints:
-	- Parent --> Node.Id
-
--------------------------------------------------
-| NodeType
--------------------------------------------------
-Values:
-	- 1: Project
-	- 2: ProjectVersion
-	- ...
-
--------------------------------------------------
-| UserType
--------------------------------------------------
-Values:
-	- 1: Administrator
-	- 2: User
-	- ...
+    - UserId --> User.Id
 
 -------------------------------------------------
 | User
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-	- Type: integer, enum UserType
-	- Full Name: text
-	- Username: text, unique
-	- Password: text
+    - Id: integer, primary key, auto-increment
 
 -------------------------------------------------
-| Revision
+| UserInfo
 -------------------------------------------------
 Table:
-	- Id: integer, primary key
-	- Timestamp: datetime
-	- User: integer, forgein key to User.Id
+    - Id: integer, primary key, auto-increment
+    - UserId: integer
+    - UserName: text
+    - DisplayName: text
+    - Email: text
+    - AuthenticationMethod: text
+    - Active: boolean
+    - RevisionId: integer
 
 Constraints:
-	- User --> User.Id
+    - UserId --> User.Id
+    - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| NodeName
+| UserBasicAuthentication
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-	- Text: text
-
--------------------------------------------------
-| NodeDescription
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Text: text
-
--------------------------------------------------
-| NodeAttributes
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Node: integer, forgein key to Node.Id
-	- Revision: integer, forgein key to Revision.Id
-	- Name: integer, forgein key to NodeName.Id
-	- Description: integer + null, forgein key to NodeDescription.Id
-	- References: integer + null, forgein key to NodeReferenceList.Id
-	- Attachments: integer + null, forgein key to NodeAttachmentList.Id
-	- Comments: integer + null, forgein key to NodeCommentList.Id
-	- IsActive: boolean
+    - Id: integer, primary key, auto-increment
+    - UserId: integer
+    - PasswordHash: text
+    - RevisionId: integer
 
 Constraints:
-	- Node --> Node.Id
-	- Revision --> Revision.Id
-	- Name --> NodeName.Id
-	- Description --> NodeDescription.Id
-	- References --> NodeReferenceList.Id
-	- Attachments --> NodeAttachmentList.Id
-	- Comments --> NodeCommentList.Id
-
-
-
-
-
-
-
+    - UserId --> User.Id
+    - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| NodeReferenceList
+| UserGroup
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-
--------------------------------------------------
-| NodeReferenceItem
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- List: integer, forgein key to NodeReferenceList.Id
-	- Reference: integer, forgein key to NodeReference.Id
+    - Id: integer, primary key, auto-increment
+    - ProjectId: integer OR null
 
 Constraints:
-	- List --> NodeReferenceList.Id
-	- Reference --> NodeReference.Id
+    - ProjectId --> Project.Id
 
 -------------------------------------------------
-| NodeReference
+| UserGroupInfo
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-	- Node: integer, forgein key to Node.Id
+    - Id: integer, primary key, auto-increment
+    - UserGroupId: integer
+    - UserGroupName: text
+    - DisplayName: text
+    - Active: boolean
+    - RevisionId: integer
 
 Constraints:
-	- Node --> Node.Id
+    - UserGroupId --> UserGroup.Id
+    - ProjectId --> Project.Id
+    - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| NodeAttachmentList
+| UserGroupMapping
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-
--------------------------------------------------
-| NodeAttachmentItem
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- List: integer, forgein key to NodeAttachmentList.Id
-	- Attachment: integer, forgein key to NodeAttachment.Id
+    - Id: integer, primary key, auto-increment
+    - UserGroupId: integer
+    - UserId: integer
+    - RevisionId: integer
 
 Constraints:
-	- List --> NodeAttachmentList.Id
-	- Attachment --> NodeAttachment.Id
+    - UserGroupId --> UserGroup.Id
+    - UserId --> User.Id
+    - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| NodeAttachment
+| Project
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-	- FileName: text
-	- FileData: blob
+    - Id: integer, primary key, auto-increment
 
 -------------------------------------------------
-| NodeCommentList
+| ProjectInfo
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-
--------------------------------------------------
-| NodeCommentItem
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- List: integer, forgein key to NodeCommentList.Id
-	- Comment: integer, forgein key to NodeComment.Id
+    - Id: integer, primary key, auto-increment
+    - ProjectId: integer
+    - Name: text
+    - Description: text
+    - Active: boolean
+    - RevisionId: integer
 
 Constraints:
-	- List --> NodeCommentList.Id
-	- Comment --> NodeComment.Id
+    - ProjectId --> Project.Id
+    - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| NodeComment
--------------------------------------------------
-Table:
-	- Id: integer, primary key, auto-increment
-	- Text: text
-
-
-
-
-
-
-
-
-
-
-
-
-
--------------------------------------------------
-| ProjectNodeAttributes
+| Tracker
 -------------------------------------------------
 Table:
-	- Id: integer, primary key, auto-increment
-	- NodeAttributes: integer, forgein key to NodeAttributes.Id
-	- Status: integer, forgein key to ProjectNodeStatus.Id
+    - Id: integer, primary key, auto-increment
+    - ProjectId: integer
 
 Constraints:
-	- NodeAttributes --> NodeAttributes.Id
-	- Status --> ProjectNodeStatus.Id
+    - ProjectId --> Project.Id
 
 -------------------------------------------------
-| ProjectNodeStatus
+| TrackerInfo
 -------------------------------------------------
 Table:
-	- Id: integer, primary key
-	- Name: text
-	- DisplayedName: text
+    - Id: integer, primary key, auto-increment
+    - TrackerId: integer
+    - Name: text
+    - Description: text
+    - Label: text
+    - Active: boolean
+    - RevisionId: integer
 
-Available statuses:
-	- 1: x?
-	- 2: y?
-	- 3: z?
-	- ...
+Constraints:
+    - TrackerId --> Tracker.Id
+    - RevisionId --> Revision.Id
+
+-------------------------------------------------
+| TrackerField
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+
+-------------------------------------------------
+| TrackerFieldInfo
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - TrackerFieldId: integer
+    - Name: text
+    - DisplayName: text
+    - Description: text
+    - Type: text
+    - Required: boolean
+    - RevisionId: integer
+
+TODO: add layout information
+
+Constraints:
+    - TrackerFieldId --> TrackerField.Id
+    - RevisionId --> Revision.Id
+
+-------------------------------------------------
+| TrackerFieldMapping
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - TrackerId: integer
+    - TrackerFieldId: integer
+    - RevisionId: integer
+
+Constraints:
+    - TrackerId --> Tracker.Id
+    - TrackerFieldId --> TrackerField.Id
+    - RevisionId --> Revision.Id
+
+TODO: prepare tables for all supported field types
+
+-------------------------------------------------
+| Artifact
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - TrackerId: integer
+    - CreatedOn: datetime
+    - CreatedBy: integer
+
+Constraints:
+    - TrackerId --> Tracker.Id
+    - CreatedBy --> User.Id
+
+TODO: additional artifact information

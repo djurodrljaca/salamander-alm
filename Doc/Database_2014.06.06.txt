@@ -1,0 +1,208 @@
+-------------------------------------------------
+| Node
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Parent: integer + null, forgein key to Node.Id
+	- Type: integer (NodeType enum)
+
+Constraints:
+	- Parent --> Node.Id
+
+-------------------------------------------------
+| NodeType
+-------------------------------------------------
+Values:
+	- 1: Project
+	- 2: ProjectVersion
+	- ...
+
+-------------------------------------------------
+| UserType
+-------------------------------------------------
+Values:
+	- 1: Administrator
+	- 2: User
+	- ...
+
+-------------------------------------------------
+| User
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Type: integer, enum UserType
+	- Full Name: text
+	- Username: text, unique
+	- Password: text
+
+-------------------------------------------------
+| Revision
+-------------------------------------------------
+Table:
+	- Id: integer, primary key
+	- Timestamp: datetime
+	- User: integer, forgein key to User.Id
+
+Constraints:
+	- User --> User.Id
+
+-------------------------------------------------
+| NodeName
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Text: text
+
+-------------------------------------------------
+| NodeDescription
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Text: text
+
+-------------------------------------------------
+| NodeAttributes
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Node: integer, forgein key to Node.Id
+	- Revision: integer, forgein key to Revision.Id
+	- Name: integer, forgein key to NodeName.Id
+	- Description: integer + null, forgein key to NodeDescription.Id
+	- References: integer + null, forgein key to NodeReferenceList.Id
+	- Attachments: integer + null, forgein key to NodeAttachmentList.Id
+	- Comments: integer + null, forgein key to NodeCommentList.Id
+	- IsActive: boolean
+
+Constraints:
+	- Node --> Node.Id
+	- Revision --> Revision.Id
+	- Name --> NodeName.Id
+	- Description --> NodeDescription.Id
+	- References --> NodeReferenceList.Id
+	- Attachments --> NodeAttachmentList.Id
+	- Comments --> NodeCommentList.Id
+
+
+
+
+
+
+
+
+-------------------------------------------------
+| NodeReferenceList
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+
+-------------------------------------------------
+| NodeReferenceItem
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- List: integer, forgein key to NodeReferenceList.Id
+	- Reference: integer, forgein key to NodeReference.Id
+
+Constraints:
+	- List --> NodeReferenceList.Id
+	- Reference --> NodeReference.Id
+
+-------------------------------------------------
+| NodeReference
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Node: integer, forgein key to Node.Id
+
+Constraints:
+	- Node --> Node.Id
+
+-------------------------------------------------
+| NodeAttachmentList
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+
+-------------------------------------------------
+| NodeAttachmentItem
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- List: integer, forgein key to NodeAttachmentList.Id
+	- Attachment: integer, forgein key to NodeAttachment.Id
+
+Constraints:
+	- List --> NodeAttachmentList.Id
+	- Attachment --> NodeAttachment.Id
+
+-------------------------------------------------
+| NodeAttachment
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- FileName: text
+	- FileData: blob
+
+-------------------------------------------------
+| NodeCommentList
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+
+-------------------------------------------------
+| NodeCommentItem
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- List: integer, forgein key to NodeCommentList.Id
+	- Comment: integer, forgein key to NodeComment.Id
+
+Constraints:
+	- List --> NodeCommentList.Id
+	- Comment --> NodeComment.Id
+
+-------------------------------------------------
+| NodeComment
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- Text: text
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------
+| ProjectNodeAttributes
+-------------------------------------------------
+Table:
+	- Id: integer, primary key, auto-increment
+	- NodeAttributes: integer, forgein key to NodeAttributes.Id
+	- Status: integer, forgein key to ProjectNodeStatus.Id
+
+Constraints:
+	- NodeAttributes --> NodeAttributes.Id
+	- Status --> ProjectNodeStatus.Id
+
+-------------------------------------------------
+| ProjectNodeStatus
+-------------------------------------------------
+Table:
+	- Id: integer, primary key
+	- Name: text
+	- DisplayedName: text
+
+Available statuses:
+	- 1: x?
+	- 2: y?
+	- 3: z?
+	- ...
