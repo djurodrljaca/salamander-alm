@@ -162,16 +162,14 @@ Constraints:
 -------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
-    - TrackerId: integer
+    - TrackerInfoId: integer
     - TrackerFieldId: integer
-    - RevisionId: integer
 
 Constraints:
-    - TrackerId --> Tracker.Id
+    - TrackerInfoId --> TrackerInfo.Id
     - TrackerFieldId --> TrackerField.Id
-    - RevisionId --> Revision.Id
 
-TODO: prepare tables for all supported field types
+TODO: prepare tables for all supported field types (TrackerFieldInfoString, TrackerFieldInfoText etc.)
 
 -------------------------------------------------
 | Artifact
@@ -186,4 +184,65 @@ Constraints:
     - TrackerId --> Tracker.Id
     - CreatedBy --> User.Id
 
-TODO: additional artifact information
+-------------------------------------------------
+| ArtifactInfo
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - ArtifactId: integer
+    - Name: text
+    - RevisionId: integer
+
+Constraints:
+    - ArtifactId --> Artifact.Id
+    - RevisionId --> Revision.Id
+
+-------------------------------------------------
+| ArtifactFieldValue
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - Value: text
+
+-------------------------------------------------
+| ArtifactFieldValueMapping
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - ArtifactInfoId: integer
+    - TrackerFieldId: integer
+    - ArtifactFieldValueId: integer
+
+Constraints:
+    - ArtifactInfoId --> ArtifactInfo.Id
+    - TrackerFieldId --> TrackerField.Id
+    - ArtifactFieldValueId --> ArtifactFieldValue.Id
+
+-------------------------------------------------
+| ArtifactComment
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - ArtifactId: integer
+    - Timestamp: datetime
+    - UserId: integer
+
+Constraints:
+    - ArtifactId --> Artifact.Id
+    - UserId --> User.Id
+
+-------------------------------------------------
+| ArtifactCommentText
+-------------------------------------------------
+Table:
+    - Id: integer, primary key, auto-increment
+    - ArtifactCommentId: integer
+    - Comment: text
+    - RevisionId: integer
+
+Constraints:
+    - ArtifactCommentId --> ArtifactComment.Id
+    - RevisionId --> Revision.Id
+
+
+TODO: add missing tables
