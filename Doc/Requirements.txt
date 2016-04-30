@@ -9,6 +9,7 @@ Projects shall contain this information:
 - Project identification number that is unique over all projects
 - A name (short text)
 - A desctiption (text)
+- State of the project (active or inactive/deleted/disabled)
 
 
 1.2 Project trackers
@@ -28,6 +29,7 @@ Trackers shall contain this information:
 - A name (short text)
 - A desctiption (text)
 - A label that shall be used for referencing artifacts of this tracker
+- State of the tracker (active or inactive/deleted/disabled)
 
 
 2.2. Artifacts
@@ -44,7 +46,7 @@ Trackers shall have a small set of fields that shall be present in each artifact
 - Timestamp when artifact was created
 - ID of the last user that updated the artifact
 - Timestamp when artifact was last updated
-- State of the artifact (active or deleted)
+- State of the artifact (active or inactive/deleted/disabled)
 
 
 2.4. Custom fields in artifacts
@@ -108,12 +110,108 @@ It shall be possible to lock an artifact so that it can no longer be updated unt
 
 3. Users and user groups
 
+Users and user groups shall be supported.
+
+
+3.1. User information
+
+Each user shall have the following information:
+- User identification number that is unique over all projects
+- User name
+- Display name
+- Email address
+- Authentication method (basic user name/password, LDAP etc.)
+- Authentication information specific to the authentication method
+- State of the user (active or inactive/deleted/disabled)
+- List of user groups that belong a specific user belongs to
+
+
+3.2. User group information
+
+Each user group shall have the following information:
+- User group identification number that is unique over all projects
+- User group name
+- Display name
+- Type of a user group (general, project)
+- State of the user group (active or inactive/deleted/disabled)
+- List of users that belong to a specific group
+- Project ID to which a specific user group belongs to (only for project user groups)
+
+General user groups shall be available to all projects, but project user groups shall only be available to a specific project.
+
+
+3.3. Builtin users
+
+There shall be only one builtin user "Administrator" that is part of the "Administrators" user group.
+
+"Administrator" shall be used at least for initial administration until other administrators are added, but it shall not be possible to disable this user.
+
+
+3.4. Builtin general user groups
+
+There shall be these builtin general user groups:
+- Administrators
+- Users
+
+"Administrators" user group shall be have complete access to all projects and to the complete system.
+
+"Users" user group shall cotain all users that are registered on the system. All users shall be automatically added to this user group at regstration and it shall not be possible to remove them from this user group. They shall not have access to the core part of the system, but only to the projects they are added to.
+
+All general user groups shall be available to all projects.
+
+
+3.5. Builtin project user groups
+
+Each project shall contain its own project user group.
+
+There shall be these builtin general user groups:
+- Project administrators
+- Project users
+
+"Project administrators" user group shall have full access to the project it belongs to.
+
+"Project users" user group shall contain all users that are added to a project it belongs to.
+
 
 4. Access control
+
+TODO
 
 
 5. Version control
 
-TODO: revisions
-TODO: tagging, branching trackers
+Each change in the system shall be trackable.
 
+
+5.1. Accessing historical state of the system
+
+It shall be possible to get a specific historical state of the system, except for users, user groups, and access control. Access to the historical state shall be read-only.
+
+All information regarding users and user groups, including their permissions in the system, in a specific historical state of the system shall reflect their latest state.
+
+
+5.2. Persistance
+
+It shall not be possible to permenantly delete something in the system, only new data can be added to the system that can replace old data. For example changing of a name of an artifact shall produce a new data entry while the old data remains accessable through historic states.
+
+
+5.3. Revisions
+
+Each change in the system shall be marked with a revision number for the change. Revision number shall be unique for the complete system.
+
+Each revision shall contain the following information:
+- Revision number
+- Timestamp of when the change was created
+- User ID of the user that created the change
+
+
+5.4. Tagging of a specific state of a project
+
+It shall be possible to create a read-only snapshot of a project - a "tag".
+
+
+5.5. Branching of a specific historical state of a project to a new project
+
+It shall be possible to create branch (or a clone) of a specific historical state of a project to a new project.
+
+For example all trackers and artifacts from that specific historical state of a project shall be copied to a new project. New IDs shall be creadted for all data that contains an ID and all references to these IDs in the new project shall be replaced with their new references while keeping the information of where it was copied from.
