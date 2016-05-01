@@ -1,49 +1,49 @@
 -------------------------------------------------
-| Revision
+| revision
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - Timestamp: datetime
-    - UserId: integer
+    - id: integer, primary key, auto-increment
+    - timestamp: datetime
+    - user_id: integer
 
 Constraints:
-    - UserId --> User.Id
+    - user_id --> user.id
 
 -------------------------------------------------
-| User
+| user
+-------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+
+-------------------------------------------------
+| user_information
 -------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
-
--------------------------------------------------
-| UserInfo
--------------------------------------------------
-Table:
-    - Id: integer, primary key, auto-increment
-    - UserId: integer
-    - UserName: text
-    - DisplayName: text
-    - Email: text
-    - AuthenticationMethod: text
-    - Active: boolean
-    - RevisionId: integer
+    - user_id: integer
+    - user_name: text
+    - display_name: text
+    - email: text
+    - authentication_method: text
+    - active: boolean
+    - revision_id: integer
 
 Constraints:
-    - UserId --> User.Id
-    - RevisionId --> Revision.Id
+    - user_id --> user.id
+    - revision_id --> revision.id
 
 -------------------------------------------------
-| UserBasicAuthentication
+| user_authentication_basic
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - UserId: integer
-    - PasswordHash: text
-    - RevisionId: integer
+    - id: integer, primary key, auto-increment
+    - user_id: integer
+    - password_hash: text
+    - revision_id: integer
 
 Constraints:
-    - UserId --> User.Id
-    - RevisionId --> Revision.Id
+    - user_id --> user.id
+    - revision_id --> revision.id
 
 -------------------------------------------------
 | UserGroup
@@ -72,7 +72,7 @@ Constraints:
     - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| UserGroupMapping
+| user_group_user_map
 -------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
