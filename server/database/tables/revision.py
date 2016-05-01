@@ -27,6 +27,24 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     return
 
 
+def current(connection: sqlite3.Connection) -> int:
+    """
+    Get current revision number
+
+    :param connection: Connection to database
+
+    :return: Current revision number
+    """
+    cursor = connection.execute("SELECT MAX(id) FROM revision;")
+
+    record = cursor.fetchone()
+
+    if record is not None:
+        return record[0]
+
+    return None
+
+
 def insert_record(connection: sqlite3.Connection,
                   timestamp: datetime.datetime,
                   user_id: int) -> int:
