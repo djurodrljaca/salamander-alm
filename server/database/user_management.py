@@ -1,9 +1,8 @@
 import authentication.basic
 import datetime
 import database.connection
-
-from database.tables import revision
-from database.tables import user, user_information, user_authentication_basic
+import sqlite3
+import database.tables
 
 
 def create_user_basic_authentication(requested_by_user: int,
@@ -22,30 +21,30 @@ def create_user_basic_authentication(requested_by_user: int,
 
     :return: User ID of the new user
     """
-    # Check if a user with the same user name already exists
-    existing_user_id = find_user_by_user_name(user_name)
-
-    if existing_user_id is not None:
-        raise ValueError("An active user with the same user name already exists")
-
     # Create a new user
     with database.connection.create() as connection:
         # Start a new revision
-        revision_id = revision.insert_record(connection,
-                                             datetime.datetime.utcnow(),
-                                             requested_by_user)
+        revision_id = database.tables.revision.insert_record(connection,
+                                                             datetime.datetime.utcnow(),
+                                                             requested_by_user)
+
+        # Check if a user with the same user name already exists
+        user = _find_user_by_user_name(connection, user_name, revision_id)
+
+        if user is not None:
+            raise ValueError("An active user with the same user name already exists")
 
         # Create the user in the new revision
-        user_id = user.insert_record(connection)
-        user_information.insert_record(connection,
-                                       user_id,
-                                       user_name,
-                                       display_name,
-                                       email,
-                                       "basic",
-                                       True,
-                                       revision_id)
-        user_authentication_basic.insert_record(
+        user_id = database.tables.user.insert_record(connection)
+        database.tables.user_information.insert_record(connection,
+                                                       user_id,
+                                                       user_name,
+                                                       display_name,
+                                                       email,
+                                                       "basic",
+                                                       True,
+                                                       revision_id)
+        database.tables.user_authentication_basic.insert_record(
             connection,
             user_id,
             authentication.basic.generate_password_hash(password),
@@ -54,7 +53,11 @@ def create_user_basic_authentication(requested_by_user: int,
     return user_id
 
 
-def find_user_by_user_name(user_name: str) -> int:
+# TODO: modify user information
+# TODO: modify user authentication
+
+
+def find_user_by_user_name(user_name: str) -> dict:
     """
     Find user by "user name" parameter
 
@@ -64,23 +67,12 @@ def find_user_by_user_name(user_name: str) -> int:
     """
     # First get the current revision
     connection = database.connection.create()
-    revision_id = revision.current(connection)
+    revision_id = database.tables.revision.current(connection)
 
-    cursor = connection.execute(
-        "SELECT user.id, MAX(user_information.revision_id) FROM user\n"
-        "INNER JOIN user_information\n"
-        "    ON ((user.id = user_information.user_id) AND\n"
-        "        (user_information.active = 1) AND\n"
-        "        (user_information.user_name = ?))\n"
-        "WHERE (user_information.revision_id <= ?);",
-        (user_name, revision_id))
+    # Find the user that matches the specified user name
+    user = _find_user_by_user_name(connection, user_name, revision_id)
 
-    record = cursor.fetchone()
-
-    if record is not None:
-        return record[0]
-
-    return None
+    return user
 
 
 def find_users_by_display_name(display_name: str) -> list:
@@ -93,27 +85,135 @@ def find_users_by_display_name(display_name: str) -> list:
     """
     # First get the current revision
     connection = database.connection.create()
-    revision_id = revision.current(connection)
+    revision_id = database.tables.revision.current(connection)
 
+    # Find all users that match the specifed display name
     cursor = connection.execute(
-        "SELECT user.id FROM user\n"
-        "INNER JOIN user_information\n"
-        "    ON ((user.id = user_information.user_id) AND\n"
-        "        (user_information.active = 1) AND\n"
-        "        (user_information.display_name = ?))\n"
-        "WHERE (user_information.revision_id <= ?) AND\n"
-        "      (user_information.revision_id = (SELECT MAX(user_information.revision_id)"
-        "                                       FROM user_information"
-        "                                       WHERE (user_information.user_id = user.id)));",
-        (display_name, revision_id))
+        "SELECT U.id AS id,\n"
+        "       UI1.user_id AS user_id,\n"
+        "       UI1.user_name AS user_name,\n"
+        "       UI1.display_name AS display_name,\n"
+        "       UI1.email AS email,\n"
+        "       UI1.authentication_method AS authentication_method\n"
+        "FROM user AS U INNER JOIN\n"
+        "(\n"
+        "    SELECT UI2.user_id,\n"
+        "           UI2.user_name,\n"
+        "           UI2.display_name,\n"
+        "           UI2.email,\n"
+        "           UI2.authentication_method,\n"
+        "           UI2.revision_id\n"
+        "    FROM user_information AS UI2\n"
+        "    WHERE (UI2.active = 1) AND\n"
+        "          (UI2.display_name = :display_name) AND\n"
+        "          (UI2.revision_id <= :max_revision_id) AND\n"
+        "          (UI2.revision_id =\n"
+        "              (\n"
+        "                  SELECT MAX(UI3.revision_id)\n"
+        "                  FROM user_information AS UI3\n"
+        "                  WHERE (UI3.user_id = UI2.user_id)\n"
+        "              ))\n"
+        ") AS UI1\n"
+        "ON (U.id = UI1.user_id);\n",
+        {"display_name": display_name, "max_revision_id": revision_id})
 
-    user_ids = list()
+    users = list()
 
+    # Process results
     for record in cursor.fetchall():
         if record is not None:
-            user_ids.append(record[0])
+            user = dict(record)
+            users.append(user)
 
-    return user_ids
+    return users
 
 
-# TODO: authenticate user
+def authenticate_user_basic_authentication(user_name: str, password: str) -> bool:
+    """
+    Authenticate user with basic authentication
+
+    :param user_name: User name
+    :param password: Password provided for authentication
+
+    :return: User ID
+    """
+    with database.connection.create() as connection:
+        # First get the current revision
+        revision_id = database.tables.revision.current(connection)
+
+        # Find the user that matches the specified user name
+        user = _find_user_by_user_name(connection, user_name, revision_id)
+
+        if user is None:
+            # Invalid user name
+            return False
+
+        if user["authentication_method"] != "basic":
+            # Invalid authentication method
+            return False
+
+        # Find the user password for the user that matches the specified user ID
+        password_hash = database.tables.user_authentication_basic.find_password_hash(connection,
+                                                                                     user["id"],
+                                                                                     revision_id)
+
+        if password_hash is None:
+            # Password was not found for the selected
+            return False
+
+        # Authenticate user
+        return authentication.basic.authenticate(password, password_hash)
+
+    return False
+
+
+def _find_user_by_user_name(connection: sqlite3.Connection,
+                            user_name: str,
+                            max_revision_id: int) -> dict:
+    """
+    Find user by "user name" parameter
+
+    :param connection: Connection to database
+    :param user_name: User name
+    :param max_revision_id: Maximum allowed revision ID for the search
+
+    :return: User ID
+    """
+    # Find the user that matches the specified user name
+    cursor = connection.execute(
+        "SELECT U.id AS id,\n"
+        "       UI1.user_id AS user_id,\n"
+        "       UI1.user_name AS user_name,\n"
+        "       UI1.display_name AS display_name,\n"
+        "       UI1.email AS email,\n"
+        "       UI1.authentication_method AS authentication_method\n"
+        "FROM user AS U INNER JOIN\n"
+        "(\n"
+        "    SELECT UI2.user_id,\n"
+        "           UI2.user_name,\n"
+        "           UI2.display_name,\n"
+        "           UI2.email,\n"
+        "           UI2.authentication_method,\n"
+        "           UI2.revision_id\n"
+        "    FROM user_information AS UI2\n"
+        "    WHERE (UI2.active = 1) AND\n"
+        "          (UI2.user_name = :user_name) AND\n"
+        "          (UI2.revision_id <= :max_revision_id) AND\n"
+        "          (UI2.revision_id =\n"
+        "              (\n"
+        "                  SELECT MAX(UI3.revision_id)\n"
+        "                  FROM user_information AS UI3\n"
+        "                  WHERE (UI3.user_id = UI2.user_id)\n"
+        "              ))\n"
+        ") AS UI1\n"
+        "ON (U.id = UI1.user_id)\n",
+        {"user_name": user_name, "max_revision_id": max_revision_id})
+
+    # Process result
+    record = cursor.fetchone()
+
+    if record is not None:
+        user = dict(record)
+        return user
+
+    return None

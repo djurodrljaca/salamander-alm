@@ -48,3 +48,30 @@ def insert_record(connection: sqlite3.Connection,
         (user_id, password_hash, revision_id))
 
     return cursor.lastrowid
+
+
+def find_password_hash(connection: sqlite3.Connection, user_id: int, max_revision_id: int) -> str:
+    """
+    Find pasword hash for the specified user
+
+    :param connection: Connection to database
+    :param user_name: User name
+    :param max_revision_id: Maximum allowed revision ID for the search
+    :return:
+    """
+    cursor = connection.execute(
+        "SELECT password_hash FROM user_authentication_basic\n"
+        "WHERE (user_id = :user_id) AND\n"
+        "      (revision_id = (SELECT MAX(revision_id)\n"
+        "                      FROM user_authentication_basic\n"
+        "                      WHERE (user_id = :user_id) AND\n"
+        "                            (revision_id <= :max_revision_id)));",
+        {"user_id": user_id, "max_revision_id": max_revision_id})
+
+    # Process result
+    record = cursor.fetchone()
+
+    if record is not None:
+        return record[0]
+
+    return None
