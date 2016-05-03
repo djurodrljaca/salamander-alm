@@ -12,7 +12,7 @@ def generate_password_hash(password: str) -> str:
     return bcrypt.hashpw(password, bcrypt.gensalt())
 
 
-def authenticate(password: str, password_hash:str) -> bool:
+def authenticate(password: str, password_hash: str) -> bool:
     """
     Tries to authenticate the specified password with the specified password hash
 

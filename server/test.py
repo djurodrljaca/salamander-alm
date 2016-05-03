@@ -9,51 +9,63 @@ def main():
 
     admin_user = database.user_management.find_user_by_user_name("administrator")
 
-    user_id = database.user_management.create_user_basic_authentication(admin_user["id"],
+    user_id = database.user_management.create_user_basic_authentication(admin_user["user_id"],
                                                                         "test",
                                                                         "Test",
                                                                         "",
                                                                         "123456")
-
     print("Created new user: " + str(user_id))
 
-    user_id = database.user_management.create_user_basic_authentication(admin_user["id"],
+    user_id = database.user_management.create_user_basic_authentication(admin_user["user_id"],
                                                                         "test1",
                                                                         "Test",
                                                                         "",
                                                                         "123456")
-
     print("Created new user: " + str(user_id))
 
     user = database.user_management.find_user_by_user_name("administrator")
-
-    print("Found users: " + str(user))
+    print("Found user: " + str(user))
 
     user = database.user_management.find_user_by_user_name("test")
-
-    print("Found users: " + str(user))
+    print("Found user: " + str(user))
 
     user = database.user_management.find_user_by_user_name("test1")
+    print("Found user: " + str(user))
 
-    print("Found users: " + str(user))
+    database.user_management.modify_user_information(admin_user["user_id"],
+                                                     user["user_id"],
+                                                     user["user_name"],
+                                                     user["display_name"],
+                                                     "john.smith@example.com",
+                                                     True)
+    user = database.user_management.find_user_by_user_id(user["user_id"])
+    print("Found user: " + str(user))
 
     users = database.user_management.find_users_by_display_name("Test")
+    print("Found users: " + str(users))
 
+    database.user_management.modify_user_information(admin_user["user_id"],
+                                                     user["user_id"],
+                                                     user["user_name"],
+                                                     user["display_name"],
+                                                     user["email"],
+                                                     False)
+    user = database.user_management.find_user_by_user_id(user["user_id"])
+    print("Found user: " + str(user))
+
+    users = database.user_management.find_users_by_display_name("Test")
     print("Found users: " + str(users))
 
     authenticated = database.user_management.authenticate_user_basic_authentication("administrator",
                                                                                     "administrator")
-
     print("User authenticated: " + str(authenticated))
 
     authenticated = database.user_management.authenticate_user_basic_authentication("test",
                                                                                     "123456")
-
     print("User authenticated: " + str(authenticated))
 
     authenticated = database.user_management.authenticate_user_basic_authentication("test",
                                                                                     "xxxxxx")
-
     print("User authenticated: " + str(authenticated))
 
 

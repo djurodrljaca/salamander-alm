@@ -1,8 +1,14 @@
 import authentication.basic
 import datetime
 import database.connection
+import database.tables.revision
+import database.tables.user
+import database.tables.user_authentication_basic
+import database.tables.user_information
 import sqlite3
-import database.tables
+import typing
+
+# TODO: add "current revision" parameter?
 
 
 def create_user_basic_authentication(requested_by_user: int,
@@ -22,6 +28,8 @@ def create_user_basic_authentication(requested_by_user: int,
     :return: User ID of the new user
     """
     # Create a new user
+    user_id = None
+
     with database.connection.create() as connection:
         # Start a new revision
         revision_id = database.tables.revision.insert_record(connection,
@@ -53,8 +61,64 @@ def create_user_basic_authentication(requested_by_user: int,
     return user_id
 
 
-# TODO: modify user information
+def modify_user_information(requested_by_user: int,
+                            user_to_modify: int,
+                            user_name: str,
+                            display_name: str,
+                            email: str,
+                            active: bool) -> None:
+    """
+    Modify user's information
+
+    :param requested_by_user: ID of the user that requested modification of a user
+    :param user_to_modify: ID of the user that should be modified
+    :param user_name: New user name
+    :param display_name: New user's name in format appropriate for displaying in the GUI
+    :param email: New email address of the user
+    :param active: New state of the user (active or inactive)
+
+    :return: Success or failure
+    """
+    # Modify user
+    with database.connection.create() as connection:
+        # Start a new revision
+        revision_id = database.tables.revision.insert_record(connection,
+                                                             datetime.datetime.utcnow(),
+                                                             requested_by_user)
+
+        # Modify the user in the new revision
+        database.tables.user_information.insert_record(connection,
+                                                       user_to_modify,
+                                                       user_name,
+                                                       display_name,
+                                                       email,
+                                                       "basic",
+                                                       active,
+                                                       revision_id)
+
+    # Finished
+    return
+
+
 # TODO: modify user authentication
+
+
+def find_user_by_user_id(user_id: int) -> dict:
+    """
+    Find user by "ID" parameter
+
+    :param user_id: User ID
+
+    :return: User ID
+    """
+    # First get the current revision
+    connection = database.connection.create()
+    revision_id = database.tables.revision.current(connection)
+
+    # Find a user that matches the specified user ID
+    user = _find_user_by_user_id(connection, user_id, revision_id)
+
+    return user
 
 
 def find_user_by_user_name(user_name: str) -> dict:
@@ -63,67 +127,32 @@ def find_user_by_user_name(user_name: str) -> dict:
 
     :param user_name: User name
 
-    :return: User ID
+    :return: User information
     """
     # First get the current revision
     connection = database.connection.create()
     revision_id = database.tables.revision.current(connection)
 
-    # Find the user that matches the specified user name
+    # Find a user that matches the specified user name
     user = _find_user_by_user_name(connection, user_name, revision_id)
 
     return user
 
 
-def find_users_by_display_name(display_name: str) -> list:
+def find_users_by_display_name(display_name: str) -> typing.List[dict]:
     """
     Find user by "user name" parameter
 
     :param display_name: User name
 
-    :return: List of user IDs
+    :return: List of user information objects
     """
     # First get the current revision
     connection = database.connection.create()
     revision_id = database.tables.revision.current(connection)
 
-    # Find all users that match the specifed display name
-    cursor = connection.execute(
-        "SELECT U.id AS id,\n"
-        "       UI1.user_id AS user_id,\n"
-        "       UI1.user_name AS user_name,\n"
-        "       UI1.display_name AS display_name,\n"
-        "       UI1.email AS email,\n"
-        "       UI1.authentication_method AS authentication_method\n"
-        "FROM user AS U INNER JOIN\n"
-        "(\n"
-        "    SELECT UI2.user_id,\n"
-        "           UI2.user_name,\n"
-        "           UI2.display_name,\n"
-        "           UI2.email,\n"
-        "           UI2.authentication_method,\n"
-        "           UI2.revision_id\n"
-        "    FROM user_information AS UI2\n"
-        "    WHERE (UI2.active = 1) AND\n"
-        "          (UI2.display_name = :display_name) AND\n"
-        "          (UI2.revision_id <= :max_revision_id) AND\n"
-        "          (UI2.revision_id =\n"
-        "              (\n"
-        "                  SELECT MAX(UI3.revision_id)\n"
-        "                  FROM user_information AS UI3\n"
-        "                  WHERE (UI3.user_id = UI2.user_id)\n"
-        "              ))\n"
-        ") AS UI1\n"
-        "ON (U.id = UI1.user_id);\n",
-        {"display_name": display_name, "max_revision_id": revision_id})
-
-    users = list()
-
-    # Process results
-    for record in cursor.fetchall():
-        if record is not None:
-            user = dict(record)
-            users.append(user)
+    # Find all users that match the specified display name
+    users = _find_users_by_attribute(connection, "display_name", display_name, revision_id)
 
     return users
 
@@ -153,9 +182,8 @@ def authenticate_user_basic_authentication(user_name: str, password: str) -> boo
             return False
 
         # Find the user password for the user that matches the specified user ID
-        password_hash = database.tables.user_authentication_basic.find_password_hash(connection,
-                                                                                     user["id"],
-                                                                                     revision_id)
+        password_hash = database.tables.user_authentication_basic.find_password_hash(
+            connection, user["user_id"], revision_id)
 
         if password_hash is None:
             # Password was not found for the selected
@@ -164,56 +192,111 @@ def authenticate_user_basic_authentication(user_name: str, password: str) -> boo
         # Authenticate user
         return authentication.basic.authenticate(password, password_hash)
 
-    return False
+
+def _find_user_by_user_id(connection: sqlite3.Connection, user_id: str, max_revision_id: int) -> dict:
+    """
+    Find user by "user name" parameter
+
+    :param connection: Connection to database
+    :param user_id: User id
+    :param max_revision_id: Maximum allowed revision ID for the search
+
+    :return: User ID
+    """
+    # Find the users that match the search attribute
+    users = _find_users_by_attribute(connection, "user_id", user_id, max_revision_id)
+
+    # Return a user only if exactly one was found
+    if users is not None:
+        if len(users) == 1:
+            return users[0]
+
+    # Error
+    return None
 
 
 def _find_user_by_user_name(connection: sqlite3.Connection,
                             user_name: str,
                             max_revision_id: int) -> dict:
     """
-    Find user by "user name" parameter
+    Find a user that matches the specified user name
 
     :param connection: Connection to database
     :param user_name: User name
     :param max_revision_id: Maximum allowed revision ID for the search
 
-    :return: User ID
+    :return: User that matches the search attribute
     """
-    # Find the user that matches the specified user name
-    cursor = connection.execute(
-        "SELECT U.id AS id,\n"
-        "       UI1.user_id AS user_id,\n"
-        "       UI1.user_name AS user_name,\n"
-        "       UI1.display_name AS display_name,\n"
-        "       UI1.email AS email,\n"
-        "       UI1.authentication_method AS authentication_method\n"
-        "FROM user AS U INNER JOIN\n"
-        "(\n"
-        "    SELECT UI2.user_id,\n"
-        "           UI2.user_name,\n"
-        "           UI2.display_name,\n"
-        "           UI2.email,\n"
-        "           UI2.authentication_method,\n"
-        "           UI2.revision_id\n"
-        "    FROM user_information AS UI2\n"
-        "    WHERE (UI2.active = 1) AND\n"
-        "          (UI2.user_name = :user_name) AND\n"
-        "          (UI2.revision_id <= :max_revision_id) AND\n"
-        "          (UI2.revision_id =\n"
-        "              (\n"
-        "                  SELECT MAX(UI3.revision_id)\n"
-        "                  FROM user_information AS UI3\n"
-        "                  WHERE (UI3.user_id = UI2.user_id)\n"
-        "              ))\n"
-        ") AS UI1\n"
-        "ON (U.id = UI1.user_id)\n",
-        {"user_name": user_name, "max_revision_id": max_revision_id})
+    # Find the users that match the search attribute
+    users = _find_users_by_attribute(connection, "user_name", user_name, max_revision_id)
+
+    # Return user only if exactly one user was found
+    if users is not None:
+        if len(users) == 1:
+            return users[0]
+
+    # Error
+    return None
+
+
+def _find_users_by_attribute(connection: sqlite3.Connection,
+                             attribute_name: str,
+                             attribute_value: typing.Any,
+                             max_revision_id: int) -> typing.List[dict]:
+    """
+    Find users that match the specified search attribute
+
+    :param connection: Connection to database
+    :param attribute_name: Search attribute name
+    :param attribute_value: Search attribute value
+    :param max_revision_id: Maximum allowed revision ID for the search
+
+    :return: Users that match the search attribute
+
+    Only the following search attributes are supported:
+    - user_id
+    - user_name
+    - display_name
+    - email
+    """
+    # Find the users that match the search attribute
+    query = ("SELECT user_id,\n"
+             "       user_name,\n"
+             "       display_name,\n"
+             "       email,\n"
+             "       authentication_method,\n"
+             "       revision_id\n"
+             "FROM\n"
+             "(\n"
+             "    SELECT UI1.user_id,\n"
+             "           UI1.user_name,\n"
+             "           UI1.display_name,\n"
+             "           UI1.email,\n"
+             "           UI1.active,\n"
+             "           UI1.authentication_method,\n"
+             "           UI1.revision_id\n"
+             "    FROM user_information AS UI1\n"
+             "    WHERE (UI1.revision_id =\n"
+             "                (\n"
+             "                    SELECT MAX(UI2.revision_id)\n"
+             "                    FROM user_information AS UI2\n"
+             "                    WHERE ((UI2.user_id = UI1.user_id) AND\n"
+             "                           (UI2.revision_id <= :max_revision_id))\n"
+             "                ))\n"
+             ")\n"
+             "WHERE (({0} = :attribute_value) AND\n"
+             "       (active = 1))").format(attribute_name)
+
+    cursor = connection.execute(query,
+                                {"attribute_value": attribute_value,
+                                 "max_revision_id": max_revision_id})
 
     # Process result
-    record = cursor.fetchone()
+    users = list()
 
-    if record is not None:
-        user = dict(record)
-        return user
+    for record in cursor.fetchall():
+        if record is not None:
+            user = dict(record)
+            users.append(user)
 
-    return None
+    return users

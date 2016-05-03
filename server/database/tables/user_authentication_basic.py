@@ -1,5 +1,9 @@
 import sqlite3
 
+# TODO: link to a user_authentication table?
+# TODO: user_authentication table should contain just: ID, user_id, type, revision_id?
+# TODO: user_authentication_basic table should contain just: ID, user_authentication_id, password_hash, revision_id?
+
 
 def create_table(connection: sqlite3.Connection) -> None:
     """
@@ -52,10 +56,10 @@ def insert_record(connection: sqlite3.Connection,
 
 def find_password_hash(connection: sqlite3.Connection, user_id: int, max_revision_id: int) -> str:
     """
-    Find pasword hash for the specified user
+    Find password hash for the specified user
 
     :param connection: Connection to database
-    :param user_name: User name
+    :param user_id: User ID
     :param max_revision_id: Maximum allowed revision ID for the search
     :return:
     """

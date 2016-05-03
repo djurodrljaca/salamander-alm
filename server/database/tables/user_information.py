@@ -1,5 +1,7 @@
 import sqlite3
 
+# TODO: move authentication_method into a new table (user_authentication)?
+
 
 def create_table(connection: sqlite3.Connection) -> None:
     """
