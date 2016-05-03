@@ -34,6 +34,7 @@ def main():
     user = database.user_management.find_user_by_user_name("test1")
     print("Found user: " + str(user))
 
+    print("Modifying user information...")
     database.user_management.modify_user_information(admin_user["user_id"],
                                                      user["user_id"],
                                                      user["user_name"],
@@ -46,6 +47,7 @@ def main():
     users = database.user_management.find_users_by_display_name("Test")
     print("Found users: " + str(users))
 
+    print("Modifying user information...")
     database.user_management.modify_user_information(admin_user["user_id"],
                                                      user["user_id"],
                                                      user["user_name"],
@@ -68,6 +70,20 @@ def main():
 
     authenticated = database.user_management.authenticate_user("test",
                                                                {"password": "xxxxxx"})
+    print("User authenticated: " + str(authenticated))
+
+    print("Modifying user authentication...")
+    user = database.user_management.find_user_by_user_name("test")
+    database.user_management.modify_user_authentication(admin_user["user_id"],
+                                                        user["user_id"],
+                                                        "basic",
+                                                        {"password": "654321"})
+    authenticated = database.user_management.authenticate_user("test",
+                                                               {"password": "123456"})
+    print("User authenticated: " + str(authenticated))
+
+    authenticated = database.user_management.authenticate_user("test",
+                                                               {"password": "654321"})
     print("User authenticated: " + str(authenticated))
 
 

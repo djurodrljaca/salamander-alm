@@ -10,7 +10,8 @@ import database.tables.user_information
 import sqlite3
 import typing
 
-# TODO: add "current revision" parameter?
+# TODO: add "current revision" parameter? Then no longer create revisions here!
+# TODO: do not handle transactions on this level? Expect a connection parameter from the caller?
 
 
 def create_user(requested_by_user: int,
@@ -120,7 +121,55 @@ def modify_user_information(requested_by_user: int,
     return
 
 
-# TODO: modify user authentication
+def modify_user_authentication(requested_by_user: int,
+                               user_to_modify: int,
+                               authentication_type: str,
+                               authentication_parameters: dict) -> None:
+    """
+    Modify user's information
+
+    :param requested_by_user: ID of the user that requested modification of a user
+    :param user_to_modify: ID of the user that should be modified
+    :param authentication_type: User's new authentication type
+    :param authentication_parameters: User's new authentication parameters
+
+    :return: Success or failure
+    """
+    # Modify user
+    with database.connection.create() as connection:
+        # Start a new revision
+        revision_id = database.tables.revision.insert_record(connection,
+                                                             datetime.datetime.utcnow(),
+                                                             requested_by_user)
+
+        # Read users current authentication type
+        user_authentication = database.tables.user_authentication.find_authentication(
+            connection,
+            user_to_modify,
+            revision_id)
+
+        # Modify authentication type if needed
+        if authentication_type != user_authentication["type"]:
+            user_authentication["id"] = database.tables.user_authentication.insert_record(
+                connection,
+                user_to_modify,
+                authentication_type,
+                revision_id)
+
+        # Modify authentication parameters
+        if authentication_type == "basic":
+            # Basic authentication
+            password_hash = authentication.basic.generate_password_hash(
+                authentication_parameters["password"])
+
+            database.tables.user_authentication_basic.insert_record(
+                connection,
+                user_authentication["id"],
+                password_hash,
+                revision_id)
+
+    # Finished
+    return
 
 
 def find_user_by_user_id(user_id: int) -> dict:
@@ -199,12 +248,12 @@ def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
 
         # Authenticate user
         user_authenticated = False
-        authentication_type = database.tables.user_authentication.find_authentication_type(
+        user_authentication = database.tables.user_authentication.find_authentication(
             connection,
             user["user_id"],
             revision_id)
 
-        if authentication_type == "basic":
+        if user_authentication["type"] == "basic":
             # Basic authentication
             password_hash = database.tables.user_authentication_basic.find_password_hash(
                 connection,
@@ -217,7 +266,7 @@ def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
                     password_hash)
         else:
             # Error, unsupported authentication type
-            raise AttributeError("Invalid authentication type: " + authentication_type)
+            raise AttributeError("Invalid authentication type: " + user_authentication["type"])
 
         return user_authenticated
 

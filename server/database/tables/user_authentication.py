@@ -48,11 +48,9 @@ def insert_record(connection: sqlite3.Connection, user_id: int, type: str, revis
     return cursor.lastrowid
 
 
-def find_authentication_type(connection: sqlite3.Connection,
-                             user_id: int,
-                             max_revision_id: int) -> str:
+def find_authentication(connection: sqlite3.Connection, user_id: int, max_revision_id: int) -> dict:
     """
-    Find authentication type for the specified user
+    Find authentication information for the specified user
 
     :param connection: Connection to database
     :param user_id: User ID
@@ -61,7 +59,7 @@ def find_authentication_type(connection: sqlite3.Connection,
     :return: Authentication type
     """
     cursor = connection.execute(
-        "SELECT type\n"
+        "SELECT id, type\n"
         "FROM user_authentication\n"
         "WHERE ((user_id = :user_id) AND\n"
         "       (revision_id =\n"
@@ -77,6 +75,6 @@ def find_authentication_type(connection: sqlite3.Connection,
     record = cursor.fetchone()
 
     if record is not None:
-        return record[0]
+        return dict(record)
 
     return None
