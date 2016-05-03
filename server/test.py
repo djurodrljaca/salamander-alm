@@ -9,18 +9,20 @@ def main():
 
     admin_user = database.user_management.find_user_by_user_name("administrator")
 
-    user_id = database.user_management.create_user_basic_authentication(admin_user["user_id"],
-                                                                        "test",
-                                                                        "Test",
-                                                                        "",
-                                                                        "123456")
+    user_id = database.user_management.create_user(admin_user["user_id"],
+                                                   "test",
+                                                   "Test",
+                                                   "test@example.com",
+                                                   "basic",
+                                                   {"password": "123456"})
     print("Created new user: " + str(user_id))
 
-    user_id = database.user_management.create_user_basic_authentication(admin_user["user_id"],
-                                                                        "test1",
-                                                                        "Test",
-                                                                        "",
-                                                                        "123456")
+    user_id = database.user_management.create_user(admin_user["user_id"],
+                                                   "test1",
+                                                   "Test",
+                                                   "test1@example.com",
+                                                   "basic",
+                                                   {"password": "123456"})
     print("Created new user: " + str(user_id))
 
     user = database.user_management.find_user_by_user_name("administrator")
@@ -56,16 +58,16 @@ def main():
     users = database.user_management.find_users_by_display_name("Test")
     print("Found users: " + str(users))
 
-    authenticated = database.user_management.authenticate_user_basic_authentication("administrator",
-                                                                                    "administrator")
+    authenticated = database.user_management.authenticate_user("administrator",
+                                                               {"password": "administrator"})
     print("User authenticated: " + str(authenticated))
 
-    authenticated = database.user_management.authenticate_user_basic_authentication("test",
-                                                                                    "123456")
+    authenticated = database.user_management.authenticate_user("test",
+                                                               {"password": "123456"})
     print("User authenticated: " + str(authenticated))
 
-    authenticated = database.user_management.authenticate_user_basic_authentication("test",
-                                                                                    "xxxxxx")
+    authenticated = database.user_management.authenticate_user("test",
+                                                               {"password": "xxxxxx"})
     print("User authenticated: " + str(authenticated))
 
 

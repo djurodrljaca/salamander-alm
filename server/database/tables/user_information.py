@@ -18,7 +18,6 @@ def create_table(connection: sqlite3.Connection) -> None:
         "    user_name             TEXT    NOT NULL,\n"
         "    display_name          TEXT    NOT NULL,\n"
         "    email                 TEXT,\n"
-        "    authentication_method TEXT    NOT NULL,\n"
         "    active                BOOLEAN NOT NULL,\n"
         "    revision_id           INTEGER REFERENCES revision (id) \n"
         "                                  NOT NULL\n"
@@ -36,13 +35,17 @@ def create_indexes(connection: sqlite3.Connection) -> None:
         "    user_name\n"
         ");")
 
+    connection.execute(
+        "CREATE INDEX user_information_ix_display_name ON user_information (\n"
+        "    display_name\n"
+        ");")
+
 
 def insert_record(connection: sqlite3.Connection,
                   user_id: int,
                   user_name: str,
                   display_name: str,
                   email: str,
-                  authentication_method: str,
                   active: bool,
                   revision_id: int) -> int:
     """
@@ -60,9 +63,9 @@ def insert_record(connection: sqlite3.Connection,
     :return: 'id' of the inserted record
     """
     cursor = connection.execute(
-        "INSERT INTO user_information (id, user_id, user_name, display_name, email,\n"
-        "                              authentication_method, active, revision_id)\n"
-        "VALUES (NULL, ?, ?, ?, ?, ?, ?, ?);",
-        (user_id, user_name, display_name, email, authentication_method, active, revision_id))
+        "INSERT INTO user_information\n"
+        "   (id, user_id, user_name, display_name, email, active, revision_id)\n"
+        "VALUES (NULL, ?, ?, ?, ?, ?, ?);",
+        (user_id, user_name, display_name, email, active, revision_id))
 
     return cursor.lastrowid

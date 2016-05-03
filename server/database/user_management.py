@@ -1,8 +1,10 @@
+import authentication
 import authentication.basic
 import datetime
 import database.connection
 import database.tables.revision
 import database.tables.user
+import database.tables.user_authentication
 import database.tables.user_authentication_basic
 import database.tables.user_information
 import sqlite3
@@ -11,11 +13,12 @@ import typing
 # TODO: add "current revision" parameter?
 
 
-def create_user_basic_authentication(requested_by_user: int,
-                                     user_name: str,
-                                     display_name: str,
-                                     email: str,
-                                     password: str) -> int:
+def create_user(requested_by_user: int,
+                user_name: str,
+                display_name: str,
+                email: str,
+                authentication_type: str,
+                authentication_parameters: dict) -> int:
     """
     Create a new user with basic authentication
 
@@ -23,7 +26,8 @@ def create_user_basic_authentication(requested_by_user: int,
     :param user_name: User name
     :param display_name: User's name in format appropriate for displaying in the GUI
     :param email: Email address of the user
-    :param password: User's password
+    :param authentication_type: User's authentication type
+    :param authentication_parameters: User's authentication parameters
 
     :return: User ID of the new user
     """
@@ -44,19 +48,36 @@ def create_user_basic_authentication(requested_by_user: int,
 
         # Create the user in the new revision
         user_id = database.tables.user.insert_record(connection)
+
+        # Add user information to the user
         database.tables.user_information.insert_record(connection,
                                                        user_id,
                                                        user_name,
                                                        display_name,
                                                        email,
-                                                       "basic",
                                                        True,
                                                        revision_id)
-        database.tables.user_authentication_basic.insert_record(
+
+        # Add user authentication to the user
+        user_authentication_id = database.tables.user_authentication.insert_record(
             connection,
             user_id,
-            authentication.basic.generate_password_hash(password),
+            authentication_type,
             revision_id)
+
+        if authentication_type == "basic":
+            # Basic authentication
+            password_hash = authentication.basic.generate_password_hash(
+                authentication_parameters["password"])
+
+            database.tables.user_authentication_basic.insert_record(
+                connection,
+                user_authentication_id,
+                password_hash,
+                revision_id)
+        else:
+            # Error, unsupported authentication type
+            raise AttributeError("Invalid authentication type: " + type)
 
     return user_id
 
@@ -92,7 +113,6 @@ def modify_user_information(requested_by_user: int,
                                                        user_name,
                                                        display_name,
                                                        email,
-                                                       "basic",
                                                        active,
                                                        revision_id)
 
@@ -157,12 +177,12 @@ def find_users_by_display_name(display_name: str) -> typing.List[dict]:
     return users
 
 
-def authenticate_user_basic_authentication(user_name: str, password: str) -> bool:
+def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
     """
     Authenticate user with basic authentication
 
     :param user_name: User name
-    :param password: Password provided for authentication
+    :param authentication_parameters: User's authentication parameters
 
     :return: User ID
     """
@@ -177,23 +197,34 @@ def authenticate_user_basic_authentication(user_name: str, password: str) -> boo
             # Invalid user name
             return False
 
-        if user["authentication_method"] != "basic":
-            # Invalid authentication method
-            return False
-
-        # Find the user password for the user that matches the specified user ID
-        password_hash = database.tables.user_authentication_basic.find_password_hash(
-            connection, user["user_id"], revision_id)
-
-        if password_hash is None:
-            # Password was not found for the selected
-            return False
-
         # Authenticate user
-        return authentication.basic.authenticate(password, password_hash)
+        user_authenticated = False
+        authentication_type = database.tables.user_authentication.find_authentication_type(
+            connection,
+            user["user_id"],
+            revision_id)
+
+        if authentication_type == "basic":
+            # Basic authentication
+            password_hash = database.tables.user_authentication_basic.find_password_hash(
+                connection,
+                user["user_id"],
+                revision_id)
+
+            if password_hash is not None:
+                user_authenticated = authentication.basic.authenticate(
+                    authentication_parameters["password"],
+                    password_hash)
+        else:
+            # Error, unsupported authentication type
+            raise AttributeError("Invalid authentication type: " + authentication_type)
+
+        return user_authenticated
 
 
-def _find_user_by_user_id(connection: sqlite3.Connection, user_id: str, max_revision_id: int) -> dict:
+def _find_user_by_user_id(connection: sqlite3.Connection,
+                          user_id: str,
+                          max_revision_id: int) -> dict:
     """
     Find user by "user name" parameter
 
@@ -264,7 +295,6 @@ def _find_users_by_attribute(connection: sqlite3.Connection,
              "       user_name,\n"
              "       display_name,\n"
              "       email,\n"
-             "       authentication_method,\n"
              "       revision_id\n"
              "FROM\n"
              "(\n"
@@ -273,7 +303,6 @@ def _find_users_by_attribute(connection: sqlite3.Connection,
              "           UI1.display_name,\n"
              "           UI1.email,\n"
              "           UI1.active,\n"
-             "           UI1.authentication_method,\n"
              "           UI1.revision_id\n"
              "    FROM user_information AS UI1\n"
              "    WHERE (UI1.revision_id =\n"
