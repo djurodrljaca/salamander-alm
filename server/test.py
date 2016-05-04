@@ -20,6 +20,9 @@ import usermanagement
 import usermanagement.user_management
 
 
+# TODO: replace this with actual unit tests!
+
+
 def main():
     database.connection.delete_database()
     database.database.create_initial_database()
