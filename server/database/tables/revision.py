@@ -14,9 +14,15 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
+import database.datatypes
 import datetime
 import sqlite3
-import database.datatypes
+from typing import Optional
+
+
+# --------------------------------------------------------------------------------------------------
+# Public API
+# --------------------------------------------------------------------------------------------------
 
 
 def create_table(connection: sqlite3.Connection) -> None:
@@ -31,7 +37,7 @@ def create_table(connection: sqlite3.Connection) -> None:
         "                       NOT NULL,\n"
         "    timestamp DATETIME,\n"
         "    user_id   INTEGER  REFERENCES user (id) \n"
-        ");")
+        ")")
 
 
 def create_indexes(connection: sqlite3.Connection) -> None:
@@ -43,7 +49,7 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     return
 
 
-def current(connection: sqlite3.Connection) -> int:
+def current(connection: sqlite3.Connection) -> Optional[int]:
     """
     Get current revision number
 
@@ -51,7 +57,7 @@ def current(connection: sqlite3.Connection) -> int:
 
     :return: Current revision number
     """
-    cursor = connection.execute("SELECT MAX(id) FROM revision;")
+    cursor = connection.execute("SELECT MAX(id) FROM revision")
 
     record = cursor.fetchone()
 
@@ -74,8 +80,9 @@ def insert_record(connection: sqlite3.Connection,
     :return: 'id' of the inserted record
     """
     cursor = connection.execute(
-        "INSERT INTO revision (id, timestamp, user_id)\n"
-        "VALUES (NULL, ?, ?);",
+        "INSERT INTO revision\n"
+        "   (id, timestamp, user_id)\n"
+        "VALUES (NULL, ?, ?)",
         (database.datatypes.datetime_to_string(timestamp), user_id))
 
     return cursor.lastrowid
