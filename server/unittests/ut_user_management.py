@@ -22,14 +22,14 @@ class UserInformation(unittest.TestCase):
                                                              "basic",
                                                              {"password": "test123"})
         return user_id
-
+    
     def create_user_test2(self):
         user_id = usermanagement.user_management.create_user(self.admin_user_id,
                                                              "test2",
                                                              "Test",
                                                              "test2@test.com",
                                                              "basic",
-                                                             {"password": "test123"})
+                                                             {"password": "test456"})
         return user_id
 
     def test_default_administrator(self):
@@ -42,13 +42,25 @@ class UserInformation(unittest.TestCase):
         self.assertIsNotNone(user["revision_id"])
 
     def test_create_user(self):
+        # Positive test
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
+
+        # Negative test
+        # Try to create a user with the same user name
+        user_id = usermanagement.user_management.create_user(self.admin_user_id,
+                                                             "test1",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"})
+        self.assertIsNone(user_id)
 
     def test_find_user_by_user_id(self):
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
 
+        # Positive test
         user = usermanagement.user_management.find_user_by_user_id(user_id)
 
         self.assertEqual(user["user_id"], user_id)
@@ -57,10 +69,15 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user["email"], "test1@test.com")
         self.assertIsNotNone(user["revision_id"])
 
+        # Negative test
+        user = usermanagement.user_management.find_user_by_user_id(999)
+        self.assertIsNone(user)
+
     def test_find_user_by_user_name(self):
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
 
+        # Positive test
         user = usermanagement.user_management.find_user_by_user_name("test1")
 
         self.assertEqual(user["user_id"], user_id)
@@ -69,6 +86,10 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user["email"], "test1@test.com")
         self.assertIsNotNone(user["revision_id"])
 
+        # Negative test
+        user = usermanagement.user_management.find_user_by_user_name("test999")
+        self.assertIsNone(user)
+
     def test_find_users_by_display_name(self):
         user_id1 = self.create_user_test1()
         self.assertIsNotNone(user_id1)
@@ -76,11 +97,9 @@ class UserInformation(unittest.TestCase):
         user_id2 = self.create_user_test2()
         self.assertIsNotNone(user_id2)
 
+        # Positive test
         users = usermanagement.user_management.find_users_by_display_name("Test")
         self.assertEqual(len(users), 2)
-
-        user1 = None
-        user2 = None
 
         if ((users[0]["user_id"] == user_id1) and
                 (users[1]["user_id"] == user_id2)):
@@ -105,12 +124,68 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertIsNotNone(user2["revision_id"])
 
-    # TODO: add negative tests
-    # TODO: add test for: find_users_by_email
+        # Negative test
+        users = usermanagement.user_management.find_users_by_display_name("Test XYZ")
+        self.assertEqual(len(users), 0)
+
+    # TODO: add test for: modify_user_name
+    # TODO: add test for: modify_display_name
+    # TODO: add test for: modify_email
+    # TODO: add test for: disable_user
+    # TODO: add test for: enable_user
     # TODO: add test for: find_user_information_history
 
-# TODO: add test cases for: user_authentication
 
+class UserAuthentication(unittest.TestCase):
+    def setUp(self):
+        _initialize_database()
+        self.admin_user_id = 1
+
+    def create_user_test1(self):
+        user_id = usermanagement.user_management.create_user(self.admin_user_id,
+                                                             "test1",
+                                                             "Test",
+                                                             "test1@test.com",
+                                                             "basic",
+                                                             {"password": "test123"})
+        return user_id
+
+    def create_user_test2(self):
+        user_id = usermanagement.user_management.create_user(self.admin_user_id,
+                                                             "test2",
+                                                             "Test",
+                                                             "test2@test.com",
+                                                             "basic",
+                                                             {"password": "test456"})
+        return user_id
+
+    def test_default_administrator(self):
+        self.assertTrue(
+            usermanagement.user_management.authenticate_user("administrator",
+                                                             {"password": "administrator"}))
+
+    def test_users(self):
+        self.create_user_test1()
+        self.create_user_test2()
+
+        # Positive test
+        self.assertTrue(
+            usermanagement.user_management.authenticate_user("test1",
+                                                             {"password": "test123"}))
+        self.assertTrue(
+            usermanagement.user_management.authenticate_user("test2",
+                                                             {"password": "test456"}))
+
+        # Negative test
+        self.assertFalse(
+            usermanagement.user_management.authenticate_user("test1",
+                                                             {"password": "Test123"}))
+        self.assertFalse(
+            usermanagement.user_management.authenticate_user("test2",
+                                                             {"password": "tEst456"}))
+
+    # TODO: add test for: find_user_information_history
+    # TODO: add test for: others...
 
 if __name__ == '__main__':
     unittest.main()

@@ -130,7 +130,7 @@ def create_user(connection: sqlite3.Connection,
     user = find_user_by_user_name(connection, user_name, revision_id)
 
     if user is not None:
-        raise ValueError("An active user with the same user name already exists")
+        return None
 
     # Create the user in the new revision
     user_id = database.tables.user.insert_record(connection)
@@ -163,7 +163,7 @@ def create_user(connection: sqlite3.Connection,
             revision_id)
     else:
         # Error, unsupported authentication type
-        raise AttributeError("Invalid authentication type: " + type)
+        user_id = None
 
     return user_id
 
@@ -237,7 +237,7 @@ def authenticate_user(connection: sqlite3.Connection,
                 password_hash)
     else:
         # Error, unsupported authentication type
-        raise AttributeError("Invalid authentication type: " + user_authentication["type"])
+        user_authenticated = False
 
     return user_authenticated
 
