@@ -1,0 +1,56 @@
+Persistent:
+- application_id = 0x53414c4d ("SALM")
+- encoding = "UTF-8"
+- user_version = 0 (increment for every release that introduces changes in the tables?
+
+Non-persistent:
+- foreign_keys = 1
+
+Not needed:
+- auto_vacuum
+- automatic_index
+- busy_timeout
+- cache_size
+- cache_spill
+- case_sensitive_like
+- cell_size_check
+- checkpoint_fullfsync
+- collation_list
+- compile_options
+- data_version
+- database_list
+- defer_foreign_keys
+- foreign_key_check
+- foreign_key_list
+- freelist_count
+- fullfsync
+- ignore_check_constraints
+- incremental_vacuum
+- index_info
+- index_list
+- index_xinfo
+- integrity_check
+- journal_mode
+- journal_size_limit
+- legacy_file_format
+- locking_mode
+- max_page_count
+- mmap_size
+- page_count
+- page_size
+- query_only
+- quick_check
+- read_uncommitted
+- recursive_triggers 
+- reverse_unordered_selects
+- schema_version
+- secure_delete
+- shrink_memory
+- soft_heap_limit
+- synchronous
+- table_info
+- temp_store
+- threads
+- wal_autocheckpoint
+- wal_checkpoint
+- writable_schema 
