@@ -15,90 +15,208 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 import authentication.basic
+from database.connection import Connection
+from database.tables.revision import RevisionTable
+from database.tables.user import UserTable
+from database.tables.user_authentication import UserAuthenticationTable
+from database.tables.user_authentication_basic import UserAuthenticationBasicTable
+from database.tables.user_information import UserInformationTable
 import datetime
-import database.connection
-import database.tables.revision
-import database.tables.user
-import database.tables.user_authentication
-import database.tables.user_authentication_basic
-import database.tables.user_information
-import sqlite3
-import sys
+from typing import Optional
 
 
-def create_initial_database() -> None:
+class Tables(object):
     """
-    Creates initial database
+    Class that holds all of the tables in the database
     """
-    connection = database.connection.create()
 
-    try:
-        connection.begin()
-
-        # Create tables and indexes
-        database.tables.revision.create_table(connection.native_connection)
-        database.tables.revision.create_indexes(connection.native_connection)
-
-        database.tables.user.create_table(connection.native_connection)
-        database.tables.user.create_indexes(connection.native_connection)
-
-        database.tables.user_authentication.create_table(connection.native_connection)
-        database.tables.user_authentication.create_indexes(connection.native_connection)
-
-        database.tables.user_authentication_basic.create_table(connection.native_connection)
-        database.tables.user_authentication_basic.create_indexes(connection.native_connection)
-
-        database.tables.user_information.create_table(connection.native_connection)
-        database.tables.user_information.create_indexes(connection.native_connection)
-
-        # Create initial system users and user groups
-        _create_initial_system_users(connection.native_connection)
-        _create_initial_system_user_groups(connection.native_connection)
-
-        connection.commit()
-    except:
-        connection.rollback()
-        raise sys.exc_info()[0]
+    def __init__(self):
+        """
+        Constructor
+        """
+        self.revision = RevisionTable()
+        self.user = UserTable()
+        self.user_authentication = UserAuthenticationTable()
+        self.user_authentication_basic = UserAuthenticationBasicTable()
+        self.user_information = UserInformationTable()
 
 
-def _create_initial_system_users(connection: sqlite3.Connection) -> None:
+class Database(object):
     """
-    Creates the initial system users:
-    - "Administrator"
+    Base class for a database object
     """
-    # Since the database doesn't contain any users we must first create just the ID of the
-    # Administrator user, then create the first revision that is referencing the Administrator
-    # and then finally write all of the other user information
-    user_id = database.tables.user.insert_record(connection)
-    revision_id = database.tables.revision.insert_record(connection,
-                                                         datetime.datetime.utcnow(),
-                                                         user_id)
-    database.tables.user_information.insert_record(connection,
-                                                   user_id,
-                                                   "administrator",
-                                                   "Administrator",
-                                                   "",
-                                                   True,
-                                                   revision_id)
 
-    user_authentication_id = database.tables.user_authentication.insert_record(
-        connection,
-        user_id,
-        "basic",
-        revision_id)
+    def __init__(self, tables: Tables):
+        """
+        Constructor
 
-    database.tables.user_authentication_basic.insert_record(
-        connection,
-        user_authentication_id,
-        authentication.basic.generate_password_hash("administrator"),
-        revision_id)
+        :param tables:  Concrete implementations of database tables
+        """
+        self.__tables = tables
 
+    def __del__(self):
+        """
+        Destructor
+        """
+        pass
 
-def _create_initial_system_user_groups(connection: sqlite3.Connection) -> None:
-    """
-    Creates the initial system users:
-    - "Administrators"
-    """
-    # TODO: implement
-    return
+    @property
+    def tables(self):
+        """
+        Property for accessing the database tables
+
+        :return:    Database tables
+        """
+        return self.__tables
+
+    def validate(self) -> bool:
+        """
+        Validates the database
+
+        :return:    Success or failure
+
+        During validation the tables are checked
+        """
+        # TODO: check database? (tables, integrity check, foreign key check, etc.)
+        raise NotImplementedError()
+
+    def create_new_database(self) -> bool:
+        """
+        Creates a new database
+
+        :return:    Success or failure
+
+        NOTE:   This should only be called during initial configuration of the application after it
+                is installed (when the database is still empty)!
+        """
+        # First create the database
+        success = self._create_database()
+
+        # Then initialize it
+        if success:
+            connection = self.create_connection()
+
+            try:
+                connection.begin_transaction()
+
+                if success:
+                    self.__create_all_tables(connection)
+
+                if success:
+                    success = self.__create_default_system_users(connection)
+
+                if success:
+                    success = self.__create_default_system_groups(connection)
+
+                if success:
+                    connection.commit_transaction()
+                else:
+                    connection.rollback_transaction()
+            except:
+                connection.rollback_transaction()
+                raise
+
+        return success
+
+    def create_connection(self) -> Optional[Connection]:
+        """
+        Creates a new database connection
+
+        :return:    Database connection instance
+        """
+        raise NotImplementedError()
+
+    def _create_database(self) -> bool:
+        """
+        Creates an empty database if needed
+
+        :return:    Success or failure
+        """
+        raise NotImplementedError()
+
+    def __create_all_tables(self, connection: Connection):
+        """
+        Creates all the database tables
+
+        :param connection:  Database connection
+        """
+        # Create tables
+        self.__tables.revision.create(connection)
+        self.__tables.user.create(connection)
+        self.__tables.user_authentication.create(connection)
+        self.__tables.user_authentication_basic.create(connection)
+        self.__tables.user_information.create(connection)
+
+    def __create_default_system_users(self, connection: Connection) -> bool:
+        """
+        Creates the default system users
+
+        :param connection:  Database connection
+
+        :return:    Success or failure
+        """
+        # Since the database doesn't contain any users we must first create just the ID of the
+        # Administrator user, then create the first revision that is referencing the Administrator
+        # and then finally write all of the other user information and authentication.
+        success = True
+        user_id = self.__tables.user.insert_row(connection)
+
+        if user_id is None:
+            success = False
+
+        revision_id = None
+
+        if success:
+            revision_id = self.__tables.revision.insert_row(connection,
+                                                            datetime.datetime.utcnow(),
+                                                            user_id)
+
+            if revision_id is None:
+                success = False
+
+        if success:
+            user_information_id = self.__tables.user_information.insert_row(connection,
+                                                                            user_id,
+                                                                            "administrator",
+                                                                            "Administrator",
+                                                                            "",
+                                                                            True,
+                                                                            revision_id)
+
+            if user_information_id is None:
+                success = False
+
+        user_authentication_id = None
+
+        if success:
+            user_authentication_id = self.__tables.user_authentication.insert_row(connection,
+                                                                                  user_id,
+                                                                                  "basic",
+                                                                                  revision_id)
+
+        if user_authentication_id is None:
+            success = False
+
+        if success:
+            user_authentication_basic_id = self.__tables.user_authentication_basic.insert_row(
+                connection,
+                user_authentication_id,
+                authentication.basic.generate_password_hash("administrator"),
+                revision_id)
+
+            if user_authentication_basic_id is None:
+                success = False
+
+        return success
+
+    def __create_default_system_groups(self, connection: Connection) -> bool:
+        """
+        Creates the default system user groups
+
+        :param connection:  Database connection
+
+        :return:    Success or failure
+        """
+        # TODO: implement
+        return True
 

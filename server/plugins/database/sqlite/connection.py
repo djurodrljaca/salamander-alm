@@ -14,23 +14,41 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
+from database.connection import Connection
+import sqlite3
 
-class Connection(object):
-    """
-    Base class for a database connection
-    """
 
-    def __init__(self):
+class ConnectionSqlite(Connection):
+    """
+    SQLite database connection
+    """
+    def __init__(self, native_connection: sqlite3.Connection):
         """
         Constructor
+
+        :param native_connection: Native connection object
         """
-        pass
+        Connection.__init__(self)
+
+        # Disable automatic transactions and save the connection object
+        native_connection.isolation_level = None
+        self.__native_connection = native_connection
+        self.__in_transaction = False
 
     def __del__(self):
         """
         Destructor
         """
-        pass
+        Connection.__del__(self)
+
+    @property
+    def native_connection(self) -> sqlite3.Connection:
+        """
+        Returns the native connection
+
+        :return:
+        """
+        return self.__native_connection
 
     @property
     def in_transaction(self) -> bool:
@@ -39,7 +57,7 @@ class Connection(object):
 
         :return:    Transaction is active or not
         """
-        raise NotImplementedError()
+        return self.__in_transaction
 
     def begin_transaction(self) -> bool:
         """
@@ -47,7 +65,12 @@ class Connection(object):
 
         :return:    Success or failure
         """
-        raise NotImplementedError()
+        if self.__in_transaction:
+            return False
+
+        self.native_connection.execute("BEGIN")
+        self.__in_transaction = True
+        return True
 
     def commit_transaction(self) -> bool:
         """
@@ -55,7 +78,12 @@ class Connection(object):
 
         :return:    Success or failure
         """
-        raise NotImplementedError()
+        if not self.__in_transaction:
+            return False
+
+        self.native_connection.execute("COMMIT")
+        self.__in_transaction = False
+        return True
 
     def rollback_transaction(self) -> bool:
         """
@@ -63,4 +91,9 @@ class Connection(object):
 
         :return:    Success or failure
         """
-        raise NotImplementedError()
+        if not self.__in_transaction:
+            return False
+
+        self.native_connection.execute("ROLLBACK")
+        self.__in_transaction = False
+        return True

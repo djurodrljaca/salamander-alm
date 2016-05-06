@@ -14,36 +14,41 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-from database.connection import Connection
+from plugins.database.sqlite.connection import ConnectionSqlite
+from database.tables.user import UserTable
 from typing import List, Optional
 
 
-class UserTable(object):
+class UserTableSqlite(UserTable):
     """
-    Base class for "user" table
+    Implementation of "user" table for SQLite database
     """
 
     def __init__(self):
         """
         Constructor
         """
-        pass
+        UserTable.__init__(self)
 
     def __del__(self):
         """
         Destructor
         """
-        pass
+        UserTable.__del__(self)
 
-    def create(self, connection: Connection) -> None:
+    def create(self, connection: ConnectionSqlite) -> None:
         """
         Creates the table
 
         :param connection:  Database connection
         """
-        raise NotImplementedError()
+        connection.native_connection.execute(
+            "CREATE TABLE user (\n"
+            "    id INTEGER PRIMARY KEY AUTOINCREMENT\n"
+            "             NOT NULL\n"
+            ")")
 
-    def read_all_users(self, connection: Connection) -> List[int]:
+    def read_all_users(self, connection: ConnectionSqlite) -> List[int]:
         """
         Reads IDs of all users in the database
 
@@ -51,9 +56,18 @@ class UserTable(object):
 
         :return:    List of user IDs
         """
-        raise NotImplementedError()
+        cursor = connection.native_connection.execute(
+            "SELECT id\n"
+            "FROM user")
 
-    def insert_row(self, connection: Connection) -> Optional[int]:
+        users = list()
+
+        for row in cursor.fetchall():
+            users.append(row[0])
+
+        return users
+
+    def insert_row(self, connection: ConnectionSqlite) -> Optional[int]:
         """
         Inserts a new row in the table
 
@@ -61,4 +75,9 @@ class UserTable(object):
 
         :return: ID of the newly created row
         """
-        raise NotImplementedError()
+        cursor = connection.native_connection.execute(
+            "INSERT INTO user\n"
+            "   (id)\n"
+            "VALUES (NULL)")
+
+        return cursor.lastrowid

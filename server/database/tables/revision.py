@@ -14,75 +14,101 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import database.datatypes
+from database.connection import Connection
 import datetime
-import sqlite3
-from typing import Optional
+from typing import List, Optional
 
 
-# --------------------------------------------------------------------------------------------------
-# Public API
-# --------------------------------------------------------------------------------------------------
-
-
-def create_table(connection: sqlite3.Connection) -> None:
+class RevisionTable(object):
     """
-    Create table: "revision"
-
-    :param connection: Connection to database
+    Base class for "revision" table
     """
-    connection.execute(
-        "CREATE TABLE revision (\n"
-        "    id        INTEGER  PRIMARY KEY AUTOINCREMENT\n"
-        "                       NOT NULL,\n"
-        "    timestamp DATETIME,\n"
-        "    user_id   INTEGER  REFERENCES user (id) \n"
-        ")")
 
+    def __init__(self):
+        """
+        Constructor
+        """
+        pass
 
-def create_indexes(connection: sqlite3.Connection) -> None:
-    """
-    Create indexes for table: "revision"
+    def __del__(self):
+        """
+        Destructor
+        """
+        pass
 
-    :param connection: Connection to database
-    """
-    return
+    def create(self, connection: Connection) -> None:
+        """
+        Creates the table
 
+        :param connection:  Database connection
+        """
+        raise NotImplementedError()
 
-def current(connection: sqlite3.Connection) -> Optional[int]:
-    """
-    Get current revision number
+    def read_current_revision_id(self,
+                                 connection: Connection) -> Optional[int]:
+        """
+        Reads the current revision ID from the database
 
-    :param connection: Connection to database
+        :param connection:  Database connection
 
-    :return: Current revision number
-    """
-    cursor = connection.execute("SELECT MAX(id) FROM revision")
+        :return:    ID of the current revision
+        """
+        raise NotImplementedError()
 
-    record = cursor.fetchone()
+    def read_revision(self,
+                      connection: Connection,
+                      revision_id: int) -> Optional[dict]:
+        """
+        Reads the revision information from the database
 
-    if record is not None:
-        return record[0]
+        :param connection:  Database connection
+        :param revision_id: ID of the revision to read
 
-    return None
+        :return:    Revision information
+        """
+        raise NotImplementedError()
 
+    def read_revisions_by_id_range(self,
+                                   connection: Connection,
+                                   min_revision_id: int,
+                                   max_revision_id: int) -> List[dict]:
+        """
+        Reads the revision information from the database
 
-def insert_record(connection: sqlite3.Connection,
-                  timestamp: datetime.datetime,
-                  user_id: int) -> Optional[int]:
-    """
-    Inserts a new record in the table: "revision"
+        :param connection:      Database connection
+        :param min_revision_id: Smallest revision ID to be included
+        :param max_revision_id: Biggest revision ID to be included
 
-    :param connection: Connection to database
-    :param timestamp: Timestamp of when the revision was created
-    :param user_id: ID of the user that created the revision
+        :return:    Revision
+        """
+        raise NotImplementedError()
 
-    :return: ID of the inserted record
-    """
-    cursor = connection.execute(
-        "INSERT INTO revision\n"
-        "   (id, timestamp, user_id)\n"
-        "VALUES (NULL, ?, ?)",
-        (database.datatypes.datetime_to_string(timestamp), user_id))
+    def read_revisions_by_time_range(self,
+                                     connection: Connection,
+                                     min_timestamp: datetime.datetime,
+                                     max_timestamp: datetime.datetime) -> List[dict]:
+        """
+        Reads the revision information from the database
 
-    return cursor.lastrowid
+        :param connection:      Database connection
+        :param min_timestamp:   Earliest timestamp to be included
+        :param max_timestamp:   Latest timestamp to be included
+
+        :return:    List of revisions
+        """
+        raise NotImplementedError()
+
+    def insert_row(self,
+                   connection: Connection,
+                   timestamp: datetime.datetime,
+                   user_id: int) -> Optional[int]:
+        """
+        Inserts a new row in the table
+
+        :param connection:  Database connection
+        :param timestamp:   Timestamp
+        :param user_id:     ID of the user
+
+        :return: ID of the newly created row
+        """
+        raise NotImplementedError()

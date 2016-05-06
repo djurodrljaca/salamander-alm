@@ -14,279 +14,319 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import datetime
-import database.connection
-import database.tables.revision
+import database.database
 import database.user_management
+import datetime
 from typing import List, Optional
-import sys
 
 
-# --------------------------------------------------------------------------------------------------
-# Public API
-# --------------------------------------------------------------------------------------------------
-# TODO: search also for disabled users? Add a parameter for this?
-# TODO: rename the "find" API to "get"?
-
-
-def find_user_by_user_id(user_id: int) -> Optional[dict]:
+class UserManagement(object):
     """
-    Find a user that matches the specified user ID
-
-    :param user_id: User ID
-
-    :return: User information object
+    User management
     """
-    # First get the current revision
-    connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection.native_connection)
 
-    # Find a user that matches the specified user ID
-    user = None
+    def __init__(self, database_object: database.database.Database):
+        """
+        Constructor
 
-    if current_revision_id is not None:
-        user = database.user_management.find_user_by_user_id(connection.native_connection,
-                                                             user_id,
-                                                             current_revision_id)
+        :param database_object: Database object
+        """
+        self.__database = database_object
+        self.__user_management = database.user_management.UserManagement(database_object)
 
-    return user
+    def __del__(self):
+        """
+        Destructor
+        """
+        pass
 
+    def read_user_by_user_id(self, user_id: int) -> Optional[dict]:
+        """
+        Reads a user that matches the specified user ID
 
-def find_user_by_user_name(user_name: str) -> Optional[dict]:
-    """
-    Find a user that matches the specified user name
+        :param user_id:             ID of the user
 
-    :param user_name: User name
+        :return:    User information object
 
-    :return: User information object
-    """
-    # First get the current revision
-    connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection.native_connection)
+        NOTE:   This method searches both active and inactive users
+        """
+        # First get the current revision
+        connection = self.__database.create_connection()
+        current_revision_id = self.__database.tables.revision.read_current_revision_id(connection)
 
-    # Find a user that matches the specified user ID
-    user = None
+        # Read a user that matches the specified user ID
+        user = None
 
-    if current_revision_id is not None:
-        user = database.user_management.find_user_by_user_name(connection.native_connection,
-                                                               user_name,
+        if current_revision_id is not None:
+            user = self.__user_management.read_user_by_user_id(connection,
+                                                               user_id,
                                                                current_revision_id)
 
-    return user
+        return user
 
+    def read_user_by_user_name(self, user_name: str) -> Optional[dict]:
+        """
+        Reads a user that matches the specified user ID
 
-def find_users_by_display_name(display_name: str) -> List[dict]:
-    """
-    Find user by "user name" parameter
+        :param user_name:           User's user name
 
-    :param display_name: User's name in format appropriate for displaying in the GUI
+        :return:    User information object
 
-    :return: List of user information objects
-    """
-    # First get the current revision
-    connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection.native_connection)
+        NOTE:   This method only searches active users
+        """
+        # First get the current revision
+        connection = self.__database.create_connection()
+        current_revision_id = self.__database.tables.revision.read_current_revision_id(connection)
 
-    # Find all users that match the specified display name
-    users = list()
+        # Read a user that matches the specified user ID
+        user = None
 
-    if current_revision_id is not None:
-        users = database.user_management.find_users_by_display_name(connection.native_connection,
-                                                                    display_name,
-                                                                    current_revision_id)
+        if current_revision_id is not None:
+            user = self.__user_management.read_user_by_user_name(connection,
+                                                                 user_name,
+                                                                 current_revision_id)
 
-    return users
+        return user
 
+    def read_users_by_user_name(self, user_name: str, only_active_users: bool) -> Optional[dict]:
+        """
+        Reads a user that matches the specified user ID
 
-def create_user(requested_by_user: int,
-                user_name: str,
-                display_name: str,
-                email: str,
-                authentication_type: str,
-                authentication_parameters: dict) -> Optional[int]:
-    """
-    Create a new user
+        :param user_name:           User's user name
+        :param only_active_users:   Only search for active users
 
-    :param requested_by_user: ID of the user that requested creation of the new user
-    :param user_name: User name
-    :param display_name: User's name in format appropriate for displaying in the GUI
-    :param email: Email address of the user
-    :param authentication_type: User's authentication type
-    :param authentication_parameters: User's authentication parameters
+        :return:    User information object
+        """
+        # First get the current revision
+        connection = self.__database.create_connection()
+        current_revision_id = self.__database.tables.revision.read_current_revision_id(connection)
 
-    :return: User ID of the new user
-    """
-    # Create a new user
-    user_id = None
+        # Read a user that matches the specified user ID
+        users = None
 
-    connection = database.connection.create()
+        if current_revision_id is not None:
+            users = self.__user_management.read_users_by_user_name(connection,
+                                                                   user_name,
+                                                                   only_active_users,
+                                                                   current_revision_id)
 
-    try:
-        success = connection.begin()
+        return users
 
-        # Start a new revision
-        revision_id = None
+    def read_users_by_display_name(self,
+                                   display_name: str,
+                                   only_active_users = True) -> Optional[dict]:
+        """
+        Reads a user that matches the specified user ID
 
-        if success:
-            revision_id = database.tables.revision.insert_record(connection.native_connection,
-                                                                 datetime.datetime.utcnow(),
-                                                                 requested_by_user)
+        :param display_name:        User's display name
+        :param only_active_users:   Only search for active users
 
-            if revision_id is None:
-                success = False
+        :return:    User information object
+        """
+        # First get the current revision
+        connection = self.__database.create_connection()
+        current_revision_id = self.__database.tables.revision.read_current_revision_id(connection)
 
-        # Create the user
-        if success:
-            user_id = database.user_management.create_user(connection.native_connection,
-                                                           user_name,
-                                                           display_name,
-                                                           email,
-                                                           authentication_type,
-                                                           authentication_parameters,
-                                                           revision_id)
+        # Read a user that matches the specified user ID
+        users = None
 
-            if user_id is None:
-                success = False
+        if current_revision_id is not None:
+            users = self.__user_management.read_users_by_display_name(connection,
+                                                                      display_name,
+                                                                      only_active_users,
+                                                                      current_revision_id)
 
-        if success:
-            connection.commit()
-        else:
-            connection.rollback()
-    except:
-        connection.rollback()
-        raise sys.exc_info()[0]
+        return users
 
-    return user_id
+    def create_user(self,
+                    requested_by_user: int,
+                    user_name: str,
+                    display_name: str,
+                    email: str,
+                    authentication_type: str,
+                    authentication_parameters: dict) -> Optional[int]:
+        """
+        Create a new user
 
+        :param requested_by_user:           ID of the user that requested creation of the new user
+        :param user_name:                   User's user name
+        :param display_name:                User's display name
+        :param email:                       Email address of the user
+        :param authentication_type:         User's authentication type
+        :param authentication_parameters:   User's authentication parameters
 
-def modify_user_information(requested_by_user: int,
-                            user_to_modify: int,
-                            user_name: str,
-                            display_name: str,
-                            email: str,
-                            active: bool) -> bool:
-    """
-    Modify user's information
+        :return: User ID of the new user
+        """
+        user_id = None
+        connection = self.__database.create_connection()
 
-    :param requested_by_user: ID of the user that requested modification of a user
-    :param user_to_modify: ID of the user that should be modified
-    :param user_name: New user name
-    :param display_name: New user's name in format appropriate for displaying in the GUI
-    :param email: New email address of the user
-    :param active: New state of the user (active or inactive)
+        try:
+            success = connection.begin_transaction()
 
-    :return: Success or failure
-    """
-    # Modify user's information
-    connection = database.connection.create()
+            # Start a new revision
+            revision_id = None
 
-    try:
-        success = connection.begin()
+            if success:
+                revision_id = self.__database.tables.revision.insert_row(connection,
+                                                                         datetime.datetime.utcnow(),
+                                                                         requested_by_user)
 
-        # Start a new revision
-        revision_id = None
+                if revision_id is None:
+                    success = False
 
-        if success:
-            revision_id = database.tables.revision.insert_record(connection.native_connection,
-                                                                 datetime.datetime.utcnow(),
-                                                                 requested_by_user)
+            # Create the user
+            if success:
+                user_id = self.__user_management.create_user(connection,
+                                                             user_name,
+                                                             display_name,
+                                                             email,
+                                                             authentication_type,
+                                                             authentication_parameters,
+                                                             revision_id)
 
-            if revision_id is None:
-                success = False
+                if user_id is None:
+                    success = False
 
-        # Modify user's information in the new revision
-        if success:
-            success = database.user_management.modify_user_information(connection.native_connection,
-                                                                       user_to_modify,
-                                                                       user_name,
-                                                                       display_name,
-                                                                       email,
-                                                                       active,
-                                                                       revision_id)
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
 
-        if success:
-            connection.commit()
-        else:
-            connection.rollback()
-    except:
-        connection.rollback()
-        raise sys.exc_info()[0]
+        return user_id
 
-    return success
+    def update_user_information(self,
+                                requested_by_user: int,
+                                user_to_modify: int,
+                                user_name: str,
+                                display_name: str,
+                                email: str,
+                                active: bool) -> bool:
+        """
+        Update user's information
 
+        :param requested_by_user:   ID of the user that requested modification of a user
+        :param user_to_modify:      ID of the user that should be modified
+        :param user_name:           User's user name
+        :param display_name:        User's display name
+        :param email:               User's email address
+        :param email:               New email address of the user
+        :param active:              New state of the user (active or inactive)
 
-def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
-    """
-    Authenticate user with basic authentication
+        :return:    Success or failure
+        """
+        user_id = None
+        connection = self.__database.create_connection()
 
-    :param user_name: User name
-    :param authentication_parameters: User's authentication parameters
+        try:
+            success = connection.begin_transaction()
 
-    :return: User ID
-    """
-    # First get the current revision
-    connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection.native_connection)
+            # Start a new revision
+            revision_id = None
 
-    # Authenticate user
-    user_authenticated = False
+            if success:
+                revision_id = self.__database.tables.revision.insert_row(connection,
+                                                                         datetime.datetime.utcnow(),
+                                                                         requested_by_user)
 
-    if current_revision_id is not None:
-        user_authenticated = database.user_management.authenticate_user(
-            connection.native_connection,
-            user_name,
-            authentication_parameters,
-            current_revision_id)
+                if revision_id is None:
+                    success = False
 
-    return user_authenticated
+            # Update user's information in the new revision
+            if success:
+                success = self.__user_management.update_user_information(connection,
+                                                                         user_to_modify,
+                                                                         user_name,
+                                                                         display_name,
+                                                                         email,
+                                                                         active,
+                                                                         revision_id)
 
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
 
-def modify_user_authentication(requested_by_user: int,
-                               user_to_modify: int,
-                               authentication_type: str,
-                               authentication_parameters: dict) -> bool:
-    """
-    Modify user's authentication
-
-    :param requested_by_user: ID of the user that requested modification of a user
-    :param user_to_modify: ID of the user that should be modified
-    :param authentication_type: User's new authentication type
-    :param authentication_parameters: User's new authentication parameters
-
-    :return: Success or failure
-    """
-    # Modify user's authentication
-    connection = database.connection.create()
-
-    try:
-        success = connection.begin()
-
-        # Start a new revision
-        revision_id = None
-
-        if success:
-            revision_id = database.tables.revision.insert_record(connection.native_connection,
-                                                                 datetime.datetime.utcnow(),
-                                                                 requested_by_user)
-
-            if revision_id is None:
-                success = False
-
-        # Modify user's authentication in the new revision
-        if success:
-            success = database.user_management.modify_user_authentication(
-                connection.native_connection,
-                user_to_modify,
-                authentication_type,
-                authentication_parameters,
-                revision_id)
-
-        if success:
-            connection.commit()
-        else:
-            connection.rollback()
-    except:
-        connection.rollback()
-        raise sys.exc_info()[0]
-
-    return success
+        return success
+#
+#
+# def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
+#     """
+#     Authenticate user with basic authentication
+#
+#     :param user_name: User name
+#     :param authentication_parameters: User's authentication parameters
+#
+#     :return: User ID
+#     """
+#     # First get the current revision
+#     connection = database.connection.create()
+#     current_revision_id = database.tables.revision.current(connection.native_connection)
+#
+#     # Authenticate user
+#     user_authenticated = False
+#
+#     if current_revision_id is not None:
+#         user_authenticated = database.user_management.authenticate_user(
+#             connection.native_connection,
+#             user_name,
+#             authentication_parameters,
+#             current_revision_id)
+#
+#     return user_authenticated
+#
+#
+# def modify_user_authentication(requested_by_user: int,
+#                                user_to_modify: int,
+#                                authentication_type: str,
+#                                authentication_parameters: dict) -> bool:
+#     """
+#     Modify user's authentication
+#
+#     :param requested_by_user: ID of the user that requested modification of a user
+#     :param user_to_modify: ID of the user that should be modified
+#     :param authentication_type: User's new authentication type
+#     :param authentication_parameters: User's new authentication parameters
+#
+#     :return: Success or failure
+#     """
+#     # Modify user's authentication
+#     connection = database.connection.create()
+#
+#     try:
+#         success = connection.begin()
+#
+#         # Start a new revision
+#         revision_id = None
+#
+#         if success:
+#             revision_id = database.tables.revision.insert_record(connection.native_connection,
+#                                                                  datetime.datetime.utcnow(),
+#                                                                  requested_by_user)
+#
+#             if revision_id is None:
+#                 success = False
+#
+#         # Modify user's authentication in the new revision
+#         if success:
+#             success = database.user_management.modify_user_authentication(
+#                 connection.native_connection,
+#                 user_to_modify,
+#                 authentication_type,
+#                 authentication_parameters,
+#                 revision_id)
+#
+#         if success:
+#             connection.commit()
+#         else:
+#             connection.rollback()
+#     except:
+#         connection.rollback()
+#         raise sys.exc_info()[0]
+#
+#     return success

@@ -14,92 +14,64 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import sqlite3
+from database.connection import Connection
 from typing import Optional
 
 
-# --------------------------------------------------------------------------------------------------
-# Public API
-# --------------------------------------------------------------------------------------------------
-
-
-def create_table(connection: sqlite3.Connection) -> None:
+class UserAuthenticationBasicTable(object):
     """
-    Create table: "user_authentication_basic"
-
-    :param connection: Connection to database
+    Base class for "user_authentication_basic" table
     """
-    connection.execute(
-        "CREATE TABLE user_authentication_basic (\n"
-        "    id                     INTEGER PRIMARY KEY AUTOINCREMENT\n"
-        "                                   NOT NULL,\n"
-        "    user_authentication_id INTEGER REFERENCES user (id) \n"
-        "                                   NOT NULL,\n"
-        "    password_hash          TEXT    NOT NULL,\n"
-        "    revision_id            INTEGER REFERENCES revision (id) \n"
-        "                                   NOT NULL\n"
-        ")")
 
+    def __init__(self):
+        """
+        Constructor
+        """
+        pass
 
-def create_indexes(connection: sqlite3.Connection) -> None:
-    """
-    Create indexes for table: "user"
+    def __del__(self):
+        """
+        Destructor
+        """
+        pass
 
-    :param connection: Connection to database
-    """
-    return
+    def create(self, connection: Connection) -> None:
+        """
+        Creates the table
 
+        :param connection:  Database connection
+        """
+        raise NotImplementedError()
 
-def insert_record(connection: sqlite3.Connection,
-                  user_authentication_id: int,
-                  password_hash: str,
-                  revision_id: int) -> Optional[int]:
-    """
-    Inserts a new record in the table: "user_authentication_basic"
+    def read_password_hash(self,
+                           connection: Connection,
+                           user_authentication_id: int,
+                           max_revision_id: int) -> str:
+        """
+        Reads authentication information for the specified user and max revision
 
-    :param connection: Connection to database
-    :param user_authentication_id: ID of the user authentication record
-    :param password_hash: Hash of the user's password
-    :param revision_id: Revision for this record
+        :param connection:              Database connection
+        :param user_authentication_id:  ID of the user authentication
+        :param max_revision_id:         Maximum revision ID for the search
 
-    :return: ID of the inserted record
-    """
-    cursor = connection.execute(
-        "INSERT INTO user_authentication_basic"
-        "   (id, user_authentication_id, password_hash, revision_id)\n"
-        "VALUES (NULL, ?, ?, ?)",
-        (user_authentication_id, password_hash, revision_id))
+        :return: Password hash
+        """
+        raise NotImplementedError()
 
-    return cursor.lastrowid
+    def insert_row(self,
+                   connection: Connection,
+                   user_authentication_id: int,
+                   password_hash: str,
+                   revision_id: int) -> Optional[int]:
+        """
+        Inserts a new row in the table
 
+        :param connection:  D           atabase connection
+        :param user_authentication_id:  ID of the user authentication
+        :param password_hash:           User's password hash
+        :param revision_id:             Revision ID
 
-def find_password_hash(connection: sqlite3.Connection,
-                       user_authentication_id: int,
-                       max_revision_id: int) -> Optional[str]:
-    """
-    Find password hash for the specified user
+        :return: ID of the newly created row
+        """
+        raise NotImplementedError()
 
-    :param connection: Connection to database
-    :param user_authentication_id: ID of the user authentication record
-    :param max_revision_id: Maximum allowed revision ID for the search
-    :return:
-    """
-    cursor = connection.execute(
-        "SELECT password_hash\n"
-        "FROM user_authentication_basic\n"
-        "WHERE ((user_authentication_id = :user_authentication_id) AND\n"
-        "       (revision_id = (\n"
-        "           SELECT MAX(revision_id)"
-        "           FROM user_authentication_basic\n"
-        "           WHERE ((user_authentication_id = :user_authentication_id) AND\n"
-        "                  (revision_id <= :max_revision_id))\n"
-        "        )))",
-        {"user_authentication_id": user_authentication_id, "max_revision_id": max_revision_id})
-
-    # Process result
-    record = cursor.fetchone()
-
-    if record is not None:
-        return record[0]
-
-    return None
