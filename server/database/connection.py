@@ -23,6 +23,80 @@ import sqlite3
 _file_path = "database.db"
 
 
+class Connection(object):
+    """
+    Database connection
+    """
+
+    def __init__(self, native_connection: sqlite3.Connection):
+        """
+        Constructor
+
+        :param native_connection: Native connection object
+        """
+        # Disable automatic transactions and save the connection object
+        native_connection.isolation_level = None
+        self.__native_connection = native_connection
+        self.__in_transaction = False
+
+    @property
+    def native_connection(self) -> sqlite3.Connection:
+        """
+        Returns the native connection
+
+        :return:
+        """
+        return self.__native_connection
+
+    @property
+    def in_transaction(self) -> bool:
+        """
+        Checks if a transaction is active on the connection
+
+        :return: Transaction is active or not
+        """
+        return self.__in_transaction
+
+    def begin(self) -> bool:
+        """
+        Begins a transaction
+
+        :return: Success or failure
+
+        NOTE: This will fail if a transaction is already active!
+        """
+        if self.__in_transaction:
+            return False
+
+        self.native_connection.execute("BEGIN")
+        self.__in_transaction = True
+        return True
+
+    def commit(self) -> bool:
+        """
+        Commits the currently active transaction
+
+        :return: Success or failure
+        """
+        if not self.__in_transaction:
+            return False
+
+        self.native_connection.execute("COMMIT")
+        self.__in_transaction = False
+        return True
+
+    def rollback(self) -> None:
+        """
+        Commit transaction
+        """
+        if not self.__in_transaction:
+            return False
+
+        self.native_connection.execute("ROLLBACK")
+        self.__in_transaction = False
+        return True
+
+
 def delete_database() -> None:
     """
     Deletes the database
@@ -31,7 +105,7 @@ def delete_database() -> None:
         os.remove(_file_path)
 
 
-def create() -> sqlite3.Connection:
+def create() -> Connection:
     """
     Creates a connection to the database
 
@@ -40,4 +114,4 @@ def create() -> sqlite3.Connection:
     connection = sqlite3.connect(_file_path)
     connection.row_factory = sqlite3.Row
 
-    return connection
+    return Connection(connection)

@@ -19,6 +19,7 @@ import database.connection
 import database.tables.revision
 import database.user_management
 from typing import List, Optional
+import sys
 
 
 # --------------------------------------------------------------------------------------------------
@@ -26,7 +27,6 @@ from typing import List, Optional
 # --------------------------------------------------------------------------------------------------
 # TODO: search also for disabled users? Add a parameter for this?
 # TODO: rename the "find" API to "get"?
-# TODO: fix handling transactions! (create custom Connection class)
 
 
 def find_user_by_user_id(user_id: int) -> Optional[dict]:
@@ -39,10 +39,15 @@ def find_user_by_user_id(user_id: int) -> Optional[dict]:
     """
     # First get the current revision
     connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection)
+    current_revision_id = database.tables.revision.current(connection.native_connection)
 
     # Find a user that matches the specified user ID
-    user = database.user_management.find_user_by_user_id(connection, user_id, current_revision_id)
+    user = None
+
+    if current_revision_id is not None:
+        user = database.user_management.find_user_by_user_id(connection.native_connection,
+                                                             user_id,
+                                                             current_revision_id)
 
     return user
 
@@ -57,12 +62,15 @@ def find_user_by_user_name(user_name: str) -> Optional[dict]:
     """
     # First get the current revision
     connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection)
+    current_revision_id = database.tables.revision.current(connection.native_connection)
 
     # Find a user that matches the specified user ID
-    user = database.user_management.find_user_by_user_name(connection,
-                                                           user_name,
-                                                           current_revision_id)
+    user = None
+
+    if current_revision_id is not None:
+        user = database.user_management.find_user_by_user_name(connection.native_connection,
+                                                               user_name,
+                                                               current_revision_id)
 
     return user
 
@@ -77,12 +85,15 @@ def find_users_by_display_name(display_name: str) -> List[dict]:
     """
     # First get the current revision
     connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection)
+    current_revision_id = database.tables.revision.current(connection.native_connection)
 
     # Find all users that match the specified display name
-    users = database.user_management.find_users_by_display_name(connection,
-                                                                display_name,
-                                                                current_revision_id)
+    users = list()
+
+    if current_revision_id is not None:
+        users = database.user_management.find_users_by_display_name(connection.native_connection,
+                                                                    display_name,
+                                                                    current_revision_id)
 
     return users
 
@@ -108,27 +119,42 @@ def create_user(requested_by_user: int,
     # Create a new user
     user_id = None
 
-    with database.connection.create() as connection:
+    connection = database.connection.create()
+
+    try:
+        success = connection.begin()
+
         # Start a new revision
-        revision_id = database.tables.revision.insert_record(connection,
-                                                             datetime.datetime.utcnow(),
-                                                             requested_by_user)
+        revision_id = None
 
+        if success:
+            revision_id = database.tables.revision.insert_record(connection.native_connection,
+                                                                 datetime.datetime.utcnow(),
+                                                                 requested_by_user)
 
-
-
-
-
+            if revision_id is None:
+                success = False
 
         # Create the user
-        if revision_id is not None:
-            user_id = database.user_management.create_user(connection,
+        if success:
+            user_id = database.user_management.create_user(connection.native_connection,
                                                            user_name,
                                                            display_name,
                                                            email,
                                                            authentication_type,
                                                            authentication_parameters,
                                                            revision_id)
+
+            if user_id is None:
+                success = False
+
+        if success:
+            connection.commit()
+        else:
+            connection.rollback()
+    except:
+        connection.rollback()
+        raise sys.exc_info()[0]
 
     return user_id
 
@@ -151,31 +177,42 @@ def modify_user_information(requested_by_user: int,
 
     :return: Success or failure
     """
-    # Modify user
-    with database.connection.create() as connection:
+    # Modify user's information
+    connection = database.connection.create()
+
+    try:
+        success = connection.begin()
+
         # Start a new revision
-        revision_id = database.tables.revision.insert_record(connection,
-                                                             datetime.datetime.utcnow(),
-                                                             requested_by_user)
+        revision_id = None
 
-        if revision_id is None:
-            # Error, failed to create a new revision
-            return False
+        if success:
+            revision_id = database.tables.revision.insert_record(connection.native_connection,
+                                                                 datetime.datetime.utcnow(),
+                                                                 requested_by_user)
 
+            if revision_id is None:
+                success = False
 
+        # Modify user's information in the new revision
+        if success:
+            success = database.user_management.modify_user_information(connection.native_connection,
+                                                                       user_to_modify,
+                                                                       user_name,
+                                                                       display_name,
+                                                                       email,
+                                                                       active,
+                                                                       revision_id)
 
+        if success:
+            connection.commit()
+        else:
+            connection.rollback()
+    except:
+        connection.rollback()
+        raise sys.exc_info()[0]
 
-
-
-
-        # Modify the user in the new revision
-        return database.user_management.modify_user_information(connection,
-                                                                user_to_modify,
-                                                                user_name,
-                                                                display_name,
-                                                                email,
-                                                                active,
-                                                                revision_id)
+    return success
 
 
 def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
@@ -189,16 +226,17 @@ def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
     """
     # First get the current revision
     connection = database.connection.create()
-    current_revision_id = database.tables.revision.current(connection)
+    current_revision_id = database.tables.revision.current(connection.native_connection)
 
     # Authenticate user
     user_authenticated = False
 
     if current_revision_id is not None:
-        user_authenticated = database.user_management.authenticate_user(connection,
-                                                                        user_name,
-                                                                        authentication_parameters,
-                                                                        current_revision_id)
+        user_authenticated = database.user_management.authenticate_user(
+            connection.native_connection,
+            user_name,
+            authentication_parameters,
+            current_revision_id)
 
     return user_authenticated
 
@@ -208,7 +246,7 @@ def modify_user_authentication(requested_by_user: int,
                                authentication_type: str,
                                authentication_parameters: dict) -> bool:
     """
-    Modify user's information
+    Modify user's authentication
 
     :param requested_by_user: ID of the user that requested modification of a user
     :param user_to_modify: ID of the user that should be modified
@@ -217,20 +255,38 @@ def modify_user_authentication(requested_by_user: int,
 
     :return: Success or failure
     """
-    # Modify user
-    success = False
-    with database.connection.create() as connection:
-        # Start a new revision
-        revision_id = database.tables.revision.insert_record(connection,
-                                                             datetime.datetime.utcnow(),
-                                                             requested_by_user)
+    # Modify user's authentication
+    connection = database.connection.create()
 
-        # Modify authentication
-        if revision_id is not None:
-            success = database.user_management.modify_user_authentication(connection,
-                                                                          user_to_modify,
-                                                                          authentication_type,
-                                                                          authentication_parameters,
-                                                                          revision_id)
+    try:
+        success = connection.begin()
+
+        # Start a new revision
+        revision_id = None
+
+        if success:
+            revision_id = database.tables.revision.insert_record(connection.native_connection,
+                                                                 datetime.datetime.utcnow(),
+                                                                 requested_by_user)
+
+            if revision_id is None:
+                success = False
+
+        # Modify user's authentication in the new revision
+        if success:
+            success = database.user_management.modify_user_authentication(
+                connection.native_connection,
+                user_to_modify,
+                authentication_type,
+                authentication_parameters,
+                revision_id)
+
+        if success:
+            connection.commit()
+        else:
+            connection.rollback()
+    except:
+        connection.rollback()
+        raise sys.exc_info()[0]
 
     return success

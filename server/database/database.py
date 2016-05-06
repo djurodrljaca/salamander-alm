@@ -23,32 +23,42 @@ import database.tables.user_authentication
 import database.tables.user_authentication_basic
 import database.tables.user_information
 import sqlite3
+import sys
 
 
 def create_initial_database() -> None:
     """
     Creates initial database
     """
-    with database.connection.create() as connection:
+    connection = database.connection.create()
+
+    try:
+        connection.begin()
+
         # Create tables and indexes
-        database.tables.revision.create_table(connection)
-        database.tables.revision.create_indexes(connection)
+        database.tables.revision.create_table(connection.native_connection)
+        database.tables.revision.create_indexes(connection.native_connection)
 
-        database.tables.user.create_table(connection)
-        database.tables.user.create_indexes(connection)
+        database.tables.user.create_table(connection.native_connection)
+        database.tables.user.create_indexes(connection.native_connection)
 
-        database.tables.user_authentication.create_table(connection)
-        database.tables.user_authentication.create_indexes(connection)
+        database.tables.user_authentication.create_table(connection.native_connection)
+        database.tables.user_authentication.create_indexes(connection.native_connection)
 
-        database.tables.user_authentication_basic.create_table(connection)
-        database.tables.user_authentication_basic.create_indexes(connection)
+        database.tables.user_authentication_basic.create_table(connection.native_connection)
+        database.tables.user_authentication_basic.create_indexes(connection.native_connection)
 
-        database.tables.user_information.create_table(connection)
-        database.tables.user_information.create_indexes(connection)
+        database.tables.user_information.create_table(connection.native_connection)
+        database.tables.user_information.create_indexes(connection.native_connection)
 
         # Create initial system users and user groups
-        _create_initial_system_users(connection)
-        _create_initial_system_user_groups(connection)
+        _create_initial_system_users(connection.native_connection)
+        _create_initial_system_user_groups(connection.native_connection)
+
+        connection.commit()
+    except:
+        connection.rollback()
+        raise sys.exc_info()[0]
 
 
 def _create_initial_system_users(connection: sqlite3.Connection) -> None:
