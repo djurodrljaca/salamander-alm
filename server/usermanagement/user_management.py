@@ -24,6 +24,9 @@ from typing import List, Optional
 # --------------------------------------------------------------------------------------------------
 # Public API
 # --------------------------------------------------------------------------------------------------
+# TODO: search also for disabled users? Add a parameter for this?
+# TODO: rename the "find" API to "get"?
+# TODO: fix handling transactions! (create custom Connection class)
 
 
 def find_user_by_user_id(user_id: int) -> Optional[dict]:
@@ -103,20 +106,29 @@ def create_user(requested_by_user: int,
     :return: User ID of the new user
     """
     # Create a new user
+    user_id = None
+
     with database.connection.create() as connection:
         # Start a new revision
         revision_id = database.tables.revision.insert_record(connection,
                                                              datetime.datetime.utcnow(),
                                                              requested_by_user)
 
+
+
+
+
+
+
         # Create the user
-        user_id = database.user_management.create_user(connection,
-                                                       user_name,
-                                                       display_name,
-                                                       email,
-                                                       authentication_type,
-                                                       authentication_parameters,
-                                                       revision_id)
+        if revision_id is not None:
+            user_id = database.user_management.create_user(connection,
+                                                           user_name,
+                                                           display_name,
+                                                           email,
+                                                           authentication_type,
+                                                           authentication_parameters,
+                                                           revision_id)
 
     return user_id
 
@@ -126,7 +138,7 @@ def modify_user_information(requested_by_user: int,
                             user_name: str,
                             display_name: str,
                             email: str,
-                            active: bool) -> None:
+                            active: bool) -> bool:
     """
     Modify user's information
 
@@ -136,6 +148,8 @@ def modify_user_information(requested_by_user: int,
     :param display_name: New user's name in format appropriate for displaying in the GUI
     :param email: New email address of the user
     :param active: New state of the user (active or inactive)
+
+    :return: Success or failure
     """
     # Modify user
     with database.connection.create() as connection:
@@ -144,14 +158,24 @@ def modify_user_information(requested_by_user: int,
                                                              datetime.datetime.utcnow(),
                                                              requested_by_user)
 
+        if revision_id is None:
+            # Error, failed to create a new revision
+            return False
+
+
+
+
+
+
+
         # Modify the user in the new revision
-        database.user_management.modify_user_information(connection,
-                                                         user_to_modify,
-                                                         user_name,
-                                                         display_name,
-                                                         email,
-                                                         active,
-                                                         revision_id)
+        return database.user_management.modify_user_information(connection,
+                                                                user_to_modify,
+                                                                user_name,
+                                                                display_name,
+                                                                email,
+                                                                active,
+                                                                revision_id)
 
 
 def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
@@ -168,10 +192,13 @@ def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
     current_revision_id = database.tables.revision.current(connection)
 
     # Authenticate user
-    user_authenticated = database.user_management.authenticate_user(connection,
-                                                                    user_name,
-                                                                    authentication_parameters,
-                                                                    current_revision_id)
+    user_authenticated = False
+
+    if current_revision_id is not None:
+        user_authenticated = database.user_management.authenticate_user(connection,
+                                                                        user_name,
+                                                                        authentication_parameters,
+                                                                        current_revision_id)
 
     return user_authenticated
 
@@ -179,7 +206,7 @@ def authenticate_user(user_name: str, authentication_parameters: str) -> bool:
 def modify_user_authentication(requested_by_user: int,
                                user_to_modify: int,
                                authentication_type: str,
-                               authentication_parameters: dict) -> None:
+                               authentication_parameters: dict) -> bool:
     """
     Modify user's information
 
@@ -191,6 +218,7 @@ def modify_user_authentication(requested_by_user: int,
     :return: Success or failure
     """
     # Modify user
+    success = False
     with database.connection.create() as connection:
         # Start a new revision
         revision_id = database.tables.revision.insert_record(connection,
@@ -198,8 +226,11 @@ def modify_user_authentication(requested_by_user: int,
                                                              requested_by_user)
 
         # Modify authentication
-        database.user_management.modify_user_authentication(connection,
-                                                            user_to_modify,
-                                                            authentication_type,
-                                                            authentication_parameters,
-                                                            revision_id)
+        if revision_id is not None:
+            success = database.user_management.modify_user_authentication(connection,
+                                                                          user_to_modify,
+                                                                          authentication_type,
+                                                                          authentication_parameters,
+                                                                          revision_id)
+
+    return success

@@ -77,12 +77,12 @@ def find_user_by_user_name(connection: sqlite3.Connection,
                                                                      max_revision_id)
 
     # Return user only if exactly one user was found
+    user = None
     if users is not None:
         if len(users) == 1:
-            return users[0]
+            user = users[0]
 
-    # Error
-    return None
+    return user
 
 
 def find_users_by_display_name(connection: sqlite3.Connection,
@@ -135,14 +135,20 @@ def create_user(connection: sqlite3.Connection,
     # Create the user in the new revision
     user_id = database.tables.user.insert_record(connection)
 
+    if user_id is None:
+        return None
+
     # Add user information to the user
-    database.tables.user_information.insert_record(connection,
-                                                   user_id,
-                                                   user_name,
-                                                   display_name,
-                                                   email,
-                                                   True,
-                                                   revision_id)
+    record_id = database.tables.user_information.insert_record(connection,
+                                                               user_id,
+                                                               user_name,
+                                                               display_name,
+                                                               email,
+                                                               True,
+                                                               revision_id)
+
+    if record_id is None:
+        return None
 
     # Add user authentication to the user
     user_authentication_id = database.tables.user_authentication.insert_record(
@@ -151,19 +157,25 @@ def create_user(connection: sqlite3.Connection,
         authentication_type,
         revision_id)
 
+    if user_authentication_id is None:
+        return None
+
     if authentication_type == "basic":
         # Basic authentication
         password_hash = authentication.basic.generate_password_hash(
             authentication_parameters["password"])
 
-        database.tables.user_authentication_basic.insert_record(
-            connection,
-            user_authentication_id,
-            password_hash,
-            revision_id)
+        record_id = database.tables.user_authentication_basic.insert_record(connection,
+                                                                            user_authentication_id,
+                                                                            password_hash,
+                                                                            revision_id)
+
+        if record_id is None:
+            # Error, failed to add authentication information to the user
+            return None
     else:
         # Error, unsupported authentication type
-        user_id = None
+        return None
 
     return user_id
 
@@ -174,7 +186,7 @@ def modify_user_information(connection: sqlite3.Connection,
                             display_name: str,
                             email: str,
                             active: bool,
-                            revision_id: int) -> None:
+                            revision_id: int) -> bool:
     """
     Modify user's information
 
@@ -185,15 +197,19 @@ def modify_user_information(connection: sqlite3.Connection,
     :param email: New email address of the user
     :param active: New state of the user (active or inactive)
     :param revision_id: Revision ID for for creating the new user
+
+    :return: Success or failure
     """
     # Modify user
-    database.tables.user_information.insert_record(connection,
-                                                   user_to_modify,
-                                                   user_name,
-                                                   display_name,
-                                                   email,
-                                                   active,
-                                                   revision_id)
+    record_id = database.tables.user_information.insert_record(connection,
+                                                               user_to_modify,
+                                                               user_name,
+                                                               display_name,
+                                                               email,
+                                                               active,
+                                                               revision_id)
+
+    return record_id is not None
 
 
 def authenticate_user(connection: sqlite3.Connection,
@@ -214,15 +230,20 @@ def authenticate_user(connection: sqlite3.Connection,
     user = find_user_by_user_name(connection, user_name, max_revision_id)
 
     if user is None:
-        # Invalid user name
+        # Error, invalid user name
         return False
 
     # Authenticate user
-    user_authenticated = False
     user_authentication = database.tables.user_authentication.find_authentication(
         connection,
         user["user_id"],
         max_revision_id)
+
+    if user_authentication is None:
+        # Error, no authentication was found for that user
+        return False
+
+    user_authenticated = False
 
     if user_authentication["type"] == "basic":
         # Basic authentication
@@ -246,7 +267,7 @@ def modify_user_authentication(connection: sqlite3.Connection,
                                user_to_modify: int,
                                authentication_type: str,
                                authentication_parameters: dict,
-                               max_revision_id: int) -> None:
+                               max_revision_id: int) -> bool:
     """
     Modify user's information
 
@@ -264,6 +285,10 @@ def modify_user_authentication(connection: sqlite3.Connection,
         user_to_modify,
         max_revision_id)
 
+    if user_authentication is None:
+        # Error, no authentication was found for that user
+        return False
+
     # Modify authentication type if needed
     if authentication_type != user_authentication["type"]:
         user_authentication["id"] = database.tables.user_authentication.insert_record(
@@ -272,14 +297,29 @@ def modify_user_authentication(connection: sqlite3.Connection,
             authentication_type,
             max_revision_id)
 
+        if user_authentication["id"] is None:
+            # Error, failed to modify authentication type
+            return False
+
     # Modify authentication parameters
     if authentication_type == "basic":
         # Basic authentication
         password_hash = authentication.basic.generate_password_hash(
             authentication_parameters["password"])
 
-        database.tables.user_authentication_basic.insert_record(
+        record_id = database.tables.user_authentication_basic.insert_record(
             connection,
             user_authentication["id"],
             password_hash,
             max_revision_id)
+
+        if record_id is None:
+            # Error, failed to modify authentication information
+            return False
+    else:
+        # Error, unsupported authentication type
+        return False
+
+    # Success
+    return True
+

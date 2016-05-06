@@ -53,7 +53,7 @@ def create_indexes(connection: sqlite3.Connection) -> None:
 def insert_record(connection: sqlite3.Connection,
                   user_authentication_id: int,
                   password_hash: str,
-                  revision_id: int) -> int:
+                  revision_id: int) -> Optional[int]:
     """
     Inserts a new record in the table: "user_authentication_basic"
 
@@ -62,7 +62,7 @@ def insert_record(connection: sqlite3.Connection,
     :param password_hash: Hash of the user's password
     :param revision_id: Revision for this record
 
-    :return: 'id' of the inserted record
+    :return: ID of the inserted record
     """
     cursor = connection.execute(
         "INSERT INTO user_authentication_basic"

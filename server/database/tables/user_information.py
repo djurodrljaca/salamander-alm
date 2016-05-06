@@ -15,7 +15,7 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 import sqlite3
-from typing import Any, List
+from typing import Any, List, Optional
 
 
 # --------------------------------------------------------------------------------------------------
@@ -127,7 +127,7 @@ def insert_record(connection: sqlite3.Connection,
                   display_name: str,
                   email: str,
                   active: bool,
-                  revision_id: int) -> int:
+                  revision_id: int) -> Optional[int]:
     """
     Inserts a new record in the table: "user_information"
 
@@ -140,7 +140,7 @@ def insert_record(connection: sqlite3.Connection,
     :param active: State of the user (active or inactive)
     :param revision_id: Revision for this record
 
-    :return: 'id' of the inserted record
+    :return: ID of the inserted record
     """
     cursor = connection.execute(
         "INSERT INTO user_information\n"

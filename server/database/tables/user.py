@@ -15,6 +15,7 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 import sqlite3
+from typing import Optional
 
 
 # --------------------------------------------------------------------------------------------------
@@ -44,13 +45,13 @@ def create_indexes(connection: sqlite3.Connection) -> None:
     return
 
 
-def insert_record(connection: sqlite3.Connection) -> int:
+def insert_record(connection: sqlite3.Connection) -> Optional[int]:
     """
     Inserts a new record in the table: "user"
 
     :param connection: Connection to database
 
-    :return: 'id' of the inserted record
+    :return: ID of the inserted record
     """
     cursor = connection.execute(
         "INSERT INTO user\n"

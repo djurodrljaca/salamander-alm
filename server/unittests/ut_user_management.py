@@ -128,7 +128,55 @@ class UserInformation(unittest.TestCase):
         users = usermanagement.user_management.find_users_by_display_name("Test XYZ")
         self.assertEqual(len(users), 0)
 
-    # TODO: add test for: modify_user_name
+    def test_modify_user_name(self):
+        user_id1 = self.create_user_test1()
+        self.assertIsNotNone(user_id1)
+
+        user1 = usermanagement.user_management.find_user_by_user_id(user_id1)
+
+        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["user_name"], "test1")
+        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["email"], "test1@test.com")
+        self.assertIsNotNone(user1["revision_id"])
+
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        user2 = usermanagement.user_management.find_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Positive test
+        self.assertTrue(
+            usermanagement.user_management.modify_user_information(user_id1,
+                                                                   user_id1,
+                                                                   "test1new",
+                                                                   user1["display_name"],
+                                                                   user1["email"],
+                                                                   True))
+
+        user1 = usermanagement.user_management.find_user_by_user_id(user_id1)
+
+        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["user_name"], "test1new")
+        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["email"], "test1@test.com")
+        self.assertIsNotNone(user1["revision_id"])
+
+        # Negative test
+        self.assertTrue(
+            usermanagement.user_management.modify_user_information(user_id2,
+                                                                   user_id2,
+                                                                   "test1new",
+                                                                   user2["display_name"],
+                                                                   user2["email"],
+                                                                   True))
+
     # TODO: add test for: modify_display_name
     # TODO: add test for: modify_email
     # TODO: add test for: disable_user

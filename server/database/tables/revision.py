@@ -69,7 +69,7 @@ def current(connection: sqlite3.Connection) -> Optional[int]:
 
 def insert_record(connection: sqlite3.Connection,
                   timestamp: datetime.datetime,
-                  user_id: int) -> int:
+                  user_id: int) -> Optional[int]:
     """
     Inserts a new record in the table: "revision"
 
@@ -77,7 +77,7 @@ def insert_record(connection: sqlite3.Connection,
     :param timestamp: Timestamp of when the revision was created
     :param user_id: ID of the user that created the revision
 
-    :return: 'id' of the inserted record
+    :return: ID of the inserted record
     """
     cursor = connection.execute(
         "INSERT INTO revision\n"
