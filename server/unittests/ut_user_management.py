@@ -578,57 +578,92 @@ class UserInformation(unittest.TestCase):
                                                                         2))
 
     # TODO: add test for: find_user_information_history
-#
-#
-# class UserAuthentication(unittest.TestCase):
-#     def setUp(self):
-#         _initialize_database()
-#         self.admin_user_id = 1
-#
-#     def create_user_test1(self):
-#         user_id = usermanagement.user_management.create_user(self.admin_user_id,
-#                                                              "test1",
-#                                                              "Test",
-#                                                              "test1@test.com",
-#                                                              "basic",
-#                                                              {"password": "test123"})
-#         return user_id
-#
-#     def create_user_test2(self):
-#         user_id = usermanagement.user_management.create_user(self.admin_user_id,
-#                                                              "test2",
-#                                                              "Test",
-#                                                              "test2@test.com",
-#                                                              "basic",
-#                                                              {"password": "test456"})
-#         return user_id
-#
-#     def test_default_administrator(self):
-#         self.assertTrue(
-#             usermanagement.user_management.authenticate_user("administrator",
-#                                                              {"password": "administrator"}))
-#
-#     def test_users(self):
-#         self.create_user_test1()
-#         self.create_user_test2()
-#
-#         # Positive test
-#         self.assertTrue(
-#             usermanagement.user_management.authenticate_user("test1",
-#                                                              {"password": "test123"}))
-#         self.assertTrue(
-#             usermanagement.user_management.authenticate_user("test2",
-#                                                              {"password": "test456"}))
-#
-#         # Negative test
-#         self.assertFalse(
-#             usermanagement.user_management.authenticate_user("test1",
-#                                                              {"password": "Test123"}))
-#         self.assertFalse(
-#             usermanagement.user_management.authenticate_user("test2",
-#                                                              {"password": "tEst456"}))
 
-    # TODO: add test for: find_user_information_history
+
+class UserAuthentication(unittest.TestCase):
+    def setUp(self):
+        self.__database = _create_database()
+        self.__user_management = usermanagement.user_management.UserManagement(self.__database)
+        self.__admin_user_id = 1
+
+    def create_user_test1(self):
+        user_id = self.__user_management.create_user(self.__admin_user_id,
+                                                     "test1",
+                                                     "Test",
+                                                     "test1@test.com",
+                                                     "basic",
+                                                     {"password": "test123"})
+        return user_id
+
+    def create_user_test2(self):
+        user_id = self.__user_management.create_user(self.__admin_user_id,
+                                                     "test2",
+                                                     "Test",
+                                                     "test2@test.com",
+                                                     "basic",
+                                                     {"password": "test456"})
+        return user_id
+
+    def test_default_administrator(self):
+        self.assertTrue(self.__user_management.authenticate_user("administrator",
+                                                                 {"password": "administrator"}))
+
+    def test_users(self):
+        self.assertIsNotNone(self.create_user_test1())
+        self.assertIsNotNone(self.create_user_test2())
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(self.__user_management.authenticate_user("test1",
+                                                                 {"password": "test123"}))
+
+        self.assertTrue(self.__user_management.authenticate_user("test2",
+                                                                 {"password": "test456"}))
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertFalse(self.__user_management.authenticate_user(None,
+                                                                  {"password": "test123"}))
+
+        self.assertFalse(self.__user_management.authenticate_user("",
+                                                                  {"password": "test456"}))
+
+        self.assertFalse(self.__user_management.authenticate_user("test1",
+                                                                  {"password": "Test123"}))
+
+        self.assertFalse(self.__user_management.authenticate_user("test1",
+                                                                  {"password": "test456"}))
+
+        self.assertFalse(self.__user_management.authenticate_user("test1",
+                                                                  {"password": ""}))
+
+        self.assertFalse(self.__user_management.authenticate_user("test2",
+                                                                  {"password": "tEst456"}))
+
+        self.assertFalse(self.__user_management.authenticate_user("test2",
+                                                                  {"password": "test123"}))
+
+    def test_basic_update_update_password(self):
+        user_id1 = self.create_user_test1()
+        self.assertIsNotNone(user_id1)
+
+        self.assertTrue(self.__user_management.authenticate_user("test1",
+                                                                 {"password": "test123"}))
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(self.__user_management.update_user_authentication(user_id1,
+                                                                          user_id1,
+                                                                          "basic",
+                                                                          {"password": "new_pw"}))
+
+        user1 = self.__user_management.read_user_by_user_id(user_id1)
+
+        self.assertTrue(self.__user_management.authenticate_user("test1",
+                                                                 {"password": "new_pw"}))
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertFalse(self.__user_management.authenticate_user("test1",
+                                                                  {"password": "test123"}))
+
+    # TODO: add test for: read_user_authentication_history?
     # TODO: add test for: others...
 
 if __name__ == '__main__':

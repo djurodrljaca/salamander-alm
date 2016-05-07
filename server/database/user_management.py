@@ -233,14 +233,14 @@ class UserManagement(object):
         """
         Update user's information
 
-        :param connection:      Connection to database
+        :param connection:      Database connection
         :param user_to_modify:  ID of the user that should be modified
         :param user_name:       User's user name
         :param display_name:    User's display name
         :param email:           User's email address
         :param email:           New email address of the user
         :param active:          New state of the user (active or inactive)
-        :param revision_id:     Revision ID for for creating the new user
+        :param revision_id:     Revision ID
 
         :return:    Success or failure
         """
@@ -267,116 +267,118 @@ class UserManagement(object):
                 success = False
 
         return success
-#
-#
-# def authenticate_user(connection: sqlite3.Connection,
-#                       user_name: str,
-#                       authentication_parameters: str,
-#                       max_revision_id: int) -> bool:
-#     """
-#     Authenticate user with basic authentication
-#
-#     :param connection: Connection to database
-#     :param user_name: User name
-#     :param authentication_parameters: User's authentication parameters
-#     :param max_revision_id: Maximum allowed revision ID for the authentication
-#
-#     :return: Authentication result: success or failure
-#     """
-#     # Find the user that matches the specified user name
-#     user = find_user_by_user_name(connection, user_name, max_revision_id)
-#
-#     if user is None:
-#         # Error, invalid user name
-#         return False
-#
-#     # Authenticate user
-#     user_authentication = database.tables.user_authentication.find_authentication(
-#         connection,
-#         user["user_id"],
-#         max_revision_id)
-#
-#     if user_authentication is None:
-#         # Error, no authentication was found for that user
-#         return False
-#
-#     user_authenticated = False
-#
-#     if user_authentication["type"] == "basic":
-#         # Basic authentication
-#         password_hash = database.tables.user_authentication_basic.find_password_hash(
-#             connection,
-#             user["user_id"],
-#             max_revision_id)
-#
-#         if password_hash is not None:
-#             user_authenticated = authentication.basic.authenticate(
-#                 authentication_parameters["password"],
-#                 password_hash)
-#     else:
-#         # Error, unsupported authentication type
-#         user_authenticated = False
-#
-#     return user_authenticated
-#
-#
-# def modify_user_authentication(connection: sqlite3.Connection,
-#                                user_to_modify: int,
-#                                authentication_type: str,
-#                                authentication_parameters: dict,
-#                                max_revision_id: int) -> bool:
-#     """
-#     Modify user's information
-#
-#     :param connection: Connection to database
-#     :param user_to_modify: ID of the user that should be modified
-#     :param authentication_type: User's new authentication type
-#     :param authentication_parameters: User's new authentication parameters
-#     :param max_revision_id: Maximum allowed revision ID for the search
-#
-#     :return: Success or failure
-#     """
-#     # Read users current authentication type
-#     user_authentication = database.tables.user_authentication.find_authentication(
-#         connection,
-#         user_to_modify,
-#         max_revision_id)
-#
-#     if user_authentication is None:
-#         # Error, no authentication was found for that user
-#         return False
-#
-#     # Modify authentication type if needed
-#     if authentication_type != user_authentication["type"]:
-#         user_authentication["id"] = database.tables.user_authentication.insert_record(
-#             connection,
-#             user_to_modify,
-#             authentication_type,
-#             max_revision_id)
-#
-#         if user_authentication["id"] is None:
-#             # Error, failed to modify authentication type
-#             return False
-#
-#     # Modify authentication parameters
-#     if authentication_type == "basic":
-#         # Basic authentication
-#         password_hash = authentication.basic.generate_password_hash(
-#             authentication_parameters["password"])
-#
-#         record_id = database.tables.user_authentication_basic.insert_record(
-#             connection,
-#             user_authentication["id"],
-#             password_hash,
-#             max_revision_id)
-#
-#         if record_id is None:
-#             # Error, failed to modify authentication information
-#             return False
-#     else:
-#         # Error, unsupported authentication type
-#         return False
-#
-#     # Success
-#     return True
-#
+
+    def authenticate_user(self,
+                          connection: Connection,
+                          user_name: str,
+                          authentication_parameters: str,
+                          max_revision_id: int) -> bool:
+        """
+        Authenticate user with basic authentication
+
+        :param connection:                  Database connection
+        :param user_name:                   User's user name
+        :param authentication_parameters:   User's authentication parameters
+        :param max_revision_id:             Maximum revision ID for the authentication
+
+        :return: Authentication result: success or failure
+        """
+        # Find the user that matches the specified user name
+        user = self.read_user_by_user_name(connection, user_name, max_revision_id)
+
+        if user is None:
+            # Error, invalid user name
+            return False
+        elif not user["active"]:
+            # Error, user is not active
+            return False
+
+        # Authenticate user
+        user_authentication = self.__database.tables.user_authentication.read_authentication(
+            connection,
+            user["user_id"],
+            max_revision_id)
+
+        if user_authentication is None:
+            # Error, no authentication was found for that user
+            return False
+
+        user_authenticated = False
+
+        if user_authentication["type"] == "basic":
+            # Basic authentication
+            password_hash = self.__database.tables.user_authentication_basic.read_password_hash(
+                connection,
+                user["user_id"],
+                max_revision_id)
+
+            if password_hash is not None:
+                user_authenticated = authentication.basic.authenticate(
+                    authentication_parameters["password"],
+                    password_hash)
+        else:
+            # Error, unsupported authentication type
+            user_authenticated = False
+
+        return user_authenticated
+
+    def update_user_authentication(self,
+                                   connection: Connection,
+                                   user_to_modify: int,
+                                   authentication_type: str,
+                                   authentication_parameters: dict,
+                                   revision_id: int) -> bool:
+        """
+        Modify user's information
+
+        :param connection:                  Database connection
+        :param user_to_modify:              ID of the user that should be modified
+        :param authentication_type:         User's new authentication type
+        :param authentication_parameters:   User's new authentication parameters
+        :param revision_id:                 Revision ID
+
+        :return: Success or failure
+        """
+        # Read users current authentication type
+        user_authentication = self.__database.tables.user_authentication.read_authentication(
+            connection,
+            user_to_modify,
+            revision_id)
+
+        if user_authentication is None:
+            # Error, no authentication was found for that user
+            return False
+
+        # Modify authentication type if needed
+        if authentication_type != user_authentication["type"]:
+            user_authentication["id"] = self.__database.tables.user_authentication.insert_row(
+                connection,
+                user_to_modify,
+                authentication_type,
+                revision_id)
+
+            if user_authentication["id"] is None:
+                # Error, failed to modify authentication type
+                return False
+
+        # Modify authentication parameters
+        if authentication_type == "basic":
+            # Basic authentication
+            password_hash = authentication.basic.generate_password_hash(
+                authentication_parameters["password"])
+
+            record_id = self.__database.tables.user_authentication_basic.insert_row(
+                connection,
+                user_authentication["id"],
+                password_hash,
+                revision_id)
+
+            if record_id is None:
+                # Error, failed to modify authentication information
+                return False
+        else:
+            # Error, unsupported authentication type
+            return False
+
+        # Success
+        return True

@@ -180,6 +180,7 @@ System shall allow access to certain parts of the system only to authorised user
 There shall be different access permissions:
 - Read (can only read data)
 - Write (can read and write data)
+- TODO: define other permissions! (create projects, create users, system configuration, etc.)
 
 
 4.1. Access to project

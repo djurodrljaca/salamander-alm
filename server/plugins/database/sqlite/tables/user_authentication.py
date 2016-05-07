@@ -66,9 +66,9 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
         :param user_id:         ID of the user
         :param max_revision_id: Maximum revision ID for the search
 
-        :return: Authentication information
+        :return:    Authentication information
         """
-        cursor = connection.execute(
+        cursor = connection.native_connection.execute(
             "SELECT id, type\n"
             "FROM user_authentication\n"
             "WHERE ((user_id = :user_id) AND\n"
@@ -103,7 +103,7 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
         :param type:        User's authentication type
         :param revision_id: Revision ID
 
-        :return: ID of the newly created row
+        :return:    ID of the newly created row
         """
         try:
             cursor = connection.native_connection.execute(
