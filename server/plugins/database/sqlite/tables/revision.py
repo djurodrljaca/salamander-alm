@@ -18,6 +18,7 @@ from plugins.database.sqlite.connection import ConnectionSqlite
 from database.tables.revision import RevisionTable
 from database.datatypes import datetime_from_string, datetime_to_string
 import datetime
+import sqlite3
 from typing import List, Optional
 
 
@@ -48,7 +49,8 @@ class RevisionTableSqlite(RevisionTable):
             "CREATE TABLE revision (\n"
             "    id        INTEGER  PRIMARY KEY AUTOINCREMENT\n"
             "                       NOT NULL,\n"
-            "    timestamp DATETIME,\n"
+            "    timestamp DATETIME NOT NULL\n"
+            "                       CHECK (length(timestamp) >= 23),\n"
             "    user_id   INTEGER  REFERENCES user (id)\n"
             "                       NOT NULL\n"
             ")")
@@ -179,11 +181,17 @@ class RevisionTableSqlite(RevisionTable):
 
         :return: ID of the newly created row
         """
-        cursor = connection.native_connection.execute(
-            "INSERT INTO revision\n"
-            "   (id, timestamp, user_id)\n"
-            "VALUES (NULL, :timestamp, :user_id)",
-            {"timestamp": datetime_to_string(timestamp),
-             "user_id": user_id})
+        try:
+            cursor = connection.native_connection.execute(
+                "INSERT INTO revision\n"
+                "   (id, timestamp, user_id)\n"
+                "VALUES (NULL, :timestamp, :user_id)",
+                {"timestamp": datetime_to_string(timestamp),
+                 "user_id": user_id})
 
-        return cursor.lastrowid
+            row_id = cursor.lastrowid
+        except sqlite3.IntegrityError:
+            # Error occurred
+            row_id = None
+
+        return row_id

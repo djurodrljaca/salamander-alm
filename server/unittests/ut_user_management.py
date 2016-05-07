@@ -69,25 +69,83 @@ class UserInformation(unittest.TestCase):
         self.assertIsNotNone(user["revision_id"])
 
     def test_create_user(self):
-        # Positive test
-        user_id = self.create_user_test1()
-        self.assertIsNotNone(user_id)
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertIsNotNone(self.create_user_test1())
 
-        # Negative test
-        # Try to create a user with the same user name
-        user_id = self.__user_management.create_user(self.__admin_user_id,
-                                                     "test1",
-                                                     "Test Other",
-                                                     "test_other@test.com",
-                                                     "basic",
-                                                     {"password": "test123"})
-        self.assertIsNone(user_id)
+        # Negative tests ---------------------------------------------------------------------------
+        # Try to create a user with a reference to a non-existing user
+        self.assertIsNone(self.__user_management.create_user(None,
+                                                             "test_other",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        self.assertIsNone(self.__user_management.create_user(999,
+                                                             "test_other",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        # Try to create a user with an invalid user name
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             None,
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             "",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        # Try to create a user with the same user name as another user
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             "test1",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        # Try to create a user with an invalid display name
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             "test_other",
+                                                             None,
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             "test_other",
+                                                             "",
+                                                             "test_other@test.com",
+                                                             "basic",
+                                                             {"password": "test123"}))
+
+        # Try to create a user with an invalid authentication type
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             "test_other",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             None,
+                                                             {"password": "test123"}))
+
+        self.assertIsNone(self.__user_management.create_user(self.__admin_user_id,
+                                                             "test_other",
+                                                             "Test Other",
+                                                             "test_other@test.com",
+                                                             "",
+                                                             {"password": "test123"}))
 
     def test_read_user_by_user_id(self):
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
 
-        # Positive test
+        # Positive tests ---------------------------------------------------------------------------
         user = self.__user_management.read_user_by_user_id(user_id)
 
         self.assertEqual(user["user_id"], user_id)
@@ -97,15 +155,15 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user["active"], True)
         self.assertIsNotNone(user["revision_id"])
 
-        # Negative test
-        user = self.__user_management.read_user_by_user_id(999)
-        self.assertIsNone(user)
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertIsNone(self.__user_management.read_user_by_user_id(None))
+        self.assertIsNone(self.__user_management.read_user_by_user_id(999))
 
     def test_read_user_by_user_name(self):
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
 
-        # Positive test
+        # Positive tests ---------------------------------------------------------------------------
         user = self.__user_management.read_user_by_user_name("test1")
 
         self.assertEqual(user["user_id"], user_id)
@@ -115,19 +173,45 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user["active"], True)
         self.assertIsNotNone(user["revision_id"])
 
-        # Negative test
-        user = self.__user_management.read_user_by_user_name("test999")
-        self.assertIsNone(user)
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertIsNone(self.__user_management.read_user_by_user_name(None))
+        self.assertIsNone(self.__user_management.read_user_by_user_name(""))
+        self.assertIsNone(self.__user_management.read_user_by_user_name("test999"))
 
-    def test_read_users_by_display_name(self):
+    def test_reads_user_by_user_name(self):
+        # Create a user and then deactivate it and create a user with the same user name
         user_id1 = self.create_user_test1()
         self.assertIsNotNone(user_id1)
 
-        user_id2 = self.create_user_test2()
+        user1 = self.__user_management.read_user_by_user_id(user_id1)
+        self.assertIsNotNone(user1)
+
+        self.assertTrue(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                       user_id1,
+                                                                       user1["user_name"],
+                                                                       user1["display_name"],
+                                                                       user1["email"],
+                                                                       False))
+
+        user_id2 = self.create_user_test1()
         self.assertIsNotNone(user_id2)
 
-        # Positive test
-        users = self.__user_management.read_users_by_display_name("Test")
+        # Positive tests ---------------------------------------------------------------------------
+        # Only active users
+        users = self.__user_management.read_users_by_user_name("test1", True)
+        self.assertEqual(len(users), 1)
+
+        user2 = users[0]
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test1")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test1@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Both active and inactive users
+        users = self.__user_management.read_users_by_user_name("test1", False)
         self.assertEqual(len(users), 2)
 
         if ((users[0]["user_id"] == user_id1) and
@@ -145,7 +229,77 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user1["user_name"], "test1")
         self.assertEqual(user1["display_name"], "Test")
         self.assertEqual(user1["email"], "test1@test.com")
-        self.assertEqual(user1["active"], True)
+        self.assertEqual(user1["active"], False)
+        self.assertIsNotNone(user1["revision_id"])
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test1")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test1@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        users = self.__user_management.read_users_by_user_name(None, False)
+        self.assertEqual(len(users), 0)
+
+        users = self.__user_management.read_users_by_user_name("", False)
+        self.assertEqual(len(users), 0)
+
+        users = self.__user_management.read_users_by_user_name("test999", False)
+        self.assertEqual(len(users), 0)
+
+    def test_read_users_by_display_name(self):
+        user_id1 = self.create_user_test1()
+        self.assertIsNotNone(user_id1)
+
+        user1 = self.__user_management.read_user_by_user_id(user_id1)
+        self.assertIsNotNone(user1)
+
+        self.assertTrue(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                       user_id1,
+                                                                       user1["user_name"],
+                                                                       user1["display_name"],
+                                                                       user1["email"],
+                                                                       False))
+
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        # Positive tests ---------------------------------------------------------------------------
+        # Only active users
+        users = self.__user_management.read_users_by_display_name("Test", True)
+        self.assertEqual(len(users), 1)
+
+        user2 = users[0]
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Both active and inactive users
+        users = self.__user_management.read_users_by_display_name("Test", False)
+        self.assertEqual(len(users), 2)
+
+        if ((users[0]["user_id"] == user_id1) and
+                (users[1]["user_id"] == user_id2)):
+            user1 = users[0]
+            user2 = users[1]
+        elif ((users[1]["user_id"] == user_id1) and
+                  (users[0]["user_id"] == user_id2)):
+            user1 = users[1]
+            user2 = users[0]
+        else:
+            self.fail("Invalid user IDs")
+
+        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["user_name"], "test1")
+        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["email"], "test1@test.com")
+        self.assertEqual(user1["active"], False)
         self.assertIsNotNone(user1["revision_id"])
 
         self.assertEqual(user2["user_id"], user_id2)
@@ -155,9 +309,58 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user2["active"], True)
         self.assertIsNotNone(user2["revision_id"])
 
-        # Negative test
+        # Negative tests ---------------------------------------------------------------------------
+        users = self.__user_management.read_users_by_display_name(None)
+        self.assertEqual(len(users), 0)
+
+        users = self.__user_management.read_users_by_display_name("")
+        self.assertEqual(len(users), 0)
+
         users = self.__user_management.read_users_by_display_name("Test XYZ")
         self.assertEqual(len(users), 0)
+
+    def test_update_user_invalid_ids(self):
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Try to update a user with a reference to a non-existing "requested by user"
+        self.assertFalse(self.__user_management.update_user_information(None,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
+
+        self.assertFalse(self.__user_management.update_user_information(999,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
+
+        # Try to update a user with a reference to a non-existing user ID
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        None,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
+
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        999,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
 
     def test_update_user_name(self):
         user_id1 = self.create_user_test1()
@@ -184,14 +387,13 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user2["active"], True)
         self.assertIsNotNone(user2["revision_id"])
 
-        # Positive test
-        self.assertTrue(
-            self.__user_management.update_user_information(user_id1,
-                                                           user_id1,
-                                                           "test1new",
-                                                           user1["display_name"],
-                                                           user1["email"],
-                                                           True))
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(self.__user_management.update_user_information(user_id1,
+                                                                       user_id1,
+                                                                       "test1new",
+                                                                       user1["display_name"],
+                                                                       user1["email"],
+                                                                       user1["active"]))
 
         user1 = self.__user_management.read_user_by_user_id(user_id1)
 
@@ -202,27 +404,179 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(user1["active"], True)
         self.assertIsNotNone(user1["revision_id"])
 
-        # Negative test
-        self.assertFalse(
-            self.__user_management.update_user_information(user_id2,
-                                                           user_id2,
-                                                           "test1new",
-                                                           user2["display_name"],
-                                                           user2["email"],
-                                                           True))
+        # Negative tests ---------------------------------------------------------------------------
+        # Try to update a user with an invalid user name
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        user_id2,
+                                                                        None,
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
 
-        self.assertFalse(
-            self.__user_management.update_user_information(9999,
-                                                           user_id1,
-                                                           user1["user_name"],
-                                                           user1["display_name"],
-                                                           user1["email"],
-                                                           True))
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        user_id2,
+                                                                        "",
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
 
-    # TODO: add test for: modify_display_name
-    # TODO: add test for: modify_email
-    # TODO: add test for: disable_user
-    # TODO: add test for: enable_user
+        # Try to update a user with the same user name as another user
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        user_id2,
+                                                                        user1["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        user2["active"]))
+
+    def test_update_display_name(self):
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(self.__user_management.update_user_information(user_id2,
+                                                                       user_id2,
+                                                                       user2["user_name"],
+                                                                       "Test New",
+                                                                       user2["email"],
+                                                                       user2["active"]))
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test New")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        # Try to update a user with an invalid display name
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        None,
+                                                                        user2["email"],
+                                                                        user2["active"]))
+
+        self.assertFalse(self.__user_management.update_user_information(self.__admin_user_id,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        "",
+                                                                        user2["email"],
+                                                                        user2["active"]))
+
+    def test_update_email(self):
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(self.__user_management.update_user_information(user_id2,
+                                                                       user_id2,
+                                                                       user2["user_name"],
+                                                                       user2["display_name"],
+                                                                       "test2new@test.com",
+                                                                       user2["active"]))
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2new@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
+
+    def test_disable_enable_user(self):
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        # Disable user
+        self.assertTrue(self.__user_management.update_user_information(user_id2,
+                                                                       user_id2,
+                                                                       user2["user_name"],
+                                                                       user2["display_name"],
+                                                                       user2["email"],
+                                                                       False))
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], False)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Enable user
+        self.assertTrue(self.__user_management.update_user_information(user_id2,
+                                                                       user_id2,
+                                                                       user2["user_name"],
+                                                                       user2["display_name"],
+                                                                       user2["email"],
+                                                                       True))
+
+        user2 = self.__user_management.read_user_by_user_id(user_id2)
+
+        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["user_name"], "test2")
+        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["active"], True)
+        self.assertIsNotNone(user2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertFalse(self.__user_management.update_user_information(user_id2,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        None))
+
+        self.assertFalse(self.__user_management.update_user_information(user_id2,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        -1))
+
+        self.assertFalse(self.__user_management.update_user_information(user_id2,
+                                                                        user_id2,
+                                                                        user2["user_name"],
+                                                                        user2["display_name"],
+                                                                        user2["email"],
+                                                                        2))
+
     # TODO: add test for: find_user_information_history
 #
 #

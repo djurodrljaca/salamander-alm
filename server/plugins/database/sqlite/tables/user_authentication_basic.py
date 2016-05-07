@@ -16,6 +16,7 @@ not, see <http://www.gnu.org/licenses/>.
 
 from plugins.database.sqlite.connection import ConnectionSqlite
 from database.tables.user_authentication_basic import UserAuthenticationBasicTable
+import sqlite3
 from typing import Optional
 
 
@@ -103,12 +104,18 @@ class UserAuthenticationBasicTableSqlite(UserAuthenticationBasicTable):
 
         :return: ID of the newly created row
         """
-        cursor = connection.native_connection.execute(
-            "INSERT INTO user_authentication_basic"
-            "   (id, user_authentication_id, password_hash, revision_id)\n"
-            "VALUES (NULL, :user_authentication_id, :password_hash, :revision_id)",
-            {"user_authentication_id": user_authentication_id,
-             "password_hash": password_hash,
-             "revision_id": revision_id})
+        try:
+            cursor = connection.native_connection.execute(
+                "INSERT INTO user_authentication_basic"
+                "   (id, user_authentication_id, password_hash, revision_id)\n"
+                "VALUES (NULL, :user_authentication_id, :password_hash, :revision_id)",
+                {"user_authentication_id": user_authentication_id,
+                 "password_hash": password_hash,
+                 "revision_id": revision_id})
 
-        return cursor.lastrowid
+            row_id = cursor.lastrowid
+        except sqlite3.IntegrityError:
+            # Error occurred
+            row_id = None
+
+        return row_id

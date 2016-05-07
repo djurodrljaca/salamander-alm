@@ -16,6 +16,7 @@ not, see <http://www.gnu.org/licenses/>.
 
 from plugins.database.sqlite.connection import ConnectionSqlite
 from database.tables.user_authentication import UserAuthenticationTable
+import sqlite3
 from typing import Optional
 
 
@@ -48,7 +49,8 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
             "                          NOT NULL,\n"
             "    user_id       INTEGER REFERENCES user (id) \n"
             "                          NOT NULL,\n"
-            "    type          TEXT    NOT NULL,\n"
+            "    type          TEXT    NOT NULL\n"
+            "                          CHECK (length(type) > 0),\n"
             "    revision_id   INTEGER REFERENCES revision (id) \n"
             "                          NOT NULL\n"
             ")")
@@ -103,12 +105,18 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
 
         :return: ID of the newly created row
         """
-        cursor = connection.native_connection.execute(
-            "INSERT INTO user_authentication\n"
-            "   (id, user_id, type, revision_id)\n"
-            "VALUES (NULL, :user_id, :type, :revision_id)",
-            {"user_id": user_id,
-             "type": type,
-             "revision_id": revision_id})
+        try:
+            cursor = connection.native_connection.execute(
+                "INSERT INTO user_authentication\n"
+                "   (id, user_id, type, revision_id)\n"
+                "VALUES (NULL, :user_id, :type, :revision_id)",
+                {"user_id": user_id,
+                 "type": type,
+                 "revision_id": revision_id})
 
-        return cursor.lastrowid
+            row_id = cursor.lastrowid
+        except sqlite3.IntegrityError:
+            # Error occurred
+            row_id = None
+
+        return row_id

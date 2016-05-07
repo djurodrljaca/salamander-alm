@@ -16,6 +16,7 @@ not, see <http://www.gnu.org/licenses/>.
 
 from plugins.database.sqlite.connection import ConnectionSqlite
 from database.tables.user_information import UserInformationTable
+import sqlite3
 from typing import Any, Optional
 
 
@@ -44,16 +45,20 @@ class UserInformationTableSqlite(UserInformationTable):
         """
         connection.native_connection.execute(
             "CREATE TABLE user_information (\n"
-            "    id                    INTEGER PRIMARY KEY AUTOINCREMENT\n"
-            "                                  NOT NULL,\n"
-            "    user_id               INTEGER REFERENCES user (id) \n"
-            "                                  NOT NULL,\n"
-            "    user_name             TEXT    NOT NULL,\n"
-            "    display_name          TEXT    NOT NULL,\n"
-            "    email                 TEXT    NOT NULL,\n"
-            "    active                BOOLEAN NOT NULL,\n"
-            "    revision_id           INTEGER REFERENCES revision (id) \n"
-            "                                  NOT NULL\n"
+            "    id           INTEGER PRIMARY KEY AUTOINCREMENT\n"
+            "                         NOT NULL,\n"
+            "    user_id      INTEGER REFERENCES user (id) \n"
+            "                         NOT NULL,\n"
+            "    user_name    TEXT    NOT NULL\n"
+            "                         CHECK (length(user_name) > 0),\n"
+            "    display_name TEXT    NOT NULL\n"
+            "                         CHECK (length(display_name) > 0),\n"
+            "    email        TEXT,\n"
+            "    active       BOOLEAN NOT NULL\n"
+            "                         CHECK ( (active = 0) OR\n"
+            "                                 (active = 1) ),\n"
+            "    revision_id  INTEGER REFERENCES revision (id) \n"
+            "                         NOT NULL\n"
             ")")
 
         connection.native_connection.execute(
@@ -160,15 +165,21 @@ class UserInformationTableSqlite(UserInformationTable):
 
         :return: ID of the newly created row
         """
-        cursor = connection.native_connection.execute(
-            "INSERT INTO user_information\n"
-            "   (id, user_id, user_name, display_name, email, active, revision_id)\n"
-            "VALUES (NULL, :user_id, :user_name, :display_name, :email, :active, :revision_id)",
-            {"user_id": user_id,
-             "user_name": user_name,
-             "display_name": display_name,
-             "email": email,
-             "active": active,
-             "revision_id": revision_id})
+        try:
+            cursor = connection.native_connection.execute(
+                "INSERT INTO user_information\n"
+                "   (id, user_id, user_name, display_name, email, active, revision_id)\n"
+                "VALUES (NULL, :user_id, :user_name, :display_name, :email, :active, :revision_id)",
+                {"user_id": user_id,
+                 "user_name": user_name,
+                 "display_name": display_name,
+                 "email": email,
+                 "active": active,
+                 "revision_id": revision_id})
 
-        return cursor.lastrowid
+            row_id = cursor.lastrowid
+        except sqlite3.IntegrityError:
+            # Error occurred
+            row_id = None
+
+        return row_id
