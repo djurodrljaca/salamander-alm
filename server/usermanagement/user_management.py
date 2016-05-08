@@ -14,6 +14,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
+import authentication.authentication
 import database.database
 import database.user_management
 import datetime
@@ -33,6 +34,7 @@ class UserManagement(object):
         """
         self.__database = database_object
         self.__user_management = database.user_management.UserManagement(database_object)
+        self.__authentication = authentication.authentication.Authentication()
 
     def __del__(self):
         """
@@ -114,7 +116,7 @@ class UserManagement(object):
 
     def read_users_by_display_name(self,
                                    display_name: str,
-                                   only_active_users = True) -> Optional[dict]:
+                                   only_active_users=True) -> Optional[dict]:
         """
         Reads a user that matches the specified user ID
 
@@ -176,12 +178,17 @@ class UserManagement(object):
 
             # Create the user
             if success:
+                reference_authentication_parameters = \
+                    self.__authentication.generate_reference_authentication_parameters(
+                        authentication_type,
+                        authentication_parameters)
+
                 user_id = self.__user_management.create_user(connection,
                                                              user_name,
                                                              display_name,
                                                              email,
                                                              authentication_type,
-                                                             authentication_parameters,
+                                                             reference_authentication_parameters,
                                                              revision_id)
 
                 if user_id is None:
@@ -253,7 +260,57 @@ class UserManagement(object):
 
         return success
 
-    # TODO: read authentication type
+    def add_authentication_method(
+            self,
+            authentication_method: authentication.authentication.AuthenticationMethod) -> bool:
+        """
+        Adds support for an authentication method
+
+        :param authentication_method:   Authentication method
+
+        :return:    Success or failure
+        """
+        return self.__authentication.add_authentication_method(authentication_method)
+
+    def remove_all_authentication_methods(self) -> None:
+        """
+        Removes all authentication methods
+        """
+        self.__authentication.remove_all_authentication_methods()
+
+    def read_user_authentication(self, user_id: int) -> Optional[dict]:
+        """
+        Reads a user's authentication
+
+        :param user_id:             ID of the user
+
+        :return:    User authentication object
+        """
+        connection = self.__database.create_connection()
+
+        try:
+            success = connection.begin_transaction()
+
+            # Read the user's authentication
+            user_authentication = None
+
+            if success:
+                user_authentication = self.__user_management.read_user_authentication(
+                    connection,
+                    user_id)
+
+                if user_authentication is None:
+                    success = False
+
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
+
+        return user_authentication
 
     def authenticate_user(self, user_name: str, authentication_parameters: str) -> bool:
         """
@@ -264,30 +321,68 @@ class UserManagement(object):
 
         :return:    Success or failure
         """
-        # First get the current revision
         connection = self.__database.create_connection()
-        current_revision_id = self.__database.tables.revision.read_current_revision_id(connection)
 
-        # Authenticate user
-        user_authenticated = False
+        try:
+            success = connection.begin_transaction()
 
-        if current_revision_id is not None:
-            user_authenticated = self.__user_management.authenticate_user(connection,
-                                                                          user_name,
-                                                                          authentication_parameters,
-                                                                          current_revision_id)
+            # Read the user that matches the specified user name
+            if success:
+                current_revision_id = self.__database.tables.revision.read_current_revision_id(
+                    connection)
+
+                if current_revision_id is None:
+                    success = False
+
+            user = None
+
+            if success:
+                user = self.__user_management.read_user_by_user_name(connection,
+                                                                     user_name,
+                                                                     current_revision_id)
+
+                if user is None:
+                    # Error, invalid user name
+                    success = False
+                elif not user["active"]:
+                    # Error, user is not active
+                    success = False
+
+            # Read user's authentication information
+            if success:
+                user_authentication = self.__user_management.read_user_authentication(
+                    connection,
+                    user["user_id"])
+
+                if user_authentication is None:
+                    # Error, no authentication was found for that user
+                    success = False
+
+            # Authenticate user
+            user_authenticated = False
+
+            if success:
+                user_authenticated = self.__authentication.authenticate(
+                    user_authentication["authentication_type"],
+                    authentication_parameters,
+                    user_authentication["authentication_parameters"])
+
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
 
         return user_authenticated
 
     def update_user_authentication(self,
-                                   requested_by_user: int,
                                    user_to_modify: int,
                                    authentication_type: str,
                                    authentication_parameters: dict) -> bool:
         """
         Update user's authentication
 
-        :param requested_by_user:           ID of the user that requested modification of the user
         :param user_to_modify:              ID of the user that should be modified
         :param authentication_type:         User's new authentication type
         :param authentication_parameters:   User's new authentication parameters
@@ -299,25 +394,18 @@ class UserManagement(object):
         try:
             success = connection.begin_transaction()
 
-            # Start a new revision
-            revision_id = None
-
+            # Update user's authentication
             if success:
-                revision_id = self.__database.tables.revision.insert_row(connection,
-                                                                         datetime.datetime.utcnow(),
-                                                                         requested_by_user)
+                reference_authentication_parameters = \
+                    self.__authentication.generate_reference_authentication_parameters(
+                        authentication_type,
+                        authentication_parameters)
 
-                if revision_id is None:
-                    success = False
-
-            # Update user's authentication in the new revision
-            if success:
                 success = self.__user_management.update_user_authentication(
                     connection,
                     user_to_modify,
                     authentication_type,
-                    authentication_parameters,
-                    revision_id)
+                    reference_authentication_parameters)
 
             if success:
                 connection.commit_transaction()

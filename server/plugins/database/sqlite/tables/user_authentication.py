@@ -45,41 +45,30 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
         """
         connection.native_connection.execute(
             "CREATE TABLE user_authentication (\n"
-            "    id            INTEGER PRIMARY KEY AUTOINCREMENT\n"
-            "                          NOT NULL,\n"
-            "    user_id       INTEGER REFERENCES user (id) \n"
-            "                          NOT NULL,\n"
-            "    type          TEXT    NOT NULL\n"
-            "                          CHECK (length(type) > 0),\n"
-            "    revision_id   INTEGER REFERENCES revision (id) \n"
-            "                          NOT NULL\n"
+            "    id                    INTEGER PRIMARY KEY AUTOINCREMENT\n"
+            "                                  NOT NULL,\n"
+            "    user_id               INTEGER REFERENCES user (id) \n"
+            "                                  NOT NULL,\n"
+            "    authentication_type   TEXT    NOT NULL\n"
+            "                                  CHECK (length(authentication_type) > 0)\n"
             ")")
 
     def read_authentication(self,
                             connection: ConnectionSqlite,
-                            user_id: int,
-                            max_revision_id: int) -> Optional[dict]:
+                            user_id: int) -> Optional[dict]:
         """
         Reads authentication information for the specified user and max revision
 
         :param connection:      Database connection
         :param user_id:         ID of the user
-        :param max_revision_id: Maximum revision ID for the search
 
         :return:    Authentication information
         """
         cursor = connection.native_connection.execute(
-            "SELECT id, type\n"
+            "SELECT id, user_id, authentication_type\n"
             "FROM user_authentication\n"
-            "WHERE ((user_id = :user_id) AND\n"
-            "       (revision_id = (\n"
-            "           SELECT MAX(revision_id)\n"
-            "           FROM user_authentication\n"
-            "           WHERE ((user_id = :user_id) AND\n"
-            "                  (revision_id <= :max_revision_id))\n"
-            "        )))",
-            {"user_id": user_id,
-             "max_revision_id": max_revision_id})
+            "WHERE (user_id = :user_id)",
+            {"user_id": user_id})
 
         # Process result
         authentication = None
@@ -93,26 +82,23 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
     def insert_row(self,
                    connection: ConnectionSqlite,
                    user_id: int,
-                   type: str,
-                   revision_id: int) -> Optional[int]:
+                   authentication_type: str) -> Optional[int]:
         """
         Inserts a new row in the table
 
-        :param connection:  Database connection
-        :param user_id:     ID of the user
-        :param type:        User's authentication type
-        :param revision_id: Revision ID
+        :param connection:          Database connection
+        :param user_id:             ID of the user
+        :param authentication_type: User's authentication type
 
         :return:    ID of the newly created row
         """
         try:
             cursor = connection.native_connection.execute(
                 "INSERT INTO user_authentication\n"
-                "   (id, user_id, type, revision_id)\n"
-                "VALUES (NULL, :user_id, :type, :revision_id)",
+                "   (id, user_id, authentication_type)\n"
+                "VALUES (NULL, :user_id, :authentication_type)",
                 {"user_id": user_id,
-                 "type": type,
-                 "revision_id": revision_id})
+                 "authentication_type": authentication_type})
 
             row_id = cursor.lastrowid
         except sqlite3.IntegrityError:
@@ -120,3 +106,34 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
             row_id = None
 
         return row_id
+
+    def update_authentication_type(self,
+                                   connection: ConnectionSqlite,
+                                   user_authentication_id: int,
+                                   authentication_type: str) -> Optional[int]:
+        """
+        Inserts a new row in the table
+
+        :param connection:              Database connection
+        :param user_authentication_id:  ID of the user authentication row
+        :param authentication_type:     User's authentication type
+
+        :return:    Success or failure
+        """
+        try:
+            cursor = connection.native_connection.execute(
+                "UPDATE user_authentication\n"
+                "SET authentication_type = :authentication_type\n"
+                "WHERE (id = :id)",
+                {"id": user_authentication_id,
+                 "authentication_type": authentication_type})
+
+            if cursor.rowcount == 1:
+                success = True
+            else:
+                success = False
+        except sqlite3.IntegrityError:
+            # Error occurred
+            success = False
+
+        return success

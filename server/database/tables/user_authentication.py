@@ -45,32 +45,43 @@ class UserAuthenticationTable(object):
 
     def read_authentication(self,
                             connection: Connection,
-                            user_id: int,
-                            max_revision_id: int) -> Optional[dict]:
+                            user_id: int) -> Optional[dict]:
         """
         Reads authentication information for the specified user and max revision
 
         :param connection:      Database connection
         :param user_id:         ID of the user
-        :param max_revision_id: Maximum revision ID for the search
 
-        :return: Authentication information
+        :return:    Authentication information
         """
         raise NotImplementedError()
 
     def insert_row(self,
                    connection: Connection,
                    user_id: int,
-                   type: str,
-                   revision_id: int) -> Optional[int]:
+                   authentication_type: str) -> Optional[int]:
         """
         Inserts a new row in the table
 
-        :param connection:  Database connection
-        :param user_id:     ID of the user
-        :param type:        User's authentication type
-        :param revision_id: Revision ID
+        :param connection:          Database connection
+        :param user_id:             ID of the user
+        :param authentication_type: User's authentication type
 
-        :return: ID of the newly created row
+        :return:    ID of the newly created row
+        """
+        raise NotImplementedError()
+
+    def update_authentication_type(self,
+                                   connection: Connection,
+                                   user_authentication_id: int,
+                                   authentication_type: str) -> Optional[int]:
+        """
+        Inserts a new row in the table
+
+        :param connection:              Database connection
+        :param user_authentication_id:  ID of the user authentication row
+        :param authentication_type:     User's authentication type
+
+        :return:    Success or failure
         """
         raise NotImplementedError()

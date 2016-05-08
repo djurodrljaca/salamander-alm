@@ -20,8 +20,8 @@ from plugins.database.sqlite.connection import ConnectionSqlite
 from plugins.database.sqlite.tables.revision import RevisionTableSqlite
 from plugins.database.sqlite.tables.user import UserTableSqlite
 from plugins.database.sqlite.tables.user_authentication import UserAuthenticationTableSqlite
-from plugins.database.sqlite.tables.user_authentication_basic \
-    import UserAuthenticationBasicTableSqlite
+from plugins.database.sqlite.tables.user_authentication_parameter \
+    import UserAuthenticationParameterTableSqlite
 from plugins.database.sqlite.tables.user_information import UserInformationTableSqlite
 import sqlite3
 from typing import Any, Optional
@@ -44,7 +44,7 @@ class DatabaseSqlite(Database):
 
         tables.user = UserTableSqlite()
         tables.user_authentication = UserAuthenticationTableSqlite()
-        tables.user_authentication_basic = UserAuthenticationBasicTableSqlite()
+        tables.user_authentication_parameter = UserAuthenticationParameterTableSqlite()
         tables.user_information = UserInformationTableSqlite()
 
         Database.__init__(self, tables)

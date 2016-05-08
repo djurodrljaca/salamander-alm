@@ -14,7 +14,6 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import authentication.basic
 from database.database import Database
 from database.connection import Connection
 from typing import List, Optional
@@ -153,18 +152,18 @@ class UserManagement(object):
                     display_name: str,
                     email: str,
                     authentication_type: str,
-                    authentication_parameters: dict,
+                    reference_authentication_parameters: dict,
                     revision_id: int) -> Optional[int]:
         """
         Creates a new user
 
-        :param connection:                  Database connection
-        :param user_name:                   User's user name
-        :param display_name:                User's display name
-        :param email:                       User's email address
-        :param authentication_type:         User's authentication type
-        :param authentication_parameters:   User's authentication parameters
-        :param revision_id:                 Revision ID
+        :param connection:                          Database connection
+        :param user_name:                           User's user name
+        :param display_name:                        User's display name
+        :param email:                               User's email address
+        :param authentication_type:                 User's authentication type
+        :param reference_authentication_parameters: User's reference authentication parameters
+        :param revision_id:                         Revision ID
 
         :return: User ID of the newly created user
         """
@@ -196,28 +195,18 @@ class UserManagement(object):
         user_authentication_id = self.__database.tables.user_authentication.insert_row(
             connection,
             user_id,
-            authentication_type,
-            revision_id)
+            authentication_type)
 
         if user_authentication_id is None:
             return None
 
-        if authentication_type == "basic":
-            # Basic authentication
-            password_hash = authentication.basic.generate_password_hash(
-                authentication_parameters["password"])
+        success = self.__database.tables.user_authentication_parameter.insert_rows(
+            connection,
+            user_authentication_id,
+            reference_authentication_parameters)
 
-            user_authentication_basic_id = \
-                self.__database.tables.user_authentication_basic.insert_row(connection,
-                                                                            user_authentication_id,
-                                                                            password_hash,
-                                                                            revision_id)
-
-            if user_authentication_basic_id is None:
-                # Error, failed to add authentication information to the user
-                return None
-        else:
-            # Error, unsupported authentication type
+        if not success:
+            # Error, failed to add authentication parameters to the user
             return None
 
         return user_id
@@ -268,117 +257,84 @@ class UserManagement(object):
 
         return success
 
-    def authenticate_user(self,
-                          connection: Connection,
-                          user_name: str,
-                          authentication_parameters: str,
-                          max_revision_id: int) -> bool:
+    def read_user_authentication(self,
+                                 connection: Connection,
+                                 user_id: int) -> Optional[dict]:
         """
-        Authenticate user with basic authentication
+        Reads a user's authentication
 
-        :param connection:                  Database connection
-        :param user_name:                   User's user name
-        :param authentication_parameters:   User's authentication parameters
-        :param max_revision_id:             Maximum revision ID for the authentication
+        :param connection:          Database connection
+        :param user_id:             ID of the user
 
-        :return: Authentication result: success or failure
+        :return:    User authentication object
         """
-        # Find the user that matches the specified user name
-        user = self.read_user_by_user_name(connection, user_name, max_revision_id)
-
-        if user is None:
-            # Error, invalid user name
-            return False
-        elif not user["active"]:
-            # Error, user is not active
-            return False
-
-        # Authenticate user
+        # Read the user's authentication
         user_authentication = self.__database.tables.user_authentication.read_authentication(
             connection,
-            user["user_id"],
-            max_revision_id)
+            user_id)
 
         if user_authentication is None:
-            # Error, no authentication was found for that user
-            return False
+            return None
 
-        user_authenticated = False
-
-        if user_authentication["type"] == "basic":
-            # Basic authentication
-            password_hash = self.__database.tables.user_authentication_basic.read_password_hash(
+        # Read the user's authentication parameters
+        authentication_parameters = \
+            self.__database.tables.user_authentication_parameter.read_authentication_parameters(
                 connection,
-                user["user_id"],
-                max_revision_id)
+                user_authentication["id"])
 
-            if password_hash is not None:
-                user_authenticated = authentication.basic.authenticate(
-                    authentication_parameters["password"],
-                    password_hash)
-        else:
-            # Error, unsupported authentication type
-            user_authenticated = False
+        if authentication_parameters is None:
+            return None
 
-        return user_authenticated
+        # Create authentication object
+        authentication_object = dict()
+        authentication_object["user_id"] = user_authentication["user_id"]
+        authentication_object["authentication_type"] = \
+            user_authentication["authentication_type"]
+        authentication_object["authentication_parameters"] = authentication_parameters
+
+        return authentication_object
 
     def update_user_authentication(self,
                                    connection: Connection,
                                    user_to_modify: int,
                                    authentication_type: str,
-                                   authentication_parameters: dict,
-                                   revision_id: int) -> bool:
+                                   reference_authentication_parameters: dict) -> bool:
         """
         Modify user's information
 
-        :param connection:                  Database connection
-        :param user_to_modify:              ID of the user that should be modified
-        :param authentication_type:         User's new authentication type
-        :param authentication_parameters:   User's new authentication parameters
-        :param revision_id:                 Revision ID
+        :param connection:                          Database connection
+        :param user_to_modify:                      ID of the user that should be modified
+        :param authentication_type:                 User's new authentication type
+        :param reference_authentication_parameters: User's new reference authentication parameters
 
-        :return: Success or failure
+        :return:    Success or failure
         """
-        # Read users current authentication type
+        # Read users current authentication information
         user_authentication = self.__database.tables.user_authentication.read_authentication(
             connection,
-            user_to_modify,
-            revision_id)
+            user_to_modify)
 
         if user_authentication is None:
             # Error, no authentication was found for that user
             return False
 
         # Modify authentication type if needed
-        if authentication_type != user_authentication["type"]:
-            user_authentication["id"] = self.__database.tables.user_authentication.insert_row(
+        if authentication_type != user_authentication["authentication_type"]:
+            success = self.__database.tables.user_authentication.update_authentication_type(
                 connection,
-                user_to_modify,
-                authentication_type,
-                revision_id)
+                user_authentication["id"],
+                authentication_type)
 
-            if user_authentication["id"] is None:
+            if not success:
                 # Error, failed to modify authentication type
                 return False
 
         # Modify authentication parameters
-        if authentication_type == "basic":
-            # Basic authentication
-            password_hash = authentication.basic.generate_password_hash(
-                authentication_parameters["password"])
+        self.__database.tables.user_authentication_parameter.delete_rows(connection,
+                                                                         user_authentication["id"])
+        success = self.__database.tables.user_authentication_parameter.insert_rows(
+            connection,
+            user_authentication["id"],
+            reference_authentication_parameters)
 
-            record_id = self.__database.tables.user_authentication_basic.insert_row(
-                connection,
-                user_authentication["id"],
-                password_hash,
-                revision_id)
-
-            if record_id is None:
-                # Error, failed to modify authentication information
-                return False
-        else:
-            # Error, unsupported authentication type
-            return False
-
-        # Success
-        return True
+        return success

@@ -16,6 +16,7 @@ not, see <http://www.gnu.org/licenses/>.
 
 import os
 import plugins.database.sqlite.database
+import plugins.authentication.basic.authentication_method
 import unittest
 import usermanagement.user_management
 
@@ -37,6 +38,8 @@ class UserInformation(unittest.TestCase):
     def setUp(self):
         self.__database = _create_database()
         self.__user_management = usermanagement.user_management.UserManagement(self.__database)
+        self.__user_management.add_authentication_method(
+            plugins.authentication.basic.authentication_method.AuthenticationMethodBasic())
         self.__admin_user_id = 1
 
     def create_user_test1(self):
@@ -584,6 +587,8 @@ class UserAuthentication(unittest.TestCase):
     def setUp(self):
         self.__database = _create_database()
         self.__user_management = usermanagement.user_management.UserManagement(self.__database)
+        self.__user_management.add_authentication_method(
+            plugins.authentication.basic.authentication_method.AuthenticationMethodBasic())
         self.__admin_user_id = 1
 
     def create_user_test1(self):
@@ -650,7 +655,6 @@ class UserAuthentication(unittest.TestCase):
 
         # Positive tests ---------------------------------------------------------------------------
         self.assertTrue(self.__user_management.update_user_authentication(user_id1,
-                                                                          user_id1,
                                                                           "basic",
                                                                           {"password": "new_pw"}))
 

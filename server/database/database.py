@@ -14,12 +14,12 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import authentication.basic
+from plugins.authentication.basic.authentication_method import AuthenticationMethodBasic
 from database.connection import Connection
 from database.tables.revision import RevisionTable
 from database.tables.user import UserTable
 from database.tables.user_authentication import UserAuthenticationTable
-from database.tables.user_authentication_basic import UserAuthenticationBasicTable
+from database.tables.user_authentication_parameter import UserAuthenticationParameterTable
 from database.tables.user_information import UserInformationTable
 import datetime
 from typing import Optional
@@ -37,7 +37,7 @@ class Tables(object):
         self.revision = RevisionTable()
         self.user = UserTable()
         self.user_authentication = UserAuthenticationTable()
-        self.user_authentication_basic = UserAuthenticationBasicTable()
+        self.user_authentication_parameter = UserAuthenticationParameterTable()
         self.user_information = UserInformationTable()
 
 
@@ -144,7 +144,7 @@ class Database(object):
         self.__tables.revision.create(connection)
         self.__tables.user.create(connection)
         self.__tables.user_authentication.create(connection)
-        self.__tables.user_authentication_basic.create(connection)
+        self.__tables.user_authentication_parameter.create(connection)
         self.__tables.user_information.create(connection)
 
     def __create_default_system_users(self, connection: Connection) -> bool:
@@ -191,18 +191,21 @@ class Database(object):
         if success:
             user_authentication_id = self.__tables.user_authentication.insert_row(connection,
                                                                                   user_id,
-                                                                                  "basic",
-                                                                                  revision_id)
+                                                                                  "basic")
 
         if user_authentication_id is None:
             success = False
 
         if success:
-            user_authentication_basic_id = self.__tables.user_authentication_basic.insert_row(
+            authentication_method = AuthenticationMethodBasic()
+            authentication_parameters = \
+                authentication_method.generate_reference_authentication_parameters(
+                    {"password": "administrator"})
+
+            user_authentication_basic_id = self.__tables.user_authentication_parameter.insert_rows(
                 connection,
                 user_authentication_id,
-                authentication.basic.generate_password_hash("administrator"),
-                revision_id)
+                authentication_parameters)
 
             if user_authentication_basic_id is None:
                 success = False
