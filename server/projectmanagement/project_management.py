@@ -18,7 +18,6 @@ from database.connection import Connection
 from database.database import DatabaseInterface
 import datetime
 from typing import List, Optional
-from usermanagement.user_management import UserManagementInterface
 
 
 class ProjectManagementInterface(object):
@@ -27,7 +26,6 @@ class ProjectManagementInterface(object):
 
     Dependencies:
     - DatabaseInterface
-    - UserManagementInterface
     """
 
     def __init__(self):
@@ -194,7 +192,7 @@ class ProjectManagementInterface(object):
                        full_name: str,
                        description: str) -> Optional[int]:
         """
-        Create a new user
+        Create a new project
 
         :param requested_by_user:   ID of the user that requested creation of the new project
         :param short_name:          Project's short name
@@ -430,10 +428,18 @@ class ProjectManagementInterface(object):
 
         :return:    Project ID of the newly created project
         """
-        # Check if a user with the same user name already exists
+        # Check if a project with the same short name already exists
         project = ProjectManagementInterface.__read_project_by_short_name(connection,
                                                                           short_name,
                                                                           revision_id)
+
+        if project is not None:
+            return None
+
+        # Check if a project with the same full name already exists
+        project = ProjectManagementInterface.__read_project_by_full_name(connection,
+                                                                         full_name,
+                                                                         revision_id)
 
         if project is not None:
             return None
@@ -445,13 +451,14 @@ class ProjectManagementInterface(object):
             return None
 
         # Add project information to the project
-        project_information_id = DatabaseInterface.tables().user_information.insert_row(connection,
-                                                                                        project_id,
-                                                                                        short_name,
-                                                                                        full_name,
-                                                                                        description,
-                                                                                        True,
-                                                                                        revision_id)
+        project_information_id = DatabaseInterface.tables().project_information.insert_row(
+            connection,
+            project_id,
+            short_name,
+            full_name,
+            description,
+            True,
+            revision_id)
 
         if project_information_id is None:
             return None

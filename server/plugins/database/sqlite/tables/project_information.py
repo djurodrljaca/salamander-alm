@@ -110,7 +110,7 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
             "           PI1.active,\n"
             "           PI1.revision_id\n"
             "    FROM project_information AS PI1\n"
-            "    WHERE (UI1.revision_id = (\n"
+            "    WHERE (PI1.revision_id = (\n"
             "                SELECT MAX(PI2.revision_id)\n"
             "                FROM project_information AS PI2\n"
             "                WHERE ((PI2.project_id = PI1.project_id) AND\n"

@@ -148,6 +148,8 @@ class Database(object):
         self.__tables.user_authentication.create(connection)
         self.__tables.user_authentication_parameter.create(connection)
         self.__tables.user_information.create(connection)
+        self.__tables.project.create(connection)
+        self.__tables.project_information.create(connection)
 
     def __create_default_system_users(self, connection: Connection) -> bool:
         """

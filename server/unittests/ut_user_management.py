@@ -143,6 +143,22 @@ class UserInformation(unittest.TestCase):
                                                               "",
                                                               {"password": "test123"}))
 
+    def test_read_all_user_ids(self):
+        user_id1 = self.create_user_test1()
+        self.assertIsNotNone(user_id1)
+
+        user_id2 = self.create_user_test2()
+        self.assertIsNotNone(user_id2)
+
+        user_ids = UserManagementInterface.read_all_user_ids()
+
+        self.assertEqual(len(user_ids), 3)
+        self.assertListEqual(user_ids, [self.__admin_user_id, user_id1, user_id2])
+
+        self.assertNotEqual(self.__admin_user_id, user_id1)
+        self.assertNotEqual(self.__admin_user_id, user_id2)
+        self.assertNotEqual(user_id1, user_id2)
+
     def test_read_user_by_user_id(self):
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
