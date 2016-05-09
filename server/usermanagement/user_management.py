@@ -14,11 +14,13 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import authentication.authentication
-import database.database
-import database.user_management
 import datetime
-from typing import List, Optional
+from typing import Optional
+
+from authentication.authentication import Authentication, AuthenticationMethod
+from authentication.basic_authentication_method import AuthenticationMethodBasic
+from database.connection import Connection
+from database.database import Database
 
 
 class UserManagement(object):
@@ -26,15 +28,15 @@ class UserManagement(object):
     User management
     """
 
-    def __init__(self, database_object: database.database.Database):
+    def __init__(self, database_object: Database):
         """
         Constructor
 
         :param database_object: Database object
         """
         self.__database = database_object
-        self.__user_management = database.user_management.UserManagement(database_object)
-        self.__authentication = authentication.authentication.Authentication()
+        self.__authentication = Authentication()
+        self.__authentication.add_authentication_method(AuthenticationMethodBasic())
 
     def __del__(self):
         """
@@ -60,9 +62,7 @@ class UserManagement(object):
         user = None
 
         if current_revision_id is not None:
-            user = self.__user_management.read_user_by_user_id(connection,
-                                                               user_id,
-                                                               current_revision_id)
+            user = self.__read_user_by_user_id(connection, user_id, current_revision_id)
 
         return user
 
@@ -84,9 +84,7 @@ class UserManagement(object):
         user = None
 
         if current_revision_id is not None:
-            user = self.__user_management.read_user_by_user_name(connection,
-                                                                 user_name,
-                                                                 current_revision_id)
+            user = self.__read_user_by_user_name(connection, user_name, current_revision_id)
 
         return user
 
@@ -107,10 +105,11 @@ class UserManagement(object):
         users = None
 
         if current_revision_id is not None:
-            users = self.__user_management.read_users_by_user_name(connection,
-                                                                   user_name,
-                                                                   only_active_users,
-                                                                   current_revision_id)
+            users = self.__database.tables.user_information.read_information(connection,
+                                                                             "user_name",
+                                                                             user_name,
+                                                                             only_active_users,
+                                                                             current_revision_id)
 
         return users
 
@@ -133,10 +132,11 @@ class UserManagement(object):
         users = None
 
         if current_revision_id is not None:
-            users = self.__user_management.read_users_by_display_name(connection,
-                                                                      display_name,
-                                                                      only_active_users,
-                                                                      current_revision_id)
+            users = self.__database.tables.user_information.read_information(connection,
+                                                                             "display_name",
+                                                                             display_name,
+                                                                             only_active_users,
+                                                                             current_revision_id)
 
         return users
 
@@ -178,18 +178,13 @@ class UserManagement(object):
 
             # Create the user
             if success:
-                reference_authentication_parameters = \
-                    self.__authentication.generate_reference_authentication_parameters(
-                        authentication_type,
-                        authentication_parameters)
-
-                user_id = self.__user_management.create_user(connection,
-                                                             user_name,
-                                                             display_name,
-                                                             email,
-                                                             authentication_type,
-                                                             reference_authentication_parameters,
-                                                             revision_id)
+                user_id = self.__create_user(connection,
+                                             user_name,
+                                             display_name,
+                                             email,
+                                             authentication_type,
+                                             authentication_parameters,
+                                             revision_id)
 
                 if user_id is None:
                     success = False
@@ -240,15 +235,28 @@ class UserManagement(object):
                 if revision_id is None:
                     success = False
 
+            # Check if there is already an existing user with the same user name
+            if success:
+                success = False
+                user = self.__read_user_by_user_name(connection, user_name, revision_id)
+
+                if user is None:
+                    success = True
+                elif user["user_id"] == user_to_modify:
+                    success = True
+
             # Update user's information in the new revision
             if success:
-                success = self.__user_management.update_user_information(connection,
-                                                                         user_to_modify,
-                                                                         user_name,
-                                                                         display_name,
-                                                                         email,
-                                                                         active,
-                                                                         revision_id)
+                row_id = self.__database.tables.user_information.insert_row(connection,
+                                                                            user_to_modify,
+                                                                            user_name,
+                                                                            display_name,
+                                                                            email,
+                                                                            active,
+                                                                            revision_id)
+
+                if row_id is None:
+                    success = False
 
             if success:
                 connection.commit_transaction()
@@ -260,9 +268,8 @@ class UserManagement(object):
 
         return success
 
-    def add_authentication_method(
-            self,
-            authentication_method: authentication.authentication.AuthenticationMethod) -> bool:
+    def add_authentication_method(self,
+                                  authentication_method: AuthenticationMethod) -> bool:
         """
         Adds support for an authentication method
 
@@ -295,9 +302,7 @@ class UserManagement(object):
             user_authentication = None
 
             if success:
-                user_authentication = self.__user_management.read_user_authentication(
-                    connection,
-                    user_id)
+                user_authentication = self.__read_user_authentication(connection, user_id)
 
                 if user_authentication is None:
                     success = False
@@ -337,9 +342,7 @@ class UserManagement(object):
             user = None
 
             if success:
-                user = self.__user_management.read_user_by_user_name(connection,
-                                                                     user_name,
-                                                                     current_revision_id)
+                user = self.__read_user_by_user_name(connection, user_name, current_revision_id)
 
                 if user is None:
                     # Error, invalid user name
@@ -350,7 +353,7 @@ class UserManagement(object):
 
             # Read user's authentication information
             if success:
-                user_authentication = self.__user_management.read_user_authentication(
+                user_authentication = self.__read_user_authentication(
                     connection,
                     user["user_id"])
 
@@ -395,17 +398,42 @@ class UserManagement(object):
             success = connection.begin_transaction()
 
             # Update user's authentication
+            user_authentication = None
+
             if success:
+                # Read users current authentication information
+                user_authentication = \
+                    self.__database.tables.user_authentication.read_authentication(connection,
+                                                                                   user_to_modify)
+
+                if user_authentication is None:
+                    # Error, no authentication was found for that user
+                    success = False
+
+            # Modify authentication type if needed
+            if success and (authentication_type != user_authentication["authentication_type"]):
+                success = self.__database.tables.user_authentication.update_authentication_type(
+                    connection,
+                    user_authentication["id"],
+                    authentication_type)
+
+            # Modify authentication parameters
+            if success:
+                success = False
+                self.__database.tables.user_authentication_parameter.delete_rows(
+                    connection,
+                    user_authentication["id"])
+
                 reference_authentication_parameters = \
                     self.__authentication.generate_reference_authentication_parameters(
                         authentication_type,
                         authentication_parameters)
 
-                success = self.__user_management.update_user_authentication(
-                    connection,
-                    user_to_modify,
-                    authentication_type,
-                    reference_authentication_parameters)
+                if reference_authentication_parameters is not None:
+                    success = self.__database.tables.user_authentication_parameter.insert_rows(
+                        connection,
+                        user_authentication["id"],
+                        reference_authentication_parameters)
 
             if success:
                 connection.commit_transaction()
@@ -416,3 +444,173 @@ class UserManagement(object):
             raise
 
         return success
+
+    def __read_user_by_user_id(self,
+                               connection: Connection,
+                               user_id: int,
+                               max_revision_id: int) -> Optional[dict]:
+        """
+        Reads a user that matches the search parameters
+
+        :param connection:          Database connection
+        :param user_id:             ID of the user
+        :param max_revision_id:     Maximum revision ID for the search
+
+        :return:    User information object
+        """
+        # Read the users that match the search attribute
+        users = self.__database.tables.user_information.read_information(connection,
+                                                                         "user_id",
+                                                                         user_id,
+                                                                         False,
+                                                                         max_revision_id)
+
+        # Return a user only if exactly one was found
+        user = None
+
+        if users is not None:
+            if len(users) == 1:
+                user = users[0]
+
+        return user
+
+    def __read_user_by_user_name(self,
+                                 connection: Connection,
+                                 user_name: str,
+                                 max_revision_id: int) -> Optional[dict]:
+        """
+        Reads a user that matches the search parameters
+
+        :param connection:          Database connection
+        :param user_name:           User's user name
+        :param max_revision_id:     Maximum revision ID for the search
+
+        :return:    User information object
+
+        NOTE:   This method only searches active users
+        """
+        # Read the users that match the search attribute
+        users = self.__database.tables.user_information.read_information(connection,
+                                                                         "user_name",
+                                                                         user_name,
+                                                                         True,
+                                                                         max_revision_id)
+
+        # Return a user only if exactly one was found
+        user = None
+
+        if users is not None:
+            if len(users) == 1:
+                user = users[0]
+
+        return user
+
+    def __create_user(self,
+                      connection: Connection,
+                      user_name: str,
+                      display_name: str,
+                      email: str,
+                      authentication_type: str,
+                      authentication_parameters: dict,
+                      revision_id: int) -> Optional[int]:
+        """
+        Creates a new user
+
+        :param connection:                  Database connection
+        :param user_name:                   User's user name
+        :param display_name:                User's display name
+        :param email:                       User's email address
+        :param authentication_type:         User's authentication type
+        :param authentication_parameters:   User's authentication parameters
+        :param revision_id:                 Revision ID
+
+        :return:    User ID of the newly created user
+        """
+        # Check if a user with the same user name already exists
+        user = self.__read_user_by_user_name(connection, user_name, revision_id)
+
+        if user is not None:
+            return None
+
+        # Create the user in the new revision
+        user_id = self.__database.tables.user.insert_row(connection)
+
+        if user_id is None:
+            return None
+
+        # Add user information to the user
+        user_information_id = self.__database.tables.user_information.insert_row(connection,
+                                                                                 user_id,
+                                                                                 user_name,
+                                                                                 display_name,
+                                                                                 email,
+                                                                                 True,
+                                                                                 revision_id)
+
+        if user_information_id is None:
+            return None
+
+        # Add user authentication to the user
+        user_authentication_id = self.__database.tables.user_authentication.insert_row(
+            connection,
+            user_id,
+            authentication_type)
+
+        if user_authentication_id is None:
+            return None
+
+        reference_authentication_parameters = \
+            self.__authentication.generate_reference_authentication_parameters(
+                authentication_type,
+                authentication_parameters)
+
+        if reference_authentication_parameters is None:
+            return None
+
+        success = self.__database.tables.user_authentication_parameter.insert_rows(
+            connection,
+            user_authentication_id,
+            reference_authentication_parameters)
+
+        if not success:
+            # Error, failed to add authentication parameters to the user
+            return None
+
+        return user_id
+
+    def __read_user_authentication(self,
+                                   connection: Connection,
+                                   user_id: int) -> Optional[dict]:
+        """
+        Reads a user's authentication
+
+        :param connection:          Database connection
+        :param user_id:             ID of the user
+
+        :return:    User authentication object
+        """
+        # Read the user's authentication
+        user_authentication = self.__database.tables.user_authentication.read_authentication(
+            connection,
+            user_id)
+
+        if user_authentication is None:
+            return None
+
+        # Read the user's authentication parameters
+        authentication_parameters = \
+            self.__database.tables.user_authentication_parameter.read_authentication_parameters(
+                connection,
+                user_authentication["id"])
+
+        if authentication_parameters is None:
+            return None
+
+        # Create authentication object
+        authentication_object = dict()
+        authentication_object["user_id"] = user_authentication["user_id"]
+        authentication_object["authentication_type"] = \
+            user_authentication["authentication_type"]
+        authentication_object["authentication_parameters"] = authentication_parameters
+
+        return authentication_object

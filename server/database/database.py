@@ -14,15 +14,16 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-from plugins.authentication.basic.authentication_method import AuthenticationMethodBasic
+import datetime
+from typing import Optional
+
+from authentication.basic_authentication_method import AuthenticationMethodBasic
 from database.connection import Connection
 from database.tables.revision import RevisionTable
 from database.tables.user import UserTable
 from database.tables.user_authentication import UserAuthenticationTable
 from database.tables.user_authentication_parameter import UserAuthenticationParameterTable
 from database.tables.user_information import UserInformationTable
-import datetime
-from typing import Optional
 
 
 class Tables(object):
