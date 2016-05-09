@@ -18,7 +18,7 @@ from authentication.authentication import AuthenticationInterface
 from database.connection import Connection
 from database.database import DatabaseInterface
 import datetime
-from typing import Optional
+from typing import List, Optional
 
 
 class UserManagementInterface(object):
@@ -43,7 +43,19 @@ class UserManagementInterface(object):
         pass
 
     @staticmethod
-    def read_user_by_user_id(user_id: int) -> Optional[dict]:
+    def read_all_user_ids() -> List[int]:
+        """
+        Reads all user IDs from the database
+
+        :return:    List of user IDs
+
+        NOTE:   This method searches both active and inactive users
+        """
+        connection = DatabaseInterface.create_connection()
+        return DatabaseInterface.tables().user.read_all_users(connection)
+
+    @staticmethod
+    def read_user_by_id(user_id: int) -> Optional[dict]:
         """
         Reads a user that matches the specified user ID
 
@@ -62,16 +74,16 @@ class UserManagementInterface(object):
         user = None
 
         if current_revision_id is not None:
-            user = UserManagementInterface.__read_user_by_user_id(connection,
-                                                                  user_id,
-                                                                  current_revision_id)
+            user = UserManagementInterface.__read_user_by_id(connection,
+                                                             user_id,
+                                                             current_revision_id)
 
         return user
 
     @staticmethod
     def read_user_by_user_name(user_name: str) -> Optional[dict]:
         """
-        Reads a user that matches the specified user ID
+        Reads a user that matches the specified user name
 
         :param user_name:   User's user name
 
@@ -84,7 +96,7 @@ class UserManagementInterface(object):
         current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
             connection)
 
-        # Read a user that matches the specified user ID
+        # Read a user that matches the specified user name
         user = None
 
         if current_revision_id is not None:
@@ -95,9 +107,9 @@ class UserManagementInterface(object):
         return user
 
     @staticmethod
-    def read_users_by_user_name(user_name: str, only_active_users: bool) -> Optional[dict]:
+    def read_users_by_user_name(user_name: str, only_active_users: bool) -> List[dict]:
         """
-        Reads a user that matches the specified user ID
+        Reads a user that matches the specified user name
 
         :param user_name:           User's user name
         :param only_active_users:   Only search for active users
@@ -109,8 +121,8 @@ class UserManagementInterface(object):
         current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
             connection)
 
-        # Read a user that matches the specified user ID
-        users = None
+        # Read users that match the specified user name
+        users = list()
 
         if current_revision_id is not None:
             users = DatabaseInterface.tables().user_information.read_information(
@@ -123,9 +135,9 @@ class UserManagementInterface(object):
         return users
 
     @staticmethod
-    def read_users_by_display_name(display_name: str, only_active_users=True) -> Optional[dict]:
+    def read_users_by_display_name(display_name: str, only_active_users=True) -> List[dict]:
         """
-        Reads a user that matches the specified user ID
+        Reads a user that matches the specified display name
 
         :param display_name:        User's display name
         :param only_active_users:   Only search for active users
@@ -137,8 +149,8 @@ class UserManagementInterface(object):
         current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
             connection)
 
-        # Read a user that matches the specified user ID
-        users = None
+        # Read users that match the specified display name
+        users = list()
 
         if current_revision_id is not None:
             users = DatabaseInterface.tables().user_information.read_information(
@@ -167,7 +179,7 @@ class UserManagementInterface(object):
         :param authentication_type:         User's authentication type
         :param authentication_parameters:   User's authentication parameters
 
-        :return: User ID of the new user
+        :return:    User ID of the new user
         """
         user_id = None
         connection = DatabaseInterface.create_connection()
@@ -222,11 +234,10 @@ class UserManagementInterface(object):
 
         :param requested_by_user:   ID of the user that requested modification of the user
         :param user_to_modify:      ID of the user that should be modified
-        :param user_name:           User's user name
-        :param display_name:        User's display name
-        :param email:               User's email address
-        :param email:               New email address of the user
-        :param active:              New state of the user (active or inactive)
+        :param user_name:           User's new user name
+        :param display_name:        User's new display name
+        :param email:               User's new email address
+        :param active:              User's new state (active or inactive)
 
         :return:    Success or failure
         """
@@ -447,9 +458,9 @@ class UserManagementInterface(object):
         return success
 
     @staticmethod
-    def __read_user_by_user_id(connection: Connection,
-                               user_id: int,
-                               max_revision_id: int) -> Optional[dict]:
+    def __read_user_by_id(connection: Connection,
+                          user_id: int,
+                          max_revision_id: int) -> Optional[dict]:
         """
         Reads a user that matches the search parameters
 

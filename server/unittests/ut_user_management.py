@@ -17,7 +17,6 @@ not, see <http://www.gnu.org/licenses/>.
 from authentication.authentication import AuthenticationInterface
 from authentication.basic_authentication_method import AuthenticationMethodBasic
 from database.database import DatabaseInterface
-import os
 from plugins.database.sqlite.database import DatabaseSqlite
 import unittest
 from usermanagement.user_management import UserManagementInterface
@@ -61,7 +60,7 @@ class UserInformation(unittest.TestCase):
         return user_id
 
     def test_default_administrator(self):
-        user = UserManagementInterface.read_user_by_user_id(self.__admin_user_id)
+        user = UserManagementInterface.read_user_by_id(self.__admin_user_id)
 
         self.assertIsNotNone(user)
         self.assertEqual(user["user_id"], self.__admin_user_id)
@@ -149,7 +148,7 @@ class UserInformation(unittest.TestCase):
         self.assertIsNotNone(user_id)
 
         # Positive tests ---------------------------------------------------------------------------
-        user = UserManagementInterface.read_user_by_user_id(user_id)
+        user = UserManagementInterface.read_user_by_id(user_id)
 
         self.assertEqual(user["user_id"], user_id)
         self.assertEqual(user["user_name"], "test1")
@@ -159,8 +158,8 @@ class UserInformation(unittest.TestCase):
         self.assertIsNotNone(user["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
-        self.assertIsNone(UserManagementInterface.read_user_by_user_id(None))
-        self.assertIsNone(UserManagementInterface.read_user_by_user_id(999))
+        self.assertIsNone(UserManagementInterface.read_user_by_id(None))
+        self.assertIsNone(UserManagementInterface.read_user_by_id(999))
 
     def test_read_user_by_user_name(self):
         user_id = self.create_user_test1()
@@ -186,7 +185,7 @@ class UserInformation(unittest.TestCase):
         user_id1 = self.create_user_test1()
         self.assertIsNotNone(user_id1)
 
-        user1 = UserManagementInterface.read_user_by_user_id(user_id1)
+        user1 = UserManagementInterface.read_user_by_id(user_id1)
         self.assertIsNotNone(user1)
 
         self.assertTrue(UserManagementInterface.update_user_information(self.__admin_user_id,
@@ -256,7 +255,7 @@ class UserInformation(unittest.TestCase):
         user_id1 = self.create_user_test1()
         self.assertIsNotNone(user_id1)
 
-        user1 = UserManagementInterface.read_user_by_user_id(user_id1)
+        user1 = UserManagementInterface.read_user_by_id(user_id1)
         self.assertIsNotNone(user1)
 
         self.assertTrue(UserManagementInterface.update_user_information(self.__admin_user_id,
@@ -326,7 +325,7 @@ class UserInformation(unittest.TestCase):
         user_id2 = self.create_user_test2()
         self.assertIsNotNone(user_id2)
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -369,7 +368,7 @@ class UserInformation(unittest.TestCase):
         user_id1 = self.create_user_test1()
         self.assertIsNotNone(user_id1)
 
-        user1 = UserManagementInterface.read_user_by_user_id(user_id1)
+        user1 = UserManagementInterface.read_user_by_id(user_id1)
 
         self.assertEqual(user1["user_id"], user_id1)
         self.assertEqual(user1["user_name"], "test1")
@@ -381,7 +380,7 @@ class UserInformation(unittest.TestCase):
         user_id2 = self.create_user_test2()
         self.assertIsNotNone(user_id2)
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -398,7 +397,7 @@ class UserInformation(unittest.TestCase):
                                                                         user1["email"],
                                                                         user1["active"]))
 
-        user1 = UserManagementInterface.read_user_by_user_id(user_id1)
+        user1 = UserManagementInterface.read_user_by_id(user_id1)
 
         self.assertEqual(user1["user_id"], user_id1)
         self.assertEqual(user1["user_name"], "test1new")
@@ -435,7 +434,7 @@ class UserInformation(unittest.TestCase):
         user_id2 = self.create_user_test2()
         self.assertIsNotNone(user_id2)
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -452,7 +451,7 @@ class UserInformation(unittest.TestCase):
                                                                         user2["email"],
                                                                         user2["active"]))
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -481,7 +480,7 @@ class UserInformation(unittest.TestCase):
         user_id2 = self.create_user_test2()
         self.assertIsNotNone(user_id2)
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -498,7 +497,7 @@ class UserInformation(unittest.TestCase):
                                                                         "test2new@test.com",
                                                                         user2["active"]))
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -514,7 +513,7 @@ class UserInformation(unittest.TestCase):
         user_id2 = self.create_user_test2()
         self.assertIsNotNone(user_id2)
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -532,7 +531,7 @@ class UserInformation(unittest.TestCase):
                                                                         user2["email"],
                                                                         False))
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -549,7 +548,7 @@ class UserInformation(unittest.TestCase):
                                                                         user2["email"],
                                                                         True))
 
-        user2 = UserManagementInterface.read_user_by_user_id(user_id2)
+        user2 = UserManagementInterface.read_user_by_id(user_id2)
 
         self.assertEqual(user2["user_id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
@@ -656,7 +655,7 @@ class UserAuthentication(unittest.TestCase):
                                                                            "basic",
                                                                            {"password": "new_pw"}))
 
-        user1 = UserManagementInterface.read_user_by_user_id(user_id1)
+        user1 = UserManagementInterface.read_user_by_id(user_id1)
 
         self.assertTrue(UserManagementInterface.authenticate_user("test1",
                                                                   {"password": "new_pw"}))

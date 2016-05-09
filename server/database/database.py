@@ -21,6 +21,8 @@ from database.tables.user import UserTable
 from database.tables.user_authentication import UserAuthenticationTable
 from database.tables.user_authentication_parameter import UserAuthenticationParameterTable
 from database.tables.user_information import UserInformationTable
+from database.tables.project import ProjectTable
+from database.tables.project_information import ProjectInformationTable
 import datetime
 from typing import Optional
 
@@ -39,6 +41,8 @@ class Tables(object):
         self.user_authentication = UserAuthenticationTable()
         self.user_authentication_parameter = UserAuthenticationParameterTable()
         self.user_information = UserInformationTable()
+        self.project = ProjectTable()
+        self.project_information = ProjectInformationTable()
 
 
 class Database(object):
