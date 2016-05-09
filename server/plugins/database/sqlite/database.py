@@ -61,6 +61,17 @@ class DatabaseSqlite(Database):
         """
         Database.__del__(self)
 
+    def validate(self) -> bool:
+        """
+        Validates the database
+
+        :return:    Success or failure
+
+        During validation the tables are checked
+        """
+        # TODO: check database? (tables, integrity check, foreign key check, etc.)
+        raise NotImplementedError()
+
     def create_connection(self) -> Optional[ConnectionSqlite]:
         """
         Creates a new database connection
@@ -71,7 +82,7 @@ class DatabaseSqlite(Database):
         connection.row_factory = sqlite3.Row
 
         # Set non-persistent PRAGMA values
-        self.__update_pragma(connection, "foreign_keys", 1)
+        DatabaseSqlite.__update_pragma(connection, "foreign_keys", 1)
 
         return ConnectionSqlite(connection)
 
@@ -81,15 +92,16 @@ class DatabaseSqlite(Database):
 
         :return:    Success or failure
         """
+        # Delete database if it already exists
         if os.path.exists(self.__database_file_path):
-            # Error, database already exists!
-            return False
+            os.remove(self.__database_file_path)
 
+        # Create database
         connection = sqlite3.connect(self.__database_file_path)
 
         # Set persistent PRAGMA values
-        self.__update_pragma(connection, "application_id", self.__application_id)
-        self.__update_pragma(connection, "encoding", self.__encoding)
+        DatabaseSqlite.__update_pragma(connection, "application_id", self.__application_id)
+        DatabaseSqlite.__update_pragma(connection, "encoding", self.__encoding)
 
         # TODO: set to "0" here and write to correct version when database is initialized?
         self.__update_pragma(connection, "user_version", self.__user_version)
@@ -98,7 +110,8 @@ class DatabaseSqlite(Database):
         connection.close()
         return True
 
-    def __read_pragma(self, connection: sqlite3.Connection, name: str) -> Any:
+    @staticmethod
+    def __read_pragma(connection: sqlite3.Connection, name: str) -> Any:
         """
         Reads PRAGMA value
 
@@ -115,7 +128,8 @@ class DatabaseSqlite(Database):
 
         return value
 
-    def __update_pragma(self, connection: sqlite3.Connection, name: str, value: Any) -> None:
+    @staticmethod
+    def __update_pragma(connection: sqlite3.Connection, name: str, value: Any) -> None:
         """
         Updates PRAGMA value
 

@@ -68,19 +68,21 @@ class AuthenticationMethod(object):
         raise NotImplementedError()
 
 
-class Authentication(object):
+class AuthenticationInterface(object):
     """
-    Class for user authentication
+    Interface to the authentication (singleton)
     """
+
+    __authentication_methods = list()   # List of authentication methods
 
     def __init__(self):
         """
         Constructor
         """
-        self.__authentication_methods = list()
+        raise RuntimeError()
 
-    def authenticate(self,
-                     authentication_type: str,
+    @staticmethod
+    def authenticate(authentication_type: str,
                      input_authentication_parameters: dict,
                      reference_authentication_parameters: dict) -> bool:
         """
@@ -93,7 +95,8 @@ class Authentication(object):
         :return:    Success or failure
         """
         success = False
-        authentication_method = self.__find_authentication_method(authentication_type)
+        authentication_method = AuthenticationInterface.__find_authentication_method(
+            authentication_type)
 
         if authentication_method is not None:
             success = authentication_method.authenticate(input_authentication_parameters,
@@ -101,8 +104,8 @@ class Authentication(object):
 
         return success
 
+    @staticmethod
     def generate_reference_authentication_parameters(
-            self,
             authentication_type: str,
             input_authentication_parameters: dict,) -> Optional[dict]:
         """
@@ -114,7 +117,8 @@ class Authentication(object):
         :return:    Reference authentication parameters
         """
         reference_authentication_parameters = None
-        authentication_method = self.__find_authentication_method(authentication_type)
+        authentication_method = AuthenticationInterface.__find_authentication_method(
+            authentication_type)
 
         if authentication_method is not None:
             reference_authentication_parameters = \
@@ -123,7 +127,8 @@ class Authentication(object):
 
         return reference_authentication_parameters
 
-    def add_authentication_method(self, authentication_method: AuthenticationMethod) -> bool:
+    @staticmethod
+    def add_authentication_method(authentication_method: AuthenticationMethod) -> bool:
         """
         Adds support for an authentication method
 
@@ -131,24 +136,28 @@ class Authentication(object):
 
         :return:    Success or failure
         """
+        if not isinstance(authentication_method, AuthenticationMethod):
+            raise AttributeError()
+
         success = False
-        existing_authentication_method = self.__find_authentication_method(
+        existing_authentication_method = AuthenticationInterface.__find_authentication_method(
             authentication_method.authentication_type())
 
         if existing_authentication_method is None:
-            self.__authentication_methods.append(authentication_method)
+            AuthenticationInterface.__authentication_methods.append(authentication_method)
             success = True
 
         return success
 
-    def remove_all_authentication_methods(self) -> None:
+    @staticmethod
+    def remove_all_authentication_methods() -> None:
         """
         Removes all authentication methods
         """
-        self.__authentication_methods.clear()
+        AuthenticationInterface.__authentication_methods.clear()
 
-    def __find_authentication_method(self,
-                                     authentication_type: str) -> Optional[AuthenticationMethod]:
+    @staticmethod
+    def __find_authentication_method(authentication_type: str) -> Optional[AuthenticationMethod]:
         """
         Find authentication method
 
@@ -156,7 +165,7 @@ class Authentication(object):
 
         :return:    Authentication method
         """
-        for item in self.__authentication_methods:
+        for item in AuthenticationInterface.__authentication_methods:
             if item.authentication_type() == authentication_type:
                 return item
 

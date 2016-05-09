@@ -18,9 +18,9 @@ from database.connection import Connection
 from typing import Any, List, Optional
 
 
-class UserInformationTable(object):
+class ProjectInformationTable(object):
     """
-    Base class for "user_information" table
+    Base class for "project_information" table
     """
 
     def __init__(self):
@@ -47,45 +47,45 @@ class UserInformationTable(object):
                          connection: Connection,
                          attribute_name: str,
                          attribute_value: Any,
-                         only_active_users: bool,
+                         only_active_projects: bool,
                          max_revision_id: int) -> List[int]:
         """
-        Reads user information for the specified user, state (active/inactive) and max revision
+        Reads project information for the specified project, state (active/inactive) and max
+        revision
 
-        :param connection:          Database connection
-        :param attribute_name:      Search attribute name
-        :param attribute_value:     Search attribute value
-        :param only_active_users:   Only search for active users
-        :param max_revision_id:     Maximum revision ID for the search
+        :param connection:              Database connection
+        :param attribute_name:          Search attribute name
+        :param attribute_value:         Search attribute value
+        :param only_active_projects:    Only search for active users
+        :param max_revision_id:         Maximum revision ID for the search
 
-        :return:    User information of all users that match the search attribute
+        :return:    Project information of all projects that match the search attribute
 
         Only the following search attributes are supported:
-        - user_id
-        - user_name
-        - display_name
-        - email
+        - project_id
+        - short name
+        - full name
         """
         raise NotImplementedError()
 
     def insert_row(self,
                    connection: Connection,
-                   user_id: int,
-                   user_name: str,
-                   display_name: str,
-                   email: str,
+                   project_id: int,
+                   short_name: str,
+                   full_name: str,
+                   description: str,
                    active: bool,
                    revision_id: int) -> Optional[int]:
         """
         Inserts a new row in the table
 
-        :param connection:      Database connection
-        :param user_id:         ID of the user
-        :param user_name:       User name
-        :param display_name:    User's name in format appropriate for displaying in the GUI
-        :param email:           Email address of the user
-        :param active:          State of the user (active or inactive)
-        :param revision_id:     Revision ID
+        :param connection:  Database connection
+        :param project_id:  ID of the project
+        :param short_name:  Project name
+        :param full_name:   Project name
+        :param description: Project description
+        :param active:      State of the project (active or inactive)
+        :param revision_id: Revision ID
 
         :return:    ID of the newly created row
         """

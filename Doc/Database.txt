@@ -24,7 +24,6 @@ Table:
     - user_name: text
     - display_name: text
     - email: text
-    - authentication_method: text
     - active: boolean
     - revision_id: integer
 
@@ -33,17 +32,27 @@ Constraints:
     - revision_id --> revision.id
 
 -------------------------------------------------
-| user_authentication_basic
+| user_authentication
 -------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - user_id: integer
-    - password_hash: text
-    - revision_id: integer
+    - authentication_type: text
 
 Constraints:
     - user_id --> user.id
-    - revision_id --> revision.id
+
+-------------------------------------------------
+| user_authentication_parameter
+-------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - user_authentication_id: integer
+    - name: text
+    - value: text
+
+Constraints:
+    - user_authentication_id --> user_authentication.id
 
 -------------------------------------------------
 | UserGroup
@@ -86,25 +95,28 @@ Constraints:
     - RevisionId --> Revision.Id
 
 -------------------------------------------------
-| Project
+| project
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
+    - id: integer, primary key, auto-increment
 
 -------------------------------------------------
-| ProjectInfo
+| project_information
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - ProjectId: integer
-    - Name: text
-    - Description: text
-    - Active: boolean
-    - RevisionId: integer
+    - id: integer, primary key, auto-increment
+    - project_id: integer
+    - short_name: text
+    - full_name: text
+    - description: text
+    - active: boolean
+    - revision_id: integer
 
 Constraints:
-    - ProjectId --> Project.Id
-    - RevisionId --> Revision.Id
+    - project_id --> project.id
+    - revision_id --> revision.id
+
+TODO: project_information_additional ???
 
 -------------------------------------------------
 | Tracker

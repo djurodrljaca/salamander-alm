@@ -14,16 +14,15 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-import datetime
-from typing import Optional
-
-from authentication.basic_authentication_method import AuthenticationMethodBasic
+from authentication.authentication import AuthenticationInterface
 from database.connection import Connection
 from database.tables.revision import RevisionTable
 from database.tables.user import UserTable
 from database.tables.user_authentication import UserAuthenticationTable
 from database.tables.user_authentication_parameter import UserAuthenticationParameterTable
 from database.tables.user_information import UserInformationTable
+import datetime
+from typing import Optional
 
 
 class Tables(object):
@@ -61,7 +60,6 @@ class Database(object):
         """
         pass
 
-    @property
     def tables(self):
         """
         Property for accessing the database tables
@@ -78,7 +76,6 @@ class Database(object):
 
         During validation the tables are checked
         """
-        # TODO: check database? (tables, integrity check, foreign key check, etc.)
         raise NotImplementedError()
 
     def create_new_database(self) -> bool:
@@ -198,9 +195,9 @@ class Database(object):
             success = False
 
         if success:
-            authentication_method = AuthenticationMethodBasic()
             authentication_parameters = \
-                authentication_method.generate_reference_authentication_parameters(
+                AuthenticationInterface.generate_reference_authentication_parameters(
+                    "basic",
                     {"password": "administrator"})
 
             user_authentication_basic_id = self.__tables.user_authentication_parameter.insert_rows(
@@ -224,3 +221,72 @@ class Database(object):
         # TODO: implement
         return True
 
+
+class DatabaseInterface(object):
+    """
+    Interface to the database (singleton)
+
+    Dependencies:
+    - AuthenticationInterface
+    """
+
+    __database_object = None   # Database instance
+
+    def __init__(self):
+        """
+        Constructor is disabled!
+        """
+        raise RuntimeError()
+
+    @staticmethod
+    def load_database_plugin(database_object: Database) -> None:
+        """
+        Load a Database object
+
+        :param database_object: Database object
+        """
+        if not isinstance(database_object, Database):
+            raise AttributeError()
+
+        DatabaseInterface.__database_object = database_object
+
+    @staticmethod
+    def tables() -> Tables:
+        """
+        Get database tables
+
+        :return:    Database tables
+        """
+        return DatabaseInterface.__database_object.tables()
+
+    @staticmethod
+    def validate() -> bool:
+        """
+        Validates the database
+
+        :return:    Success or failure
+
+        During validation the tables are checked
+        """
+        return DatabaseInterface.__database_object.validate()
+
+    @staticmethod
+    def create_new_database() -> bool:
+        """
+        Creates a new database
+
+        :return:    Success or failure
+
+        NOTE:   This should only be called during initial configuration of the application after it
+                is installed (when the database is still empty)!
+        """
+        return DatabaseInterface.__database_object.create_new_database()
+
+    @staticmethod
+    def create_connection() -> Optional[Connection]:
+        """
+        Creates a new database connection
+
+        :return:    Database connection instance
+        """
+        return DatabaseInterface.__database_object.create_connection()

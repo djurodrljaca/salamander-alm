@@ -17,7 +17,7 @@ not, see <http://www.gnu.org/licenses/>.
 from plugins.database.sqlite.connection import ConnectionSqlite
 from database.tables.user_information import UserInformationTable
 import sqlite3
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 
 class UserInformationTableSqlite(UserInformationTable):
@@ -76,7 +76,7 @@ class UserInformationTableSqlite(UserInformationTable):
                          attribute_name: str,
                          attribute_value: Any,
                          only_active_users: bool,
-                         max_revision_id: int) -> Optional[dict]:
+                         max_revision_id: int) -> List[int]:
         """
         Reads user information for the specified user, state (active/inactive) and max revision
 

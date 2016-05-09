@@ -59,6 +59,6 @@ class UserTable(object):
 
         :param connection:  Database connection
 
-        :return: ID of the newly created row
+        :return:    ID of the newly created row
         """
         raise NotImplementedError()

@@ -14,10 +14,8 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-# TODO: move to authentication package!
-
-import bcrypt
 from authentication.authentication import AuthenticationMethod
+import bcrypt
 from typing import Optional
 
 

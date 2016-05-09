@@ -14,60 +14,46 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
-from plugins.database.sqlite.connection import ConnectionSqlite
-from database.tables.user import UserTable
+from database.connection import Connection
 from typing import List, Optional
 
 
-class UserTableSqlite(UserTable):
+class ProjectTable(object):
     """
-    Implementation of "user" table for SQLite database
+    Base class for "project" table
     """
 
     def __init__(self):
         """
         Constructor
         """
-        UserTable.__init__(self)
+        pass
 
     def __del__(self):
         """
         Destructor
         """
-        UserTable.__del__(self)
+        pass
 
-    def create(self, connection: ConnectionSqlite) -> None:
+    def create(self, connection: Connection) -> None:
         """
         Creates the table
 
         :param connection:  Database connection
         """
-        connection.native_connection.execute(
-            "CREATE TABLE user (\n"
-            "    id INTEGER PRIMARY KEY AUTOINCREMENT\n"
-            "               NOT NULL\n"
-            ")")
+        raise NotImplementedError()
 
-    def read_all_users(self, connection: ConnectionSqlite) -> List[int]:
+    def read_all_projects(self, connection: Connection) -> List[int]:
         """
-        Reads IDs of all users in the database
+        Reads IDs of all projects in the database
 
         :param connection:  Database connection
 
-        :return:    List of user IDs
+        :return:    List of project IDs
         """
-        cursor = connection.native_connection.execute(
-            "SELECT id\n"
-            "FROM user")
+        raise NotImplementedError()
 
-        users = list()
-
-        for row in cursor.fetchall():
-            users.append(row[0])
-
-        return users
-
-    def insert_row(self, connection: ConnectionSqlite) -> Optional[int]:
+    def insert_row(self, connection: Connection) -> Optional[int]:
         """
         Inserts a new row in the table
 
@@ -75,9 +61,4 @@ class UserTableSqlite(UserTable):
 
         :return:    ID of the newly created row
         """
-        cursor = connection.native_connection.execute(
-            "INSERT INTO user\n"
-            "   (id)\n"
-            "VALUES (NULL)")
-
-        return cursor.lastrowid
+        raise NotImplementedError()

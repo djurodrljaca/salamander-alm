@@ -15,26 +15,26 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 from plugins.database.sqlite.connection import ConnectionSqlite
-from database.tables.user import UserTable
+from database.tables.project import ProjectTable
 from typing import List, Optional
 
 
-class UserTableSqlite(UserTable):
+class ProjectTableSqlite(ProjectTable):
     """
-    Implementation of "user" table for SQLite database
+    Implementation of "project" table for SQLite database
     """
 
     def __init__(self):
         """
         Constructor
         """
-        UserTable.__init__(self)
+        ProjectTable.__init__(self)
 
     def __del__(self):
         """
         Destructor
         """
-        UserTable.__del__(self)
+        ProjectTable.__del__(self)
 
     def create(self, connection: ConnectionSqlite) -> None:
         """
@@ -43,29 +43,29 @@ class UserTableSqlite(UserTable):
         :param connection:  Database connection
         """
         connection.native_connection.execute(
-            "CREATE TABLE user (\n"
+            "CREATE TABLE project (\n"
             "    id INTEGER PRIMARY KEY AUTOINCREMENT\n"
             "               NOT NULL\n"
             ")")
 
-    def read_all_users(self, connection: ConnectionSqlite) -> List[int]:
+    def read_all_projects(self, connection: ConnectionSqlite) -> List[int]:
         """
-        Reads IDs of all users in the database
+        Reads IDs of all projects in the database
 
         :param connection:  Database connection
 
-        :return:    List of user IDs
+        :return:    List of project IDs
         """
         cursor = connection.native_connection.execute(
             "SELECT id\n"
-            "FROM user")
+            "FROM project")
 
-        users = list()
+        projects = list()
 
         for row in cursor.fetchall():
-            users.append(row[0])
+            projects.append(row[0])
 
-        return users
+        return projects
 
     def insert_row(self, connection: ConnectionSqlite) -> Optional[int]:
         """
@@ -76,7 +76,7 @@ class UserTableSqlite(UserTable):
         :return:    ID of the newly created row
         """
         cursor = connection.native_connection.execute(
-            "INSERT INTO user\n"
+            "INSERT INTO project\n"
             "   (id)\n"
             "VALUES (NULL)")
 
