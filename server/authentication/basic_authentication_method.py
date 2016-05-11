@@ -28,13 +28,7 @@ class AuthenticationMethodBasic(AuthenticationMethod):
         """
         Constructor
         """
-        pass
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
+        AuthenticationMethod.__init__(self)
 
     def authentication_type(self) -> str:
         """

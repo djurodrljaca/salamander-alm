@@ -580,8 +580,6 @@ class UserAuthentication(unittest.TestCase):
                                                                            "basic",
                                                                            {"password": "new_pw"}))
 
-        user1 = UserManagementInterface.read_user_by_id(user_id1)
-
         self.assertTrue(UserManagementInterface.authenticate_user("test1",
                                                                   {"password": "new_pw"}))
         self.assertFalse(UserManagementInterface.authenticate_user("test1",

@@ -18,7 +18,6 @@ from authentication.authentication import AuthenticationInterface
 from database.connection import Connection
 from database.database import DatabaseInterface
 from database.tables.user import UserSelection
-import datetime
 from typing import List, Optional
 
 

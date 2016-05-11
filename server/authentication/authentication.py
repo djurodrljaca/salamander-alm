@@ -28,12 +28,6 @@ class AuthenticationMethod(object):
         """
         pass
 
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
-
     def authentication_type(self) -> str:
         """
         Returns the supported authentication type

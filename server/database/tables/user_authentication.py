@@ -77,7 +77,7 @@ class UserAuthenticationTable(Table):
 
     def update_row(self,
                    connection: Connection,
-                   user_authentication_id: int,
+                   user_id: int,
                    authentication_type: str) -> bool:
         """
         Updates a row in the table

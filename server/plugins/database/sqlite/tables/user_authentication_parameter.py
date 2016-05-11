@@ -103,6 +103,7 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
 
         :return:    Success or failure
         """
+        success = False
         value_array = list()
 
         for key in authentication_parameters.keys():
