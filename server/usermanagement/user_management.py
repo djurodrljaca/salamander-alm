@@ -243,7 +243,7 @@ class UserManagementInterface(object):
                     if user["id"] != user_to_modify:
                         success = False
 
-            # Update user's information in the new revision
+            # Update user's information
             if success:
                 success = DatabaseInterface.tables().user.update_row(connection,
                                                                      user_to_modify,
@@ -263,6 +263,96 @@ class UserManagementInterface(object):
         return success
 
     @staticmethod
+    def activate_user(user_id: int) -> bool:
+        """
+        Activates an inactive user
+
+        :param user_id: ID of the user that should be activated
+
+        :return:    Success or failure
+        """
+        connection = DatabaseInterface.create_connection()
+
+        try:
+            success = connection.begin_transaction()
+
+            # Read user
+            user = None
+
+            if success:
+                user = UserManagementInterface.__read_user_by_id(connection, user_id)
+
+                if user is None:
+                    success = False
+                elif user["active"]:
+                    # Error, user is already active
+                    success = False
+
+            # Activate user
+            if success:
+                success = DatabaseInterface.tables().user.update_row(connection,
+                                                                     user_id,
+                                                                     user["user_name"],
+                                                                     user["display_name"],
+                                                                     user["email"],
+                                                                     True)
+
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
+
+        return success
+
+    @staticmethod
+    def deactivate_user(user_id: int) -> bool:
+        """
+        Deactivates an active user
+
+        :param user_id: ID of the user that should be deactivated
+
+        :return:    Success or failure
+        """
+        connection = DatabaseInterface.create_connection()
+
+        try:
+            success = connection.begin_transaction()
+
+            # Read user
+            user = None
+
+            if success:
+                user = UserManagementInterface.__read_user_by_id(connection, user_id)
+
+                if user is None:
+                    success = False
+                elif not user["active"]:
+                    # Error, user is already inactive
+                    success = False
+
+            # Deactivate user
+            if success:
+                success = DatabaseInterface.tables().user.update_row(connection,
+                                                                     user_id,
+                                                                     user["user_name"],
+                                                                     user["display_name"],
+                                                                     user["email"],
+                                                                     False)
+
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
+
+        return success
+
+    @staticmethod
     def read_user_authentication(user_id: int) -> Optional[dict]:
         """
         Reads user's authentication
@@ -270,6 +360,11 @@ class UserManagementInterface(object):
         :param user_id: ID of the user
 
         :return:    User authentication object
+
+        Returned dictionary contains items:
+
+        - authentication_type
+        - authentication_parameters
         """
         connection = DatabaseInterface.create_connection()
 
@@ -387,7 +482,7 @@ class UserManagementInterface(object):
 
             # Modify authentication type if needed
             if success and (authentication_type != user_authentication["authentication_type"]):
-                success = DatabaseInterface.tables().user_authentication.update_authentication_type(
+                success = DatabaseInterface.tables().user_authentication.update_row(
                     connection,
                     user_to_modify,
                     authentication_type)
@@ -601,7 +696,6 @@ class UserManagementInterface(object):
 
         Returned dictionary contains items:
 
-        - user_id
         - authentication_type
         - authentication_parameters
         """
@@ -624,7 +718,6 @@ class UserManagementInterface(object):
 
         # Create authentication object
         authentication_object = dict()
-        authentication_object["user_id"] = user_id
         authentication_object["authentication_type"] = user_authentication["authentication_type"]
         authentication_object["authentication_parameters"] = authentication_parameters
 
