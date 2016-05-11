@@ -17,10 +17,9 @@ not, see <http://www.gnu.org/licenses/>.
 from authentication.authentication import AuthenticationInterface
 from database.connection import Connection
 from database.tables.revision import RevisionTable
-from database.tables.user import UserTable
+from database.tables.user import UserTable, UserSelection
 from database.tables.user_authentication import UserAuthenticationTable
 from database.tables.user_authentication_parameter import UserAuthenticationParameterTable
-from database.tables.user_information import UserInformationTable
 from database.tables.project import ProjectTable
 from database.tables.project_information import ProjectInformationTable
 import datetime
@@ -41,7 +40,6 @@ class Tables(object):
         self.user = UserTable()
         self.user_authentication = UserAuthenticationTable()
         self.user_authentication_parameter = UserAuthenticationParameterTable()
-        self.user_information = UserInformationTable()
 
         self.project = ProjectTable()
         self.project_information = ProjectInformationTable()
@@ -113,6 +111,9 @@ class Database(object):
                     success = self.__create_default_system_groups(connection)
 
                 if success:
+                    success = self.__create_first_revision(connection)
+
+                if success:
                     connection.commit_transaction()
                 else:
                     connection.rollback_transaction()
@@ -150,7 +151,6 @@ class Database(object):
         self.__tables.user.create(connection)
         self.__tables.user_authentication.create(connection)
         self.__tables.user_authentication_parameter.create(connection)
-        self.__tables.user_information.create(connection)
 
         self.__tables.project.create(connection)
         self.__tables.project_information.create(connection)
@@ -162,61 +162,44 @@ class Database(object):
         :param connection:  Database connection
 
         :return:    Success or failure
+
+        This method creates users:
+
+        - "administrator"
         """
-        # Since the database doesn't contain any users we must first create just the ID of the
-        # Administrator user, then create the first revision that is referencing the Administrator
-        # and then finally write all of the other user information and authentication.
-        success = True
-        user_id = self.__tables.user.insert_row(connection)
+        # Since the database doesn't contain any users we must first create one (Administrator) and
+        # then create the first revision that is referencing the Administrator
+        # Create the user in the new revision
+        user_id = DatabaseInterface.tables().user.insert_row(connection,
+                                                             "administrator",
+                                                             "Administrator",
+                                                             "",
+                                                             True)
 
         if user_id is None:
-            success = False
+            return False
 
-        revision_id = None
-
-        if success:
-            revision_id = self.__tables.revision.insert_row(connection,
-                                                            datetime.datetime.utcnow(),
-                                                            user_id)
-
-            if revision_id is None:
-                success = False
-
-        if success:
-            user_information_id = self.__tables.user_information.insert_row(connection,
-                                                                            user_id,
-                                                                            "administrator",
-                                                                            "Administrator",
-                                                                            "",
-                                                                            True,
-                                                                            revision_id)
-
-            if user_information_id is None:
-                success = False
-
-        user_authentication_id = None
-
-        if success:
-            user_authentication_id = self.__tables.user_authentication.insert_row(connection,
-                                                                                  user_id,
-                                                                                  "basic")
+        # Add user authentication to the user
+        user_authentication_id = DatabaseInterface.tables().user_authentication.insert_row(
+            connection,
+            user_id,
+            "basic")
 
         if user_authentication_id is None:
-            success = False
+            return False
 
-        if success:
-            authentication_parameters = \
-                AuthenticationInterface.generate_reference_authentication_parameters(
-                    "basic",
-                    {"password": "administrator"})
+        reference_authentication_parameters = \
+            AuthenticationInterface.generate_reference_authentication_parameters(
+                "basic",
+                {"password": "administrator"})
 
-            user_authentication_basic_id = self.__tables.user_authentication_parameter.insert_rows(
-                connection,
-                user_authentication_id,
-                authentication_parameters)
+        if reference_authentication_parameters is None:
+            return False
 
-            if user_authentication_basic_id is None:
-                success = False
+        success = DatabaseInterface.tables().user_authentication_parameter.insert_rows(
+            connection,
+            user_id,
+            reference_authentication_parameters)
 
         return success
 
@@ -231,12 +214,49 @@ class Database(object):
         # TODO: implement
         return True
 
+    def __create_first_revision(self, connection: Connection) -> bool:
+        """
+        Creates the default system users
+
+        :param connection:  Database connection
+
+        :return:    Success or failure
+        """
+        # Get the administrator's user ID
+        # Read the users that match the search attribute
+        users = DatabaseInterface.tables().user.read_users_by_attribute(connection,
+                                                                        "user_name",
+                                                                        "administrator",
+                                                                        UserSelection.Active)
+
+        user = None
+
+        if users is not None:
+            if len(users) == 1:
+                user = users[0]
+
+        if user is None:
+            return False
+
+        if user["id"] is None:
+            return False
+
+        revision_id = self.__tables.revision.insert_row(connection,
+                                                        datetime.datetime.utcnow(),
+                                                        user["id"])
+
+        if revision_id is None:
+            return False
+
+        return True
+
 
 class DatabaseInterface(object):
     """
     Interface to the database (singleton)
 
     Dependencies:
+
     - AuthenticationInterface
     """
 

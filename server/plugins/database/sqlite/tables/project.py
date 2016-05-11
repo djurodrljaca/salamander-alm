@@ -22,6 +22,10 @@ from typing import List, Optional
 class ProjectTableSqlite(ProjectTable):
     """
     Implementation of "project" table for SQLite database
+
+    Table's columns:
+
+    - id:   int
     """
 
     def __init__(self):
@@ -42,9 +46,9 @@ class ProjectTableSqlite(ProjectTable):
             "               NOT NULL\n"
             ")")
 
-    def read_all_projects(self, connection: ConnectionSqlite) -> List[int]:
+    def read_all_ids(self, connection: ConnectionSqlite) -> List[int]:
         """
-        Reads IDs of all projects in the database
+        Reads IDs of all project IDs in the database
 
         :param connection:  Database connection
 

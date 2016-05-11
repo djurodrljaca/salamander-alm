@@ -22,6 +22,10 @@ from typing import List, Optional
 class ProjectTable(Table):
     """
     Base class for "project" table
+
+    Table's columns:
+
+    - id:   int
     """
 
     def __init__(self):
@@ -38,9 +42,9 @@ class ProjectTable(Table):
         """
         raise NotImplementedError()
 
-    def read_all_projects(self, connection: Connection) -> List[int]:
+    def read_all_ids(self, connection: Connection) -> List[int]:
         """
-        Reads IDs of all projects in the database
+        Reads IDs of all project IDs in the database
 
         :param connection:  Database connection
 

@@ -23,6 +23,11 @@ from typing import Optional
 class UserAuthenticationTableSqlite(UserAuthenticationTable):
     """
     Implementation of "user_authentication" table for SQLite database
+
+    Table's columns:
+
+    - user_id:              int, references user.id, unique
+    - authentication_type:  str
     """
 
     def __init__(self):
@@ -39,27 +44,30 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
         """
         connection.native_connection.execute(
             "CREATE TABLE user_authentication (\n"
-            "    id                    INTEGER PRIMARY KEY AUTOINCREMENT\n"
-            "                                  NOT NULL,\n"
-            "    user_id               INTEGER REFERENCES user (id) \n"
-            "                                  NOT NULL,\n"
+            "    user_id               INTEGER REFERENCES user (id)\n"
+            "                                  NOT NULL\n"
+            "                                  UNIQUE,\n"
             "    authentication_type   TEXT    NOT NULL\n"
             "                                  CHECK (length(authentication_type) > 0)\n"
             ")")
 
-    def read_authentication(self,
-                            connection: ConnectionSqlite,
-                            user_id: int) -> Optional[dict]:
+    def read_authentication(self, connection: ConnectionSqlite, user_id: int) -> Optional[dict]:
         """
-        Reads authentication information for the specified user and max revision
+        Reads authentication information for the specified user
 
-        :param connection:      Database connection
-        :param user_id:         ID of the user
+        :param connection:  Database connection
+        :param user_id:     ID of the user
 
         :return:    Authentication information
+
+        Returned dictionary contains items:
+
+        - user_id
+        - authentication_type
         """
         cursor = connection.native_connection.execute(
-            "SELECT id, user_id, authentication_type\n"
+            "SELECT user_id,\n"
+            "       authentication_type\n"
             "FROM user_authentication\n"
             "WHERE (user_id = :user_id)",
             {"user_id": user_id})
@@ -89,8 +97,10 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
         try:
             cursor = connection.native_connection.execute(
                 "INSERT INTO user_authentication\n"
-                "   (id, user_id, authentication_type)\n"
-                "VALUES (NULL, :user_id, :authentication_type)",
+                "   (user_id,\n"
+                "    authentication_type)\n"
+                "VALUES (:user_id,\n"
+                "        :authentication_type)",
                 {"user_id": user_id,
                  "authentication_type": authentication_type})
 
@@ -101,16 +111,16 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
 
         return row_id
 
-    def update_authentication_type(self,
-                                   connection: ConnectionSqlite,
-                                   user_authentication_id: int,
-                                   authentication_type: str) -> Optional[int]:
+    def update_row(self,
+                   connection: ConnectionSqlite,
+                   user_id: int,
+                   authentication_type: str) -> bool:
         """
-        Inserts a new row in the table
+        Updates a row in the table
 
-        :param connection:              Database connection
-        :param user_authentication_id:  ID of the user authentication row
-        :param authentication_type:     User's authentication type
+        :param connection:          Database connection
+        :param user_id:             ID of the user
+        :param authentication_type: User's new authentication type
 
         :return:    Success or failure
         """
@@ -118,8 +128,8 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
             cursor = connection.native_connection.execute(
                 "UPDATE user_authentication\n"
                 "SET authentication_type = :authentication_type\n"
-                "WHERE (id = :id)",
-                {"id": user_authentication_id,
+                "WHERE (user_id = :user_id)",
+                {"user_id": user_id,
                  "authentication_type": authentication_type})
 
             if cursor.rowcount == 1:

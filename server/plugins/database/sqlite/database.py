@@ -22,7 +22,6 @@ from plugins.database.sqlite.tables.user import UserTableSqlite
 from plugins.database.sqlite.tables.user_authentication import UserAuthenticationTableSqlite
 from plugins.database.sqlite.tables.user_authentication_parameter \
     import UserAuthenticationParameterTableSqlite
-from plugins.database.sqlite.tables.user_information import UserInformationTableSqlite
 from plugins.database.sqlite.tables.project import ProjectTableSqlite
 from plugins.database.sqlite.tables.project_information import ProjectInformationTableSqlite
 import sqlite3
@@ -47,7 +46,6 @@ class DatabaseSqlite(Database):
         tables.user = UserTableSqlite()
         tables.user_authentication = UserAuthenticationTableSqlite()
         tables.user_authentication_parameter = UserAuthenticationParameterTableSqlite()
-        tables.user_information = UserInformationTableSqlite()
 
         tables.project = ProjectTableSqlite()
         tables.project_information = ProjectInformationTableSqlite()

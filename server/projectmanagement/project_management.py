@@ -16,6 +16,7 @@ not, see <http://www.gnu.org/licenses/>.
 
 from database.connection import Connection
 from database.database import DatabaseInterface
+from database.tables.project_information import ProjectSelection
 import datetime
 from typing import List, Optional
 
@@ -25,6 +26,7 @@ class ProjectManagementInterface(object):
     User management
 
     Dependencies:
+
     - DatabaseInterface
     """
 
@@ -41,148 +43,204 @@ class ProjectManagementInterface(object):
         pass
 
     @staticmethod
-    def read_all_project_ids() -> List[int]:
+    def read_all_project_ids(project_selection=ProjectSelection.Active,
+                             max_revision_id=None) -> List[int]:
         """
         Reads all project IDs from the database
 
+        :param project_selection:   Search for active, inactive or all project
+        :param max_revision_id:     Maximum revision ID for the search ("None" for latest revision)
+
         :return:    List of project IDs
-
-        NOTE:   This method searches both active and inactive project
         """
         connection = DatabaseInterface.create_connection()
-        return DatabaseInterface.tables().project.read_all_projects(connection)
 
-    @staticmethod
-    def read_project_by_id(project_id: int) -> Optional[dict]:
-        """
-        Reads a project that matches the specified project ID
+        if max_revision_id is None:
+            max_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
+                connection)
 
-        :param project_id:  ID of the user
+        # Reads all project IDs from the database
+        projects = None
 
-        :return:    Project information object
-
-        NOTE:   This method searches both active and inactive projects
-        """
-        # First get the current revision
-        connection = DatabaseInterface.create_connection()
-        current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
-            connection)
-
-        # Read a project that matches the specified project ID
-        user = None
-
-        if current_revision_id is not None:
-            user = ProjectManagementInterface.__read_project_by_id(connection,
-                                                                   project_id,
-                                                                   current_revision_id)
-
-        return user
-
-    @staticmethod
-    def read_project_by_short_name(short_name: str) -> Optional[dict]:
-        """
-        Reads a project that matches the specified short name
-
-        :param short_name:  Project's short name
-
-        :return:    Project information object
-
-        NOTE:   This method only searches active projects
-        """
-        # First get the current revision
-        connection = DatabaseInterface.create_connection()
-        current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
-            connection)
-
-        # Read a project that matches the specified short name
-        project = None
-
-        if current_revision_id is not None:
-            project = ProjectManagementInterface.__read_project_by_short_name(connection,
-                                                                              short_name,
-                                                                              current_revision_id)
-
-        return project
-
-    @staticmethod
-    def read_projects_by_short_name(short_name: str, only_active_projects: bool) -> List[dict]:
-        """
-        Reads a project that matches the specified short name
-
-        :param short_name:              Project's short name
-        :param only_active_projects:    Only search for active projects
-
-        :return:    Project information object
-        """
-        # First get the current revision
-        connection = DatabaseInterface.create_connection()
-        current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
-            connection)
-
-        # Read projects that match the specified short name
-        projects = list()
-
-        if current_revision_id is not None:
-            projects = DatabaseInterface.tables().project_information.read_information(
+        if max_revision_id is not None:
+            projects = DatabaseInterface.tables().project_information.read_all_project_ids(
                 connection,
-                "short_name",
-                short_name,
-                only_active_projects,
-                current_revision_id)
+                project_selection,
+                max_revision_id)
 
         return projects
 
     @staticmethod
-    def read_project_by_full_name(full_name: str) -> Optional[dict]:
+    def read_project_by_id(project_id: int, max_revision_id=None) -> Optional[dict]:
         """
-        Reads a project that matches the specified full name
+        Reads a project (active or inactive) that matches the specified project ID
 
-        :param full_name:  Project's full name
+        :param project_id:      ID of the user
+        :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Project information object
 
-        NOTE:   This method only searches active projects
-        """
-        # First get the current revision
-        connection = DatabaseInterface.create_connection()
-        current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
-            connection)
+        Returned dictionary contains items:
 
-        # Read a project that matches the specified full name
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+        """
+        connection = DatabaseInterface.create_connection()
+
+        if max_revision_id is None:
+            max_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
+                connection)
+
+        # Read a project that matches the specified project ID
+        user = None
+
+        if max_revision_id is not None:
+            user = ProjectManagementInterface.__read_project_by_id(connection,
+                                                                   project_id,
+                                                                   max_revision_id)
+
+        return user
+
+    @staticmethod
+    def read_project_by_short_name(short_name: str, max_revision_id=None) -> Optional[dict]:
+        """
+        Reads an active project that matches the specified short name
+
+        :param short_name:      Project's short name
+        :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
+
+        Returned dictionary contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+        """
+        connection = DatabaseInterface.create_connection()
+
+        if max_revision_id is None:
+            max_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
+                connection)
+
+        # Read a project that matches the specified short name
         project = None
 
-        if current_revision_id is not None:
-            project = ProjectManagementInterface.__read_project_by_full_name(connection,
-                                                                             full_name,
-                                                                             current_revision_id)
+        if max_revision_id is not None:
+            project = ProjectManagementInterface.__read_project_by_short_name(connection,
+                                                                              short_name,
+                                                                              max_revision_id)
 
         return project
 
     @staticmethod
-    def read_projects_by_full_name(full_name: str, only_active_projects=True) -> List[dict]:
+    def read_projects_by_short_name(short_name: str, max_revision_id=None) -> List[dict]:
         """
-        Reads a user that matches the specified user ID
+        Reads all active and inactive projects that match the specified short name
 
-        :param full_name:               Projects's full name
-        :param only_active_projects:    Only search for active projects
+        :param short_name:      Project's short name
+        :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
+
+        :return:    Project information of all projects that match the search attribute
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+        """
+        connection = DatabaseInterface.create_connection()
+
+        if max_revision_id is None:
+            max_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
+                connection)
+
+        # Read projects that match the specified short name
+        projects = list()
+
+        if max_revision_id is not None:
+            projects = DatabaseInterface.tables().project_information.read_information(
+                connection,
+                "short_name",
+                short_name,
+                ProjectSelection.All,
+                max_revision_id)
+
+        return projects
+
+    @staticmethod
+    def read_project_by_full_name(full_name: str, max_revision_id=None) -> Optional[dict]:
+        """
+        Reads an active project that matches the specified full name
+
+        :param full_name:       Project's full name
+        :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Project information object
         """
-        # First get the current revision
         connection = DatabaseInterface.create_connection()
-        current_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
-            connection)
+
+        if max_revision_id is None:
+            max_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
+                connection)
+
+        # Read a project that matches the specified full name
+        project = None
+
+        if max_revision_id is not None:
+            project = ProjectManagementInterface.__read_project_by_full_name(connection,
+                                                                             full_name,
+                                                                             max_revision_id)
+
+        return project
+
+    @staticmethod
+    def read_projects_by_full_name(full_name: str, max_revision_id=None) -> List[dict]:
+        """
+        Reads all active and inactive projects that match the specified short name
+
+        :param full_name:       Projects's full name
+        :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
+
+        :return:    Project information of all projects that match the search attribute
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+        """
+        connection = DatabaseInterface.create_connection()
+
+        if max_revision_id is None:
+            max_revision_id = DatabaseInterface.tables().revision.read_current_revision_id(
+                connection)
 
         # Read projects that match the specified full name
         projects = list()
 
-        if current_revision_id is not None:
+        if max_revision_id is not None:
             projects = DatabaseInterface.tables().project_information.read_information(
                 connection,
                 "full_name",
                 full_name,
-                only_active_projects,
-                current_revision_id)
+                ProjectSelection.All,
+                max_revision_id)
 
         return projects
 
@@ -192,7 +250,7 @@ class ProjectManagementInterface(object):
                        full_name: str,
                        description: str) -> Optional[int]:
         """
-        Create a new project
+        Creates a new project
 
         :param requested_by_user:   ID of the user that requested creation of the new project
         :param short_name:          Project's short name
@@ -248,7 +306,7 @@ class ProjectManagementInterface(object):
                                    description: str,
                                    active: bool) -> bool:
         """
-        Update project's information
+        Updates project's information
 
         :param requested_by_user:   ID of the user that requested modification of the user
         :param project_to_modify:   ID of the user that should be modified
@@ -325,20 +383,31 @@ class ProjectManagementInterface(object):
                              project_id: int,
                              max_revision_id: int) -> Optional[dict]:
         """
-        Reads a project that matches the search parameters
+        Reads a project (active or inactive) that matches the search parameters
 
         :param connection:      Database connection
         :param project_id:      ID of the project
         :param max_revision_id: Maximum revision ID for the search
 
         :return:    Project information object
+
+        Returned dictionary contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
         """
         # Read the projects that match the search attribute
-        projects = DatabaseInterface.tables().project_information.read_information(connection,
-                                                                                   "project_id",
-                                                                                   project_id,
-                                                                                   False,
-                                                                                   max_revision_id)
+        projects = DatabaseInterface.tables().project_information.read_information(
+            connection,
+            "project_id",
+            project_id,
+            ProjectSelection.All,
+            max_revision_id)
 
         # Return a project only if exactly one was found
         project = None
@@ -354,7 +423,7 @@ class ProjectManagementInterface(object):
                                      short_name: str,
                                      max_revision_id: int) -> Optional[dict]:
         """
-        Reads a project that matches the search parameters
+        Reads an active project that matches the specified short name
 
         :param connection:      Database connection
         :param short_name:      Projects's short name
@@ -362,14 +431,23 @@ class ProjectManagementInterface(object):
 
         :return:    Project information object
 
-        NOTE:   This method only searches active projects
+        Returned dictionary contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
         """
         # Read the projects that match the search attribute
-        projects = DatabaseInterface.tables().project_information.read_information(connection,
-                                                                                   "short_name",
-                                                                                   short_name,
-                                                                                   True,
-                                                                                   max_revision_id)
+        projects = DatabaseInterface.tables().project_information.read_information(
+            connection,
+            "short_name",
+            short_name,
+            ProjectSelection.Active,
+            max_revision_id)
 
         # Return a project only if exactly one was found
         project = None
@@ -385,7 +463,7 @@ class ProjectManagementInterface(object):
                                     full_name: str,
                                     max_revision_id: int) -> Optional[dict]:
         """
-        Reads a project that matches the search parameters
+        Reads an active project that matches the specified full name
 
         :param connection:      Database connection
         :param full_name:       Projects's full name
@@ -393,14 +471,23 @@ class ProjectManagementInterface(object):
 
         :return:    Project information object
 
-        NOTE:   This method only searches active projects
+        Returned dictionary contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
         """
         # Read the projects that match the search attribute
-        projects = DatabaseInterface.tables().project_information.read_information(connection,
-                                                                                   "full_name",
-                                                                                   full_name,
-                                                                                   True,
-                                                                                   max_revision_id)
+        projects = DatabaseInterface.tables().project_information.read_information(
+            connection,
+            "full_name",
+            full_name,
+            ProjectSelection.Active,
+            max_revision_id)
 
         # Return a project only if exactly one was found
         project = None

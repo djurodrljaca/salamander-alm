@@ -22,6 +22,11 @@ from typing import Optional
 class UserAuthenticationTable(Table):
     """
     Base class for "user_authentication" table
+
+    Table's columns:
+
+    - user_id:              int, references user.id, unique
+    - authentication_type:  str
     """
 
     def __init__(self):
@@ -38,16 +43,20 @@ class UserAuthenticationTable(Table):
         """
         raise NotImplementedError()
 
-    def read_authentication(self,
-                            connection: Connection,
-                            user_id: int) -> Optional[dict]:
+    def read_authentication(self, connection: Connection, user_id: int) -> Optional[dict]:
         """
-        Reads authentication information for the specified user and max revision
+        Reads authentication information for the specified user
 
-        :param connection:      Database connection
-        :param user_id:         ID of the user
+        :param connection:  Database connection
+        :param user_id:     ID of the user
 
         :return:    Authentication information
+
+        Returned dictionary contains items:
+
+        - id
+        - user_id
+        - authentication_type
         """
         raise NotImplementedError()
 
@@ -66,16 +75,16 @@ class UserAuthenticationTable(Table):
         """
         raise NotImplementedError()
 
-    def update_authentication_type(self,
-                                   connection: Connection,
-                                   user_authentication_id: int,
-                                   authentication_type: str) -> Optional[int]:
+    def update_row(self,
+                   connection: Connection,
+                   user_authentication_id: int,
+                   authentication_type: str) -> bool:
         """
-        Inserts a new row in the table
+        Updates a row in the table
 
-        :param connection:              Database connection
-        :param user_authentication_id:  ID of the user authentication row
-        :param authentication_type:     User's authentication type
+        :param connection:          Database connection
+        :param user_id:             ID of the user
+        :param authentication_type: User's new authentication type
 
         :return:    Success or failure
         """

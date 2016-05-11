@@ -22,7 +22,13 @@ from typing import Optional
 
 class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
     """
-    Implementation of "user_authentication_basic" table for SQLite database
+    Implementation of "user_authentication_parameter" table for SQLite database
+
+    Table's columns:
+
+    - user_id:  int, references user.id, unique
+    - name:     str
+    - value:    str
     """
 
     def __init__(self):
@@ -39,30 +45,38 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
         """
         connection.native_connection.execute(
             "CREATE TABLE user_authentication_parameter (\n"
-            "    id                     INTEGER PRIMARY KEY AUTOINCREMENT\n"
-            "                                   NOT NULL,\n"
-            "    user_authentication_id INTEGER REFERENCES user (id) \n"
-            "                                   NOT NULL,\n"
-            "    name                   TEXT    NOT NULL,\n"
-            "    value                  TEXT    NOT NULL\n"
+            "    user_id     INTEGER REFERENCES user (id)\n"
+            "                        NOT NULL\n"
+            "                        UNIQUE,\n"
+            "    name        TEXT    NOT NULL,\n"
+            "    value       TEXT    NOT NULL\n"
             ")")
 
     def read_authentication_parameters(self,
                                        connection: ConnectionSqlite,
-                                       user_authentication_id: int) -> Optional[dict]:
+                                       user_id: int) -> Optional[dict]:
         """
-        Reads authentication parameters for the specified user authentication
+        Reads authentication parameters for the specified user
 
-        :param connection:              Database connection
-        :param user_authentication_id:  ID of the user authentication
+        :param connection:  Database connection
+        :param user_id:     ID of the user
 
         :return:    Authentication parameters
+
+        Returned dictionary contains all of the users authentication parameters (names depend on
+        the authentication type).
+
+        Example of a returned dictionary:
+
+        {"password_hash": "4252397432974634",
+         "domain_name": "EXAMPLE"}
         """
         cursor = connection.native_connection.execute(
-            "SELECT name, value\n"
+            "SELECT name,\n"
+            "       value\n"
             "FROM user_authentication_parameter\n"
-            "WHERE (user_authentication_id = :user_authentication_id)",
-            {"user_authentication_id": user_authentication_id})
+            "WHERE (user_id = :user_id)",
+            {"user_id": user_id})
 
         # Process result
         authentication_parameters = None
@@ -78,13 +92,13 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
 
     def insert_rows(self,
                     connection: ConnectionSqlite,
-                    user_authentication_id: int,
+                    user_id: int,
                     authentication_parameters: dict) -> bool:
         """
         Inserts new rows in the table
 
         :param connection:                  Database connection
-        :param user_authentication_id:      ID of the user authentication
+        :param user_id:                     ID of the user
         :param authentication_parameters:   User's authentication parameters
 
         :return:    Success or failure
@@ -92,7 +106,7 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
         value_array = list()
 
         for key in authentication_parameters.keys():
-            value_item = {"user_authentication_id": user_authentication_id,
+            value_item = {"user_id": user_id,
                           "name": key,
                           "value": authentication_parameters[key]}
             value_array.append(value_item)
@@ -100,8 +114,12 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
         try:
             cursor = connection.native_connection.executemany(
                 "INSERT INTO user_authentication_parameter"
-                "   (id, user_authentication_id, name, value)\n"
-                "VALUES (NULL, :user_authentication_id, :name, :value)",
+                "   (user_id,\n"
+                "    name,\n"
+                "    value)\n"
+                "VALUES (:user_id,\n"
+                "        :name,\n"
+                "        :value)",
                 value_array)
 
             if cursor.rowcount == len(value_array):
@@ -112,14 +130,14 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
 
         return success
 
-    def delete_rows(self, connection: ConnectionSqlite, user_authentication_id: int) -> None:
+    def delete_rows(self, connection: ConnectionSqlite, user_id: int) -> None:
         """
-        Deletes authentication parameters for the specified user authentication
+        Deletes authentication parameters for the specified user
 
-        :param connection:              Database connection
-        :param user_authentication_id:  ID of the user authentication
+        :param connection:  Database connection
+        :param user_id:     ID of the user authentication
         """
         connection.native_connection.execute(
             "DELETE FROM user_authentication_parameter\n"
-            "WHERE (user_authentication_id = :user_authentication_id)",
-            {"user_authentication_id": user_authentication_id})
+            "WHERE (user_id = :user_id)",
+            {"user_id": user_id})

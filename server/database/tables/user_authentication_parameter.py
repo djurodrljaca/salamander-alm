@@ -22,6 +22,12 @@ from typing import Optional
 class UserAuthenticationParameterTable(Table):
     """
     Base class for "user_authentication_parameter" table
+
+    Table's columns:
+
+    - user_id:  int, references user.id, unique
+    - name:     str
+    - value:    str
     """
 
     def __init__(self):
@@ -40,37 +46,45 @@ class UserAuthenticationParameterTable(Table):
 
     def read_authentication_parameters(self,
                                        connection: Connection,
-                                       user_authentication_id: int) -> Optional[dict]:
+                                       user_id: int) -> Optional[dict]:
         """
         Reads authentication parameters for the specified user
 
-        :param connection:              Database connection
-        :param user_authentication_id:  ID of the user authentication
+        :param connection:  Database connection
+        :param user_id:     ID of the user
 
         :return:    Authentication parameters
+
+        Returned dictionary contains all of the users authentication parameters (names depend on
+        the authentication type).
+
+        Example of a returned dictionary:
+
+        {"password_hash": "4252397432974634",
+         "domain_name": "EXAMPLE"}
         """
         raise NotImplementedError()
 
     def insert_rows(self,
                     connection: Connection,
-                    user_authentication_id: int,
+                    user_id: int,
                     authentication_parameters: dict) -> bool:
         """
         Inserts new rows in the table
 
         :param connection:                  Database connection
-        :param user_authentication_id:      ID of the user authentication
+        :param user_id:                     ID of the user
         :param authentication_parameters:   User's authentication parameters
 
         :return:    Success or failure
         """
         raise NotImplementedError()
 
-    def delete_rows(self, connection: Connection, user_authentication_id: int) -> None:
+    def delete_rows(self, connection: Connection, user_id: int) -> None:
         """
-        Deletes authentication parameters for the specified user authentication
+        Deletes authentication parameters for the specified user
 
-        :param connection:              Database connection
-        :param user_authentication_id:  ID of the user authentication
+        :param connection:  Database connection
+        :param user_id:     ID of the user authentication
         """
         raise NotImplementedError()

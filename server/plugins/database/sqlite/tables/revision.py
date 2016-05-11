@@ -25,6 +25,12 @@ from typing import List, Optional
 class RevisionTableSqlite(RevisionTable):
     """
     Implementation of "revision" table for SQLite database
+
+    Table's columns:
+
+    - id:           int
+    - timestamp:    datetime
+    - user_id:      int, references user.id
     """
 
     def __init__(self):
@@ -75,6 +81,12 @@ class RevisionTableSqlite(RevisionTable):
         :param revision_id: ID of the revision to read
 
         :return:    Revision information
+
+        Returned dictionary contains items:
+
+        - id
+        - timestamp
+        - user_id
         """
         cursor = connection.native_connection.execute(
             "SELECT id,\n"
@@ -105,7 +117,13 @@ class RevisionTableSqlite(RevisionTable):
         :param min_revision_id: Smallest revision ID to be included
         :param max_revision_id: Biggest revision ID to be included
 
-        :return:    Revision
+        :return:    List of revisions
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - timestamp
+        - user_id
         """
         revisions = list()
 
@@ -140,6 +158,12 @@ class RevisionTableSqlite(RevisionTable):
         :param max_timestamp:   Latest timestamp to be included
 
         :return:    List of revisions
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - timestamp
+        - user_id
         """
         revisions = list()
 
@@ -173,13 +197,17 @@ class RevisionTableSqlite(RevisionTable):
         :param timestamp:   Timestamp
         :param user_id:     ID of the user
 
-        :return: ID of the newly created row
+        :return:    ID of the newly created row
         """
         try:
             cursor = connection.native_connection.execute(
                 "INSERT INTO revision\n"
-                "   (id, timestamp, user_id)\n"
-                "VALUES (NULL, :timestamp, :user_id)",
+                "   (id,\n"
+                "    timestamp,\n"
+                "    user_id)\n"
+                "VALUES (NULL,\n"
+                "        :timestamp,\n"
+                "        :user_id)",
                 {"timestamp": datetime_to_string(timestamp),
                  "user_id": user_id})
 

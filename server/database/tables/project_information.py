@@ -16,12 +16,32 @@ not, see <http://www.gnu.org/licenses/>.
 
 from database.connection import Connection
 from database.table import Table
+import enum
 from typing import Any, List, Optional
+
+
+class ProjectSelection(enum.Enum):
+    """
+    Project selection
+    """
+    Active = 1,
+    Inactive = 2,
+    All = 3
 
 
 class ProjectInformationTable(Table):
     """
     Base class for "project_information" table
+
+    Table's columns:
+
+    - id:           int
+    - project_id:   int
+    - short_name:   str
+    - full_name:    str
+    - description:  Optional[str]
+    - active:       bool
+    - revision_id:  int
     """
 
     def __init__(self):
@@ -38,28 +58,54 @@ class ProjectInformationTable(Table):
         """
         raise NotImplementedError()
 
+    def read_all_project_ids(self,
+                             connection: Connection,
+                             project_selection: ProjectSelection,
+                             max_revision_id: int) -> List[int]:
+        """
+        Reads IDs of all project IDs in the database
+
+        :param connection:          Database connection
+        :param project_selection:   Search for active, inactive or all projects
+        :param max_revision_id:     Maximum revision ID for the search
+
+        :return:    List of project IDs
+        """
+        raise NotImplementedError()
+
     def read_information(self,
                          connection: Connection,
                          attribute_name: str,
                          attribute_value: Any,
-                         only_active_projects: bool,
-                         max_revision_id: int) -> List[int]:
+                         project_selection: ProjectSelection,
+                         max_revision_id: int) -> List[dict]:
         """
         Reads project information for the specified project, state (active/inactive) and max
         revision
 
-        :param connection:              Database connection
-        :param attribute_name:          Search attribute name
-        :param attribute_value:         Search attribute value
-        :param only_active_projects:    Only search for active users
-        :param max_revision_id:         Maximum revision ID for the search
+        :param connection:          Database connection
+        :param attribute_name:      Search attribute name
+        :param attribute_value:     Search attribute value
+        :param project_selection:   Search for active, inactive or all projects
+        :param max_revision_id:     Maximum revision ID for the search
 
         :return:    Project information of all projects that match the search attribute
 
         Only the following search attributes are supported:
+
         - project_id
         - short name
         - full name
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
         """
         raise NotImplementedError()
 

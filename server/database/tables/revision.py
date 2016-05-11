@@ -23,6 +23,12 @@ from typing import List, Optional
 class RevisionTable(Table):
     """
     Base class for "revision" table
+
+    Table's columns:
+
+    - id:           int
+    - timestamp:    datetime
+    - user_id:      int, references user.id
     """
 
     def __init__(self):
@@ -39,8 +45,7 @@ class RevisionTable(Table):
         """
         raise NotImplementedError()
 
-    def read_current_revision_id(self,
-                                 connection: Connection) -> Optional[int]:
+    def read_current_revision_id(self, connection: Connection) -> Optional[int]:
         """
         Reads the current revision ID from the database
 
@@ -50,9 +55,7 @@ class RevisionTable(Table):
         """
         raise NotImplementedError()
 
-    def read_revision(self,
-                      connection: Connection,
-                      revision_id: int) -> Optional[dict]:
+    def read_revision(self, connection: Connection, revision_id: int) -> Optional[dict]:
         """
         Reads the revision information from the database
 
@@ -60,6 +63,12 @@ class RevisionTable(Table):
         :param revision_id: ID of the revision to read
 
         :return:    Revision information
+
+        Returned dictionary contains items:
+
+        - id
+        - timestamp
+        - user_id
         """
         raise NotImplementedError()
 
@@ -74,7 +83,13 @@ class RevisionTable(Table):
         :param min_revision_id: Smallest revision ID to be included
         :param max_revision_id: Biggest revision ID to be included
 
-        :return:    Revision
+        :return:    List of revisions
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - timestamp
+        - user_id
         """
         raise NotImplementedError()
 
@@ -90,6 +105,12 @@ class RevisionTable(Table):
         :param max_timestamp:   Latest timestamp to be included
 
         :return:    List of revisions
+
+        Each dictionary in the returned list contains items:
+
+        - id
+        - timestamp
+        - user_id
         """
         raise NotImplementedError()
 
@@ -104,6 +125,6 @@ class RevisionTable(Table):
         :param timestamp:   Timestamp
         :param user_id:     ID of the user
 
-        :return: ID of the newly created row
+        :return:    ID of the newly created row
         """
         raise NotImplementedError()

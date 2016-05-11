@@ -71,6 +71,8 @@ class AuthenticationMethod(object):
 class AuthenticationInterface(object):
     """
     Interface to the authentication (singleton)
+
+    No dependencies on the other parts of the system
     """
 
     __authentication_methods = list()   # List of authentication methods

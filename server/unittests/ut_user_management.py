@@ -28,8 +28,7 @@ def _initialize_system():
     AuthenticationInterface.add_authentication_method(AuthenticationMethodBasic())
 
     # Database
-    database_file_path = "database.db"
-    DatabaseInterface.load_database_plugin(DatabaseSqlite(database_file_path))
+    DatabaseInterface.load_database_plugin(DatabaseSqlite("database.db"))
 
     # User management
     # No initialization needed
@@ -41,19 +40,19 @@ class UserInformation(unittest.TestCase):
         DatabaseInterface.create_new_database()
         self.__admin_user_id = 1
 
-    def create_user_test1(self):
-        user_id = UserManagementInterface.create_user(self.__admin_user_id,
-                                                      "test1",
-                                                      "Test",
+    @staticmethod
+    def create_user_test1():
+        user_id = UserManagementInterface.create_user("test1",
+                                                      "Test 1",
                                                       "test1@test.com",
                                                       "basic",
                                                       {"password": "test123"})
         return user_id
 
-    def create_user_test2(self):
-        user_id = UserManagementInterface.create_user(self.__admin_user_id,
-                                                      "test2",
-                                                      "Test",
+    @staticmethod
+    def create_user_test2():
+        user_id = UserManagementInterface.create_user("test2",
+                                                      "Test 2",
                                                       "test2@test.com",
                                                       "basic",
                                                       {"password": "test456"})
@@ -63,91 +62,58 @@ class UserInformation(unittest.TestCase):
         user = UserManagementInterface.read_user_by_id(self.__admin_user_id)
 
         self.assertIsNotNone(user)
-        self.assertEqual(user["user_id"], self.__admin_user_id)
+        self.assertEqual(user["id"], self.__admin_user_id)
         self.assertEqual(user["user_name"], "administrator")
         self.assertEqual(user["display_name"], "Administrator")
         self.assertEqual(user["email"], "")
         self.assertEqual(user["active"], True)
-        self.assertIsNotNone(user["revision_id"])
 
     def test_create_user(self):
         # Positive tests ---------------------------------------------------------------------------
-        self.assertIsNotNone(self.create_user_test1())
+        self.assertIsNotNone(UserInformation.create_user_test1())
 
         # Negative tests ---------------------------------------------------------------------------
-        # Try to create a user with a reference to a non-existing user
-        self.assertIsNone(UserManagementInterface.create_user(None,
-                                                              "test_other",
-                                                              "Test Other",
-                                                              "test_other@test.com",
-                                                              "basic",
-                                                              {"password": "test123"}))
-
-        self.assertIsNone(UserManagementInterface.create_user(999,
-                                                              "test_other",
-                                                              "Test Other",
-                                                              "test_other@test.com",
-                                                              "basic",
-                                                              {"password": "test123"}))
-
         # Try to create a user with an invalid user name
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              None,
-                                                              "Test Other",
-                                                              "test_other@test.com",
-                                                              "basic",
-                                                              {"password": "test123"}))
-
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              "",
+        self.assertIsNone(UserManagementInterface.create_user("",
                                                               "Test Other",
                                                               "test_other@test.com",
                                                               "basic",
                                                               {"password": "test123"}))
 
         # Try to create a user with the same user name as another user
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              "test1",
+        self.assertIsNone(UserManagementInterface.create_user("test1",
                                                               "Test Other",
                                                               "test_other@test.com",
                                                               "basic",
                                                               {"password": "test123"}))
 
-        # Try to create a user with an invalid display name
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              "test_other",
-                                                              None,
-                                                              "test_other@test.com",
-                                                              "basic",
-                                                              {"password": "test123"}))
+        # Try to create a user with an invalid display name: "test123"}))
 
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              "test_other",
+        self.assertIsNone(UserManagementInterface.create_user("test_other",
                                                               "",
                                                               "test_other@test.com",
                                                               "basic",
                                                               {"password": "test123"}))
 
-        # Try to create a user with an invalid authentication type
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              "test_other",
-                                                              "Test Other",
+        # Try to create a user with the same display name as another user
+        self.assertIsNone(UserManagementInterface.create_user("test_other",
+                                                              "Test 1",
                                                               "test_other@test.com",
-                                                              None,
+                                                              "basic",
                                                               {"password": "test123"}))
 
-        self.assertIsNone(UserManagementInterface.create_user(self.__admin_user_id,
-                                                              "test_other",
+        # Try to create a user with an invalid authentication type
+        self.assertIsNone(UserManagementInterface.create_user("test_other",
                                                               "Test Other",
                                                               "test_other@test.com",
                                                               "",
                                                               {"password": "test123"}))
 
     def test_read_all_user_ids(self):
-        user_id1 = self.create_user_test1()
+        user_id1 = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id1)
 
-        user_id2 = self.create_user_test2()
+        user_id2 = UserInformation.create_user_test2()
         self.assertIsNotNone(user_id2)
 
         user_ids = UserManagementInterface.read_all_user_ids()
@@ -160,177 +126,117 @@ class UserInformation(unittest.TestCase):
         self.assertNotEqual(user_id1, user_id2)
 
     def test_read_user_by_id(self):
-        user_id = self.create_user_test1()
+        user_id = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id)
 
         # Positive tests ---------------------------------------------------------------------------
         user = UserManagementInterface.read_user_by_id(user_id)
 
-        self.assertEqual(user["user_id"], user_id)
+        self.assertEqual(user["id"], user_id)
         self.assertEqual(user["user_name"], "test1")
-        self.assertEqual(user["display_name"], "Test")
+        self.assertEqual(user["display_name"], "Test 1")
         self.assertEqual(user["email"], "test1@test.com")
         self.assertEqual(user["active"], True)
-        self.assertIsNotNone(user["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
-        self.assertIsNone(UserManagementInterface.read_user_by_id(None))
         self.assertIsNone(UserManagementInterface.read_user_by_id(999))
 
     def test_read_user_by_user_name(self):
-        user_id = self.create_user_test1()
+        user_id = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id)
 
         # Positive tests ---------------------------------------------------------------------------
         user = UserManagementInterface.read_user_by_user_name("test1")
 
-        self.assertEqual(user["user_id"], user_id)
+        self.assertEqual(user["id"], user_id)
         self.assertEqual(user["user_name"], "test1")
-        self.assertEqual(user["display_name"], "Test")
+        self.assertEqual(user["display_name"], "Test 1")
         self.assertEqual(user["email"], "test1@test.com")
         self.assertEqual(user["active"], True)
-        self.assertIsNotNone(user["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
-        self.assertIsNone(UserManagementInterface.read_user_by_user_name(None))
         self.assertIsNone(UserManagementInterface.read_user_by_user_name(""))
         self.assertIsNone(UserManagementInterface.read_user_by_user_name("test999"))
 
     def test_reads_user_by_user_name(self):
         # Create a user and then deactivate it and create a user with the same user name
-        user_id1 = self.create_user_test1()
+        user_id1 = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id1)
 
         user1 = UserManagementInterface.read_user_by_id(user_id1)
         self.assertIsNotNone(user1)
 
-        self.assertTrue(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                        user_id1,
+        self.assertTrue(UserManagementInterface.update_user_information(user_id1,
                                                                         user1["user_name"],
                                                                         user1["display_name"],
                                                                         user1["email"],
                                                                         False))
 
-        user_id2 = self.create_user_test1()
+        user_id2 = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id2)
 
         # Positive tests ---------------------------------------------------------------------------
-        # Only active users
-        users = UserManagementInterface.read_users_by_user_name("test1", True)
-        self.assertEqual(len(users), 1)
-
-        user2 = users[0]
-
-        self.assertEqual(user2["user_id"], user_id2)
-        self.assertEqual(user2["user_name"], "test1")
-        self.assertEqual(user2["display_name"], "Test")
-        self.assertEqual(user2["email"], "test1@test.com")
-        self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
-
-        # Both active and inactive users
-        users = UserManagementInterface.read_users_by_user_name("test1", False)
+        users = UserManagementInterface.read_users_by_user_name("test1")
         self.assertEqual(len(users), 2)
 
-        if ((users[0]["user_id"] == user_id1) and
-                (users[1]["user_id"] == user_id2)):
-            user1 = users[0]
-            user2 = users[1]
-        elif ((users[1]["user_id"] == user_id1) and
-                  (users[0]["user_id"] == user_id2)):
-            user1 = users[1]
-            user2 = users[0]
-        else:
-            self.fail("Invalid user IDs")
+        user1 = users[0]
+        user2 = users[1]
 
-        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["id"], user_id1)
         self.assertEqual(user1["user_name"], "test1")
-        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["display_name"], "Test 1")
         self.assertEqual(user1["email"], "test1@test.com")
         self.assertEqual(user1["active"], False)
-        self.assertIsNotNone(user1["revision_id"])
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test1")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 1")
         self.assertEqual(user2["email"], "test1@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
-        users = UserManagementInterface.read_users_by_user_name(None, False)
+        users = UserManagementInterface.read_users_by_user_name("")
         self.assertEqual(len(users), 0)
 
-        users = UserManagementInterface.read_users_by_user_name("", False)
-        self.assertEqual(len(users), 0)
-
-        users = UserManagementInterface.read_users_by_user_name("test999", False)
+        users = UserManagementInterface.read_users_by_user_name("test999")
         self.assertEqual(len(users), 0)
 
     def test_read_users_by_display_name(self):
-        user_id1 = self.create_user_test1()
+        user_id1 = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id1)
 
         user1 = UserManagementInterface.read_user_by_id(user_id1)
         self.assertIsNotNone(user1)
 
-        self.assertTrue(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                        user_id1,
+        self.assertTrue(UserManagementInterface.update_user_information(user_id1,
                                                                         user1["user_name"],
                                                                         user1["display_name"],
                                                                         user1["email"],
                                                                         False))
 
-        user_id2 = self.create_user_test2()
+        user_id2 = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id2)
 
         # Positive tests ---------------------------------------------------------------------------
-        # Only active users
-        users = UserManagementInterface.read_users_by_display_name("Test", True)
-        self.assertEqual(len(users), 1)
-
-        user2 = users[0]
-
-        self.assertEqual(user2["user_id"], user_id2)
-        self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
-        self.assertEqual(user2["email"], "test2@test.com")
-        self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
-
-        # Both active and inactive users
-        users = UserManagementInterface.read_users_by_display_name("Test", False)
+        users = UserManagementInterface.read_users_by_display_name("Test 1")
         self.assertEqual(len(users), 2)
 
-        if ((users[0]["user_id"] == user_id1) and
-                (users[1]["user_id"] == user_id2)):
-            user1 = users[0]
-            user2 = users[1]
-        elif ((users[1]["user_id"] == user_id1) and
-                  (users[0]["user_id"] == user_id2)):
-            user1 = users[1]
-            user2 = users[0]
-        else:
-            self.fail("Invalid user IDs")
+        user1 = users[0]
+        user2 = users[1]
 
-        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["id"], user_id1)
         self.assertEqual(user1["user_name"], "test1")
-        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["display_name"], "Test 1")
         self.assertEqual(user1["email"], "test1@test.com")
         self.assertEqual(user1["active"], False)
-        self.assertIsNotNone(user1["revision_id"])
 
-        self.assertEqual(user2["user_id"], user_id2)
-        self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
-        self.assertEqual(user2["email"], "test2@test.com")
+        self.assertEqual(user2["id"], user_id2)
+        self.assertEqual(user2["user_name"], "test1")
+        self.assertEqual(user2["display_name"], "Test 1")
+        self.assertEqual(user2["email"], "test1@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
-        users = UserManagementInterface.read_users_by_display_name(None)
-        self.assertEqual(len(users), 0)
-
         users = UserManagementInterface.read_users_by_display_name("")
         self.assertEqual(len(users), 0)
 
@@ -338,76 +244,53 @@ class UserInformation(unittest.TestCase):
         self.assertEqual(len(users), 0)
 
     def test_update_user_invalid_ids(self):
-        user_id2 = self.create_user_test2()
+        user_id2 = UserInformation.create_user_test2()
         self.assertIsNotNone(user_id2)
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
-        # Try to update a user with a reference to a non-existing "requested by user"
-        self.assertFalse(UserManagementInterface.update_user_information(None,
-                                                                         user_id2,
-                                                                         user2["user_name"],
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         user2["active"]))
-
-        self.assertFalse(UserManagementInterface.update_user_information(999,
-                                                                         user_id2,
-                                                                         user2["user_name"],
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         user2["active"]))
-
+        # Positive tests ---------------------------------------------------------------------------
         # Try to update a user with a reference to a non-existing user ID
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         None,
+        self.assertFalse(UserManagementInterface.update_user_information(999,
                                                                          user2["user_name"],
                                                                          user2["display_name"],
                                                                          user2["email"],
                                                                          user2["active"]))
 
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         999,
-                                                                         user2["user_name"],
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         user2["active"]))
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
 
     def test_update_user_name(self):
-        user_id1 = self.create_user_test1()
+        user_id1 = UserInformation.create_user_test1()
         self.assertIsNotNone(user_id1)
 
         user1 = UserManagementInterface.read_user_by_id(user_id1)
 
-        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["id"], user_id1)
         self.assertEqual(user1["user_name"], "test1")
-        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["display_name"], "Test 1")
         self.assertEqual(user1["email"], "test1@test.com")
         self.assertEqual(user1["active"], True)
-        self.assertIsNotNone(user1["revision_id"])
 
-        user_id2 = self.create_user_test2()
+        user_id2 = UserInformation.create_user_test2()
         self.assertIsNotNone(user_id2)
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Positive tests ---------------------------------------------------------------------------
         self.assertTrue(UserManagementInterface.update_user_information(user_id1,
-                                                                        user_id1,
                                                                         "test1new",
                                                                         user1["display_name"],
                                                                         user1["email"],
@@ -415,53 +298,52 @@ class UserInformation(unittest.TestCase):
 
         user1 = UserManagementInterface.read_user_by_id(user_id1)
 
-        self.assertEqual(user1["user_id"], user_id1)
+        self.assertEqual(user1["id"], user_id1)
         self.assertEqual(user1["user_name"], "test1new")
-        self.assertEqual(user1["display_name"], "Test")
+        self.assertEqual(user1["display_name"], "Test 1")
         self.assertEqual(user1["email"], "test1@test.com")
         self.assertEqual(user1["active"], True)
-        self.assertIsNotNone(user1["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
         # Try to update a user with an invalid user name
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         user_id2,
-                                                                         None,
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         user2["active"]))
-
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         user_id2,
+        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
                                                                          "",
                                                                          user2["display_name"],
                                                                          user2["email"],
                                                                          user2["active"]))
 
         # Try to update a user with the same user name as another user
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         user_id2,
+        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
                                                                          user1["user_name"],
                                                                          user2["display_name"],
                                                                          user2["email"],
                                                                          user2["active"]))
 
     def test_update_display_name(self):
-        user_id2 = self.create_user_test2()
+        user_id1 = UserInformation.create_user_test1()
+        self.assertIsNotNone(user_id1)
+
+        user1 = UserManagementInterface.read_user_by_id(user_id1)
+
+        self.assertEqual(user1["id"], user_id1)
+        self.assertEqual(user1["user_name"], "test1")
+        self.assertEqual(user1["display_name"], "Test 1")
+        self.assertEqual(user1["email"], "test1@test.com")
+        self.assertEqual(user1["active"], True)
+
+        user_id2 = UserInformation.create_user_test2()
         self.assertIsNotNone(user_id2)
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Positive tests ---------------------------------------------------------------------------
         self.assertTrue(UserManagementInterface.update_user_information(user_id2,
-                                                                        user_id2,
                                                                         user2["user_name"],
                                                                         "Test New",
                                                                         user2["email"],
@@ -469,45 +351,41 @@ class UserInformation(unittest.TestCase):
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
         self.assertEqual(user2["display_name"], "Test New")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
         # Try to update a user with an invalid display name
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         user_id2,
-                                                                         user2["user_name"],
-                                                                         None,
-                                                                         user2["email"],
-                                                                         user2["active"]))
-
-        self.assertFalse(UserManagementInterface.update_user_information(self.__admin_user_id,
-                                                                         user_id2,
+        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
                                                                          user2["user_name"],
                                                                          "",
                                                                          user2["email"],
                                                                          user2["active"]))
 
+        # Try to update a user with the same display name as another user
+        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
+                                                                         user2["user_name"],
+                                                                         user1["display_name"],
+                                                                         user2["email"],
+                                                                         user2["active"]))
+
     def test_update_email(self):
-        user_id2 = self.create_user_test2()
+        user_id2 = UserInformation.create_user_test2()
         self.assertIsNotNone(user_id2)
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Positive tests ---------------------------------------------------------------------------
         self.assertTrue(UserManagementInterface.update_user_information(user_id2,
-                                                                        user_id2,
                                                                         user2["user_name"],
                                                                         user2["display_name"],
                                                                         "test2new@test.com",
@@ -515,33 +393,30 @@ class UserInformation(unittest.TestCase):
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2new@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
         # There are no negative tests
 
     def test_disable_enable_user(self):
-        user_id2 = self.create_user_test2()
+        user_id2 = UserInformation.create_user_test2()
         self.assertIsNotNone(user_id2)
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Positive tests ---------------------------------------------------------------------------
         # Disable user
         self.assertTrue(UserManagementInterface.update_user_information(user_id2,
-                                                                        user_id2,
                                                                         user2["user_name"],
                                                                         user2["display_name"],
                                                                         user2["email"],
@@ -549,16 +424,14 @@ class UserInformation(unittest.TestCase):
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], False)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Enable user
         self.assertTrue(UserManagementInterface.update_user_information(user_id2,
-                                                                        user_id2,
                                                                         user2["user_name"],
                                                                         user2["display_name"],
                                                                         user2["email"],
@@ -566,36 +439,14 @@ class UserInformation(unittest.TestCase):
 
         user2 = UserManagementInterface.read_user_by_id(user_id2)
 
-        self.assertEqual(user2["user_id"], user_id2)
+        self.assertEqual(user2["id"], user_id2)
         self.assertEqual(user2["user_name"], "test2")
-        self.assertEqual(user2["display_name"], "Test")
+        self.assertEqual(user2["display_name"], "Test 2")
         self.assertEqual(user2["email"], "test2@test.com")
         self.assertEqual(user2["active"], True)
-        self.assertIsNotNone(user2["revision_id"])
 
         # Negative tests ---------------------------------------------------------------------------
-        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
-                                                                         user_id2,
-                                                                         user2["user_name"],
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         None))
-
-        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
-                                                                         user_id2,
-                                                                         user2["user_name"],
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         -1))
-
-        self.assertFalse(UserManagementInterface.update_user_information(user_id2,
-                                                                         user_id2,
-                                                                         user2["user_name"],
-                                                                         user2["display_name"],
-                                                                         user2["email"],
-                                                                         2))
-
-        # TODO: add test for: find_user_information_history
+        # There are no negative tests
 
 
 class UserAuthentication(unittest.TestCase):
@@ -604,19 +455,19 @@ class UserAuthentication(unittest.TestCase):
         DatabaseInterface.create_new_database()
         self.__admin_user_id = 1
 
-    def create_user_test1(self):
-        user_id = UserManagementInterface.create_user(self.__admin_user_id,
-                                                      "test1",
-                                                      "Test",
+    @staticmethod
+    def create_user_test1():
+        user_id = UserManagementInterface.create_user("test1",
+                                                      "Test 1",
                                                       "test1@test.com",
                                                       "basic",
                                                       {"password": "test123"})
         return user_id
 
-    def create_user_test2(self):
-        user_id = UserManagementInterface.create_user(self.__admin_user_id,
-                                                      "test2",
-                                                      "Test",
+    @staticmethod
+    def create_user_test2():
+        user_id = UserManagementInterface.create_user("test2",
+                                                      "Test 2",
                                                       "test2@test.com",
                                                       "basic",
                                                       {"password": "test456"})
@@ -626,9 +477,9 @@ class UserAuthentication(unittest.TestCase):
         self.assertTrue(UserManagementInterface.authenticate_user("administrator",
                                                                   {"password": "administrator"}))
 
-    def test_users(self):
-        self.assertIsNotNone(self.create_user_test1())
-        self.assertIsNotNone(self.create_user_test2())
+    def test_authenticate_user(self):
+        self.assertIsNotNone(UserAuthentication.create_user_test1())
+        self.assertIsNotNone(UserAuthentication.create_user_test2())
 
         # Positive tests ---------------------------------------------------------------------------
         self.assertTrue(UserManagementInterface.authenticate_user("test1",
@@ -638,9 +489,6 @@ class UserAuthentication(unittest.TestCase):
                                                                   {"password": "test456"}))
 
         # Negative tests ---------------------------------------------------------------------------
-        self.assertFalse(UserManagementInterface.authenticate_user(None,
-                                                                   {"password": "test123"}))
-
         self.assertFalse(UserManagementInterface.authenticate_user("",
                                                                    {"password": "test456"}))
 
@@ -660,7 +508,7 @@ class UserAuthentication(unittest.TestCase):
                                                                    {"password": "test123"}))
 
     def test_basic_update_update_password(self):
-        user_id1 = self.create_user_test1()
+        user_id1 = UserAuthentication.create_user_test1()
         self.assertIsNotNone(user_id1)
 
         self.assertTrue(UserManagementInterface.authenticate_user("test1",
@@ -680,7 +528,7 @@ class UserAuthentication(unittest.TestCase):
         self.assertFalse(UserManagementInterface.authenticate_user("test1",
                                                                    {"password": "test123"}))
 
-        # TODO: add test for: others...
+        # TODO: add test for: read_user_authentication, update_user_authentication, others?
 
 if __name__ == '__main__':
     unittest.main()
