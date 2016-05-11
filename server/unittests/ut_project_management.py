@@ -111,6 +111,43 @@ class ProjectInformation(unittest.TestCase):
 
         self.assertNotEqual(project_id1, project_id2)
 
+    def test_read_project_by_id(self):
+        project_id = self.create_project_test1()
+        self.assertIsNotNone(project_id)
+
+        # Positive tests ---------------------------------------------------------------------------
+        project = ProjectManagementInterface.read_project_by_id(project_id)
+
+        self.assertEqual(project["project_id"], project_id)
+        self.assertEqual(project["short_name"], "test1")
+        self.assertEqual(project["full_name"], "Test 1")
+        self.assertEqual(project["description"], "Test project 1")
+        self.assertEqual(project["active"], True)
+        self.assertIsNotNone(project["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertIsNone(ProjectManagementInterface.read_project_by_id(None))
+        self.assertIsNone(ProjectManagementInterface.read_project_by_id(999))
+
+    def test_read_project_by_short_name(self):
+        project_id = self.create_project_test1()
+        self.assertIsNotNone(project_id)
+
+        # Positive tests ---------------------------------------------------------------------------
+        project = ProjectManagementInterface.read_project_by_short_name("test1")
+
+        self.assertEqual(project["project_id"], project_id)
+        self.assertEqual(project["short_name"], "test1")
+        self.assertEqual(project["full_name"], "Test 1")
+        self.assertEqual(project["description"], "Test project 1")
+        self.assertEqual(project["active"], True)
+        self.assertIsNotNone(project["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertIsNone(ProjectManagementInterface.read_project_by_short_name(None))
+        self.assertIsNone(ProjectManagementInterface.read_project_by_short_name(""))
+        self.assertIsNone(ProjectManagementInterface.read_project_by_short_name("test999"))
+
     # TODO: implement the other tests
 
 if __name__ == '__main__':

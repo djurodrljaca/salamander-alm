@@ -159,7 +159,7 @@ class UserInformation(unittest.TestCase):
         self.assertNotEqual(self.__admin_user_id, user_id2)
         self.assertNotEqual(user_id1, user_id2)
 
-    def test_read_user_by_user_id(self):
+    def test_read_user_by_id(self):
         user_id = self.create_user_test1()
         self.assertIsNotNone(user_id)
 

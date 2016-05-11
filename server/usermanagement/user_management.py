@@ -544,6 +544,8 @@ class UserManagementInterface(object):
         if user is not None:
             return None
 
+        # TODO: check also display name!
+
         # Create the user in the new revision
         user_id = DatabaseInterface.tables().user.insert_row(connection)
 
