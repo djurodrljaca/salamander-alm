@@ -31,12 +31,6 @@ class UserAuthenticationTableSqlite(UserAuthenticationTable):
         """
         UserAuthenticationTable.__init__(self)
 
-    def __del__(self):
-        """
-        Destructor
-        """
-        UserAuthenticationTable.__del__(self)
-
     def create(self, connection: ConnectionSqlite) -> None:
         """
         Creates the table

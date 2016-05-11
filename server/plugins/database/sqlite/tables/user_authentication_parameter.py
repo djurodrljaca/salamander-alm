@@ -31,12 +31,6 @@ class UserAuthenticationParameterTableSqlite(UserAuthenticationParameterTable):
         """
         UserAuthenticationParameterTable.__init__(self)
 
-    def __del__(self):
-        """
-        Destructor
-        """
-        UserAuthenticationParameterTable.__del__(self)
-
     def create(self, connection: ConnectionSqlite) -> None:
         """
         Creates the table

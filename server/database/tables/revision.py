@@ -15,11 +15,12 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 from database.connection import Connection
+from database.table import Table
 import datetime
 from typing import List, Optional
 
 
-class RevisionTable(object):
+class RevisionTable(Table):
     """
     Base class for "revision" table
     """
@@ -28,13 +29,7 @@ class RevisionTable(object):
         """
         Constructor
         """
-        pass
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
+        Table.__init__(self)
 
     def create(self, connection: Connection) -> None:
         """

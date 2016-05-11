@@ -37,10 +37,12 @@ class Tables(object):
         Constructor
         """
         self.revision = RevisionTable()
+
         self.user = UserTable()
         self.user_authentication = UserAuthenticationTable()
         self.user_authentication_parameter = UserAuthenticationParameterTable()
         self.user_information = UserInformationTable()
+
         self.project = ProjectTable()
         self.project_information = ProjectInformationTable()
 
@@ -66,7 +68,7 @@ class Database(object):
 
     def tables(self):
         """
-        Property for accessing the database tables
+        Method for accessing the database tables
 
         :return:    Database tables
         """
@@ -144,10 +146,12 @@ class Database(object):
         """
         # Create tables
         self.__tables.revision.create(connection)
+
         self.__tables.user.create(connection)
         self.__tables.user_authentication.create(connection)
         self.__tables.user_authentication_parameter.create(connection)
         self.__tables.user_information.create(connection)
+
         self.__tables.project.create(connection)
         self.__tables.project_information.create(connection)
 

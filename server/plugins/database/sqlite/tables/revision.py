@@ -33,12 +33,6 @@ class RevisionTableSqlite(RevisionTable):
         """
         RevisionTable.__init__(self)
 
-    def __del__(self):
-        """
-        Destructor
-        """
-        RevisionTable.__del__(self)
-
     def create(self, connection: ConnectionSqlite) -> None:
         """
         Creates the table

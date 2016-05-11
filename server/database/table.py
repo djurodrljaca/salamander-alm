@@ -15,45 +15,23 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 from database.connection import Connection
-from database.table import Table
-from typing import List, Optional
 
 
-class UserTable(Table):
+class Table(object):
     """
-    Base class for "user" table
+    Base class for a database table
     """
 
     def __init__(self):
         """
         Constructor
         """
-        Table.__init__(self)
+        pass
 
     def create(self, connection: Connection) -> None:
         """
         Creates the table
 
         :param connection:  Database connection
-        """
-        raise NotImplementedError()
-
-    def read_all_users(self, connection: Connection) -> List[int]:
-        """
-        Reads IDs of all users in the database
-
-        :param connection:  Database connection
-
-        :return:    List of user IDs
-        """
-        raise NotImplementedError()
-
-    def insert_row(self, connection: Connection) -> Optional[int]:
-        """
-        Inserts a new row in the table
-
-        :param connection:  Database connection
-
-        :return:    ID of the newly created row
         """
         raise NotImplementedError()

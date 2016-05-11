@@ -31,12 +31,6 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
         """
         ProjectInformationTable.__init__(self)
 
-    def __del__(self):
-        """
-        Destructor
-        """
-        ProjectInformationTable.__del__(self)
-
     def create(self, connection: ConnectionSqlite) -> None:
         """
         Creates the table

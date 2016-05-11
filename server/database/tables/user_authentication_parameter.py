@@ -15,10 +15,11 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 from database.connection import Connection
+from database.table import Table
 from typing import Optional
 
 
-class UserAuthenticationParameterTable(object):
+class UserAuthenticationParameterTable(Table):
     """
     Base class for "user_authentication_parameter" table
     """
@@ -27,13 +28,7 @@ class UserAuthenticationParameterTable(object):
         """
         Constructor
         """
-        pass
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
+        Table.__init__(self)
 
     def create(self, connection: Connection) -> None:
         """
@@ -45,7 +40,7 @@ class UserAuthenticationParameterTable(object):
 
     def read_authentication_parameters(self,
                                        connection: Connection,
-                                       user_authentication_id: int) -> dict:
+                                       user_authentication_id: int) -> Optional[dict]:
         """
         Reads authentication parameters for the specified user
 

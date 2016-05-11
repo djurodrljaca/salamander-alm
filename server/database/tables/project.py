@@ -15,10 +15,11 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 from database.connection import Connection
+from database.table import Table
 from typing import List, Optional
 
 
-class ProjectTable(object):
+class ProjectTable(Table):
     """
     Base class for "project" table
     """
@@ -27,13 +28,7 @@ class ProjectTable(object):
         """
         Constructor
         """
-        pass
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
+        Table.__init__(self)
 
     def create(self, connection: Connection) -> None:
         """
