@@ -99,7 +99,6 @@ class ProjectInformationTable(Table):
 
         Each dictionary in the returned list contains items:
 
-        - id
         - project_id
         - short_name
         - full_name

@@ -158,7 +158,6 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
 
         Each dictionary in the returned list contains items:
 
-        - id
         - project_id
         - short_name
         - full_name
@@ -171,8 +170,7 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
 
         # Read the users that match the search attribute
         query = (
-            "SELECT id,\n"
-            "       project_id,\n"
+            "SELECT project_id,\n"
             "       short_name,\n"
             "       full_name,\n"
             "       description,\n"

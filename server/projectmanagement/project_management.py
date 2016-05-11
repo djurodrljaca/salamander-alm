@@ -75,7 +75,7 @@ class ProjectManagementInterface(object):
         """
         Reads a project (active or inactive) that matches the specified project ID
 
-        :param project_id:      ID of the user
+        :param project_id:      ID of the project
         :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Project information object
@@ -83,7 +83,6 @@ class ProjectManagementInterface(object):
         Returned dictionary contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
@@ -97,14 +96,14 @@ class ProjectManagementInterface(object):
                 connection)
 
         # Read a project that matches the specified project ID
-        user = None
+        project = None
 
         if max_revision_id is not None:
-            user = ProjectManagementInterface.__read_project_by_id(connection,
-                                                                   project_id,
-                                                                   max_revision_id)
+            project = ProjectManagementInterface.__read_project_by_id(connection,
+                                                                      project_id,
+                                                                      max_revision_id)
 
-        return user
+        return project
 
     @staticmethod
     def read_project_by_short_name(short_name: str, max_revision_id=None) -> Optional[dict]:
@@ -114,10 +113,11 @@ class ProjectManagementInterface(object):
         :param short_name:      Project's short name
         :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
+        :return:    Project information object
+
         Returned dictionary contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
@@ -153,7 +153,6 @@ class ProjectManagementInterface(object):
         Each dictionary in the returned list contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
@@ -170,12 +169,17 @@ class ProjectManagementInterface(object):
         projects = list()
 
         if max_revision_id is not None:
-            projects = DatabaseInterface.tables().project_information.read_information(
-                connection,
-                "short_name",
-                short_name,
-                ProjectSelection.All,
-                max_revision_id)
+            project_information_list = \
+                DatabaseInterface.tables().project_information.read_information(
+                    connection,
+                    "short_name",
+                    short_name,
+                    ProjectSelection.All,
+                    max_revision_id)
+
+            for project_information in project_information_list:
+                projects.append(ProjectManagementInterface.__parse_project_information(
+                    project_information))
 
         return projects
 
@@ -188,6 +192,15 @@ class ProjectManagementInterface(object):
         :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Project information object
+
+        Returned dictionary contains items:
+
+        - id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
         """
         connection = DatabaseInterface.create_connection()
 
@@ -218,7 +231,6 @@ class ProjectManagementInterface(object):
         Each dictionary in the returned list contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
@@ -235,12 +247,17 @@ class ProjectManagementInterface(object):
         projects = list()
 
         if max_revision_id is not None:
-            projects = DatabaseInterface.tables().project_information.read_information(
-                connection,
-                "full_name",
-                full_name,
-                ProjectSelection.All,
-                max_revision_id)
+            project_information_list = \
+                DatabaseInterface.tables().project_information.read_information(
+                    connection,
+                    "full_name",
+                    full_name,
+                    ProjectSelection.All,
+                    max_revision_id)
+
+            for project_information in project_information_list:
+                projects.append(ProjectManagementInterface.__parse_project_information(
+                    project_information))
 
         return projects
 
@@ -341,7 +358,7 @@ class ProjectManagementInterface(object):
                                                                                   revision_id)
 
                 if project is not None:
-                    if project["project_id"] != project_to_modify:
+                    if project["id"] != project_to_modify:
                         success = False
 
             # Check if there is already an existing project with the same full name
@@ -351,7 +368,7 @@ class ProjectManagementInterface(object):
                                                                                  revision_id)
 
                 if project is not None:
-                    if project["project_id"] != project_to_modify:
+                    if project["id"] != project_to_modify:
                         success = False
 
             # Update project's information in the new revision
@@ -379,6 +396,130 @@ class ProjectManagementInterface(object):
         return success
 
     @staticmethod
+    def activate_project(requested_by_user: int, project_id: int) -> bool:
+        """
+        Activates an inactive project
+
+        :param requested_by_user:   ID of the user that requested modification of the user
+        :param project_id:  ID of the project that should be activated
+
+        :return:    Success or failure
+        """
+        connection = DatabaseInterface.create_connection()
+
+        try:
+            success = connection.begin_transaction()
+
+            # Start a new revision
+            revision_id = None
+
+            if success:
+                revision_id = DatabaseInterface.tables().revision.insert_row(
+                    connection,
+                    datetime.datetime.utcnow(),
+                    requested_by_user)
+
+                if revision_id is None:
+                    success = False
+
+            # Read project
+            project = None
+
+            if success:
+                project = ProjectManagementInterface.__read_project_by_id(connection,
+                                                                          project_id,
+                                                                          revision_id)
+
+                if project is None:
+                    success = False
+                elif project["active"]:
+                    # Error, project is already active
+                    success = False
+
+            # Activate project
+            if success:
+                success = DatabaseInterface.tables().project_information.insert_row(
+                    connection,
+                    project_id,
+                    project["short_name"],
+                    project["full_name"],
+                    project["description"],
+                    True,
+                    revision_id)
+
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
+
+        return success
+
+    @staticmethod
+    def deactivate_project(requested_by_user: int, project_id: int) -> bool:
+        """
+        Deactivates an active project
+
+        :param requested_by_user:   ID of the user that requested modification of the user
+        :param project_id: ID of the project that should be deactivated
+
+        :return:    Success or failure
+        """
+        connection = DatabaseInterface.create_connection()
+
+        try:
+            success = connection.begin_transaction()
+
+            # Start a new revision
+            revision_id = None
+
+            if success:
+                revision_id = DatabaseInterface.tables().revision.insert_row(
+                    connection,
+                    datetime.datetime.utcnow(),
+                    requested_by_user)
+
+                if revision_id is None:
+                    success = False
+
+            # Read project
+            project = None
+
+            if success:
+                project = ProjectManagementInterface.__read_project_by_id(connection,
+                                                                          project_id,
+                                                                          revision_id)
+
+                if project is None:
+                    success = False
+                elif not project["active"]:
+                    # Error, project is already inactive
+                    success = False
+
+            # Deactivate project
+            if success:
+                success = DatabaseInterface.tables().project_information.insert_row(
+                    connection,
+                    project_id,
+                    project["short_name"],
+                    project["full_name"],
+                    project["description"],
+                    False,
+                    revision_id)
+
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
+
+        return success
+
+    @staticmethod
     def __read_project_by_id(connection: Connection,
                              project_id: int,
                              max_revision_id: int) -> Optional[dict]:
@@ -394,7 +535,6 @@ class ProjectManagementInterface(object):
         Returned dictionary contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
@@ -414,7 +554,12 @@ class ProjectManagementInterface(object):
 
         if projects is not None:
             if len(projects) == 1:
-                project = projects[0]
+                project = {"id": projects[0]["project_id"],
+                           "short_name": projects[0]["short_name"],
+                           "full_name": projects[0]["full_name"],
+                           "description": projects[0]["description"],
+                           "active": projects[0]["active"],
+                           "revision_id": projects[0]["revision_id"]}
 
         return project
 
@@ -454,7 +599,12 @@ class ProjectManagementInterface(object):
 
         if projects is not None:
             if len(projects) == 1:
-                project = projects[0]
+                project = {"id": projects[0]["project_id"],
+                           "short_name": projects[0]["short_name"],
+                           "full_name": projects[0]["full_name"],
+                           "description": projects[0]["description"],
+                           "active": projects[0]["active"],
+                           "revision_id": projects[0]["revision_id"]}
 
         return project
 
@@ -494,7 +644,12 @@ class ProjectManagementInterface(object):
 
         if projects is not None:
             if len(projects) == 1:
-                project = projects[0]
+                project = {"id": projects[0]["project_id"],
+                           "short_name": projects[0]["short_name"],
+                           "full_name": projects[0]["full_name"],
+                           "description": projects[0]["description"],
+                           "active": projects[0]["active"],
+                           "revision_id": projects[0]["revision_id"]}
 
         return project
 
@@ -505,7 +660,7 @@ class ProjectManagementInterface(object):
                          description: str,
                          revision_id: int) -> Optional[int]:
         """
-        Creates a new user
+        Creates a new project
 
         :param connection:  Database connection
         :param short_name:  Project's short name
@@ -551,3 +706,12 @@ class ProjectManagementInterface(object):
             return None
 
         return project_id
+
+    @staticmethod
+    def __parse_project_information(project_information: dict) -> dict:
+        return {"id": project_information["project_id"],
+                "short_name": project_information["short_name"],
+                "full_name": project_information["full_name"],
+                "description": project_information["description"],
+                "active": project_information["active"],
+                "revision_id": project_information["revision_id"]}
