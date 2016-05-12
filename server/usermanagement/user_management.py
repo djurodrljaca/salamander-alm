@@ -33,15 +33,9 @@ class UserManagementInterface(object):
 
     def __init__(self):
         """
-        Constructor
+        Constructor is disabled!
         """
-        pass
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
+        raise RuntimeError()
 
     @staticmethod
     def read_all_user_ids(user_selection=UserSelection.Active) -> List[int]:

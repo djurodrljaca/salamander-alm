@@ -14,13 +14,6 @@ Constraints:
 -------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
-
--------------------------------------------------
-| user_information
--------------------------------------------------
-Table:
-    - Id: integer, primary key, auto-increment
-    - user_id: integer
     - user_name: text
     - display_name: text
     - email: text
@@ -28,15 +21,13 @@ Table:
     - revision_id: integer
 
 Constraints:
-    - user_id --> user.id
     - revision_id --> revision.id
 
 -------------------------------------------------
 | user_authentication
 -------------------------------------------------
 Table:
-    - id: integer, primary key, auto-increment
-    - user_id: integer
+    - user_id: integer, unique
     - authentication_type: text
 
 Constraints:
@@ -46,13 +37,12 @@ Constraints:
 | user_authentication_parameter
 -------------------------------------------------
 Table:
-    - id: integer, primary key, auto-increment
-    - user_authentication_id: integer
+    - user_id: integer, unique
     - name: text
     - value: text
 
 Constraints:
-    - user_authentication_id --> user_authentication.id
+    - user_id --> user.id
 
 -------------------------------------------------
 | UserGroup
@@ -119,68 +109,61 @@ Constraints:
 TODO: project_information_additional ???
 
 -------------------------------------------------
-| Tracker
+| tracker
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - ProjectId: integer
+    - id: integer, primary key, auto-increment
+    - project_id: integer
 
 Constraints:
-    - ProjectId --> Project.Id
+    - project_id --> project.id
 
 -------------------------------------------------
-| TrackerInfo
+| tracker_information
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - TrackerId: integer
-    - Name: text
-    - Description: text
-    - Label: text
-    - Active: boolean
-    - RevisionId: integer
+    - id: integer, primary key, auto-increment
+    - tracker_id: integer
+    - short_name: text
+    - full_name: text
+    - description: text
+    - active: boolean
+    - revision_id: integer
 
 Constraints:
-    - TrackerId --> Tracker.Id
-    - RevisionId --> Revision.Id
+    - tracker_id --> tracker.id
+    - revision_id --> revision.id
 
 -------------------------------------------------
-| TrackerField
+| tracker_field
 -------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
-
--------------------------------------------------
-| TrackerFieldInfo
--------------------------------------------------
-Table:
-    - Id: integer, primary key, auto-increment
-    - TrackerFieldId: integer
-    - Name: text
-    - DisplayName: text
-    - Description: text
-    - Type: text
-    - Required: boolean
-    - RevisionId: integer
-
-TODO: add layout information
+    - tracker_id: integer
 
 Constraints:
-    - TrackerFieldId --> TrackerField.Id
-    - RevisionId --> Revision.Id
+    - tracker_id --> tracker.id
 
 -------------------------------------------------
-| TrackerFieldMapping
+| tracker_field_info
 -------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - TrackerInfoId: integer
-    - TrackerFieldId: integer
+    - id: integer, primary key, auto-increment
+    - tracker_field_id: integer
+    - name: text
+    - display_name: text
+    - description: text
+    - type: text
+    - required: boolean
+    - active: boolean
+    - revision_id: integer
 
 Constraints:
-    - TrackerInfoId --> TrackerInfo.Id
-    - TrackerFieldId --> TrackerField.Id
+    - tracker_field_id --> tracker_field.id
+    - revision_id --> revision.id
 
+
+TODO: add layout information into the field info? Into its own table?
 TODO: prepare tables for all supported field types (TrackerFieldInfoString, TrackerFieldInfoText etc.)
 
 -------------------------------------------------

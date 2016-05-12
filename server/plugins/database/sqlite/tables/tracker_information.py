@@ -15,19 +15,19 @@ not, see <http://www.gnu.org/licenses/>.
 """
 
 from plugins.database.sqlite.connection import ConnectionSqlite
-from database.tables.project_information import ProjectInformationTable, ProjectSelection
+from database.tables.tracker_information import TrackerInformationTable, TrackerSelection
 import sqlite3
 from typing import Any, List, Optional
 
 
-class ProjectInformationTableSqlite(ProjectInformationTable):
+class TrackerInformationTableSqlite(TrackerInformationTable):
     """
-    Implementation of "project_information" table for SQLite database
+    Implementation of "tracker_information" table for SQLite database
 
     Table's columns:
 
     - id:           int
-    - project_id:   int, references project.id
+    - tracker_id:   int, references tracker.id
     - short_name:   str
     - full_name:    str
     - description:  Optional[str]
@@ -39,7 +39,7 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
         """
         Constructor
         """
-        ProjectInformationTable.__init__(self)
+        TrackerInformationTable.__init__(self)
 
     def create(self, connection: ConnectionSqlite) -> None:
         """
@@ -48,10 +48,10 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
         :param connection:  Database connection
         """
         connection.native_connection.execute(
-            "CREATE TABLE project_information (\n"
+            "CREATE TABLE tracker_information (\n"
             "    id          INTEGER PRIMARY KEY AUTOINCREMENT\n"
             "                        NOT NULL,\n"
-            "    project_id  INTEGER REFERENCES project (id)\n"
+            "    tracker_id  INTEGER REFERENCES tracker (id)\n"
             "                        NOT NULL,\n"
             "    short_name  TEXT    NOT NULL\n"
             "                        CHECK (length(short_name) > 0),\n"
@@ -66,165 +66,170 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
             ")")
 
         connection.native_connection.execute(
-            "CREATE INDEX project_information_ix_project_id ON project_information (\n"
-            "    project_id\n"
+            "CREATE INDEX tracker_information_ix_tracker_id ON tracker_information (\n"
+            "    tracker_id\n"
             ")")
 
         connection.native_connection.execute(
-            "CREATE INDEX project_information_ix_short_name ON project_information (\n"
+            "CREATE INDEX tracker_information_ix_short_name ON tracker_information (\n"
             "    short_name\n"
             ")")
 
         connection.native_connection.execute(
-            "CREATE INDEX project_information_ix_full_name ON project_information (\n"
+            "CREATE INDEX tracker_information_ix_full_name ON tracker_information (\n"
             "    full_name\n"
             ")")
 
-    def read_all_project_ids(self,
+    def read_all_tracker_ids(self,
                              connection: ConnectionSqlite,
-                             project_selection: ProjectSelection,
+                             project_id: int,
+                             tracker_selection: TrackerSelection,
                              max_revision_id: int) -> List[int]:
         """
-        Reads IDs of all project IDs in the database
+        Reads IDs of all tracker IDs in the database that belong to the specified project
 
         :param connection:          Database connection
-        :param project_selection:   Search for active, inactive or all projects
+        :param project_id:          ID of the project
+        :param tracker_selection:   Search for active, inactive or all trackers
         :param max_revision_id:     Maximum revision ID for the search
 
-        :return:    List of project IDs
+        :return:    List of tracker IDs
         """
         query = (
-            "SELECT project_id,\n"
-            "       active\n"
-            "FROM (\n"
-            "    SELECT PI1.project_id,\n"
-            "           PI1.short_name,\n"
-            "           PI1.full_name,\n"
-            "           PI1.description,\n"
-            "           PI1.active,\n"
-            "           PI1.revision_id\n"
-            "    FROM project_information AS PI1\n"
-            "    WHERE (PI1.revision_id = (\n"
-            "                SELECT MAX(PI2.revision_id)\n"
-            "                FROM project_information AS PI2\n"
-            "                WHERE ((PI2.project_id = PI1.project_id) AND\n"
-            "                       (PI2.revision_id <= :max_revision_id))\n"
+            "SELECT TI.tracker_id\n"
+            "FROM tracker as T\n"
+            "INNER JOIN (\n"
+            "    SELECT TI1.tracker_id,\n"
+            "           TI1.active\n"
+            "    FROM tracker_information AS TI1\n"
+            "    WHERE (TI1.revision_id = (\n"
+            "                SELECT MAX(TI2.revision_id)\n"
+            "                FROM tracker_information AS TI2\n"
+            "                WHERE ((TI2.tracker_id = TI1.tracker_id) AND\n"
+            "                       (TI2.revision_id <= :max_revision_id))\n"
             "           ))\n"
-            ")\n"
+            ") AS TI\n"
+            "ON (T.id = TI.tracker_id)"
         )
 
-        if project_selection == ProjectSelection.Active:
-            query += "WHERE (active = 1)"
-        if project_selection == ProjectSelection.Inactive:
-            query += "WHERE (active = 0)"
+        if tracker_selection == TrackerSelection.Active:
+            query += ("WHERE ((T.project_id = :project_id) AND\n"
+                      "       (TI.active = 1))")
+        elif tracker_selection == TrackerSelection.Inactive:
+            query += ("WHERE ((T.project_id = :project_id) AND\n"
+                      "       (TI.active = 0))")
         else:
-            # Nothing needed for selecting all users
-            pass
+            query += "WHERE (T.project_id = :project_id)"
 
-        cursor = connection.native_connection.execute(query, {"max_revision_id": max_revision_id})
+        cursor = connection.native_connection.execute(query, {"project_id": project_id,
+                                                              "max_revision_id": max_revision_id})
 
         # Process result
-        projects = list()
+        trackers = list()
 
         for row in cursor.fetchall():
             if row is not None:
-                projects.append(row["project_id"])
+                trackers.append(row["TI.tracker_id"])
 
-        return projects
+        return trackers
 
     def read_information(self,
                          connection: ConnectionSqlite,
                          attribute_name: str,
                          attribute_value: Any,
-                         project_selection: ProjectSelection,
+                         tracker_selection: TrackerSelection,
                          max_revision_id: int) -> List[dict]:
         """
-        Reads project information for the specified project, state (active/inactive) and max
+        Reads tracker information for the specified tracker, state (active/inactive) and max
         revision
 
         :param connection:          Database connection
         :param attribute_name:      Search attribute name
         :param attribute_value:     Search attribute value
-        :param project_selection:   Search for active, inactive or all projects
+        :param tracker_selection:   Search for active, inactive or all trackers
         :param max_revision_id:     Maximum revision ID for the search
 
-        :return:    Project information of all projects that match the search attribute
+        :return:    Tracker information of all trackers that match the search attribute
 
         Only the following search attributes are supported:
 
-        - project_id
-        - short_name
-        - full_name
+        - tracker_id
+        - short name
+        - full name
 
         Each dictionary in the returned list contains items:
 
         - project_id
+        - tracker_id
         - short_name
         - full_name
         - description
         - active
         - revision_id
         """
-        if attribute_name not in ["project_id", "short_name", "full_name"]:
+        if attribute_name not in ["tracker_id", "short_name", "full_name"]:
             raise AttributeError("Unsupported attribute name")
 
         # Read the users that match the search attribute
         query = (
-            "SELECT project_id,\n"
-            "       short_name,\n"
-            "       full_name,\n"
-            "       description,\n"
-            "       active,\n"
-            "       revision_id\n"
-            "FROM (\n"
-            "    SELECT PI1.id,\n"
-            "           PI1.project_id,\n"
-            "           PI1.short_name,\n"
-            "           PI1.full_name,\n"
-            "           PI1.description,\n"
-            "           PI1.active,\n"
-            "           PI1.revision_id\n"
-            "    FROM project_information AS PI1\n"
-            "    WHERE (PI1.revision_id = (\n"
-            "                SELECT MAX(PI2.revision_id)\n"
-            "                FROM project_information AS PI2\n"
-            "                WHERE ((PI2.project_id = PI1.project_id) AND\n"
-            "                       (PI2.revision_id <= :max_revision_id))\n"
+            "SELECT T.project_id,\n"
+            "       TI.tracker_id,\n"
+            "       TI.short_name,\n"
+            "       TI.full_name,\n"
+            "       TI.description,\n"
+            "       TI.active,\n"
+            "       TI.revision_id\n"
+            "FROM tracker as T\n"
+            "INNER JOIN (\n"
+            "    SELECT TI1.tracker_id,\n"
+            "           TI1.short_name,\n"
+            "           TI1.full_name,\n"
+            "           TI1.description,\n"
+            "           TI1.active,\n"
+            "           TI1.revision_id\n"
+            "    FROM tracker_information AS TI1\n"
+            "    WHERE (TI1.revision_id = (\n"
+            "                SELECT MAX(TI2.revision_id)\n"
+            "                FROM tracker_information AS TI2\n"
+            "                WHERE ((TI2.tracker_id = TI1.tracker_id) AND\n"
+            "                       (TI2.revision_id <= :max_revision_id))\n"
             "           ))\n"
-            ")\n"
+            ") AS TI\n"
+            "ON (T.id = TI.tracker_id)"
         )
 
-        if project_selection == ProjectSelection.Active:
-            query += ("WHERE (({0} = :attribute_value) AND\n"
-                      "       (active = 1))")
-        elif project_selection == ProjectSelection.Inactive:
-            query += ("WHERE (({0} = :attribute_value) AND\n"
-                      "       (active = 0))")
+        if tracker_selection == TrackerSelection.Active:
+            query += ("WHERE ((TI.{0} = :attribute_value) AND\n"
+                      "       (TI.active = 1))")
+        elif tracker_selection == TrackerSelection.Inactive:
+            query += ("WHERE ((TI.{0} = :attribute_value) AND\n"
+                      "       (TI.active = 0))")
         else:
-            query += "WHERE ({0} = :attribute_value)"
+            query += "WHERE (TI.{0} = :attribute_value)"
 
         cursor = connection.native_connection.execute(query.format(attribute_name),
                                                       {"attribute_value": attribute_value,
                                                        "max_revision_id": max_revision_id})
 
         # Process result
-        projects = list()
+        trackers = list()
 
         for row in cursor.fetchall():
             if row is not None:
-                project = {"project_id": row["project_id"],
-                           "short_name": row["short_name"],
-                           "full_name": row["full_name"],
-                           "description": row["description"],
-                           "active": bool(row["active"]),
-                           "revision_id": row["revision_id"]}
-                projects.append(project)
+                tracker = {"project_id": row["T.project_id"],
+                           "tracker_id": row["TI.tracker_id"],
+                           "short_name": row["TI.short_name"],
+                           "full_name": row["TI.full_name"],
+                           "description": row["TI.description"],
+                           "active": bool(row["TI.active"]),
+                           "revision_id": row["TI.revision_id"]}
+                trackers.append(tracker)
 
-        return projects
+        return trackers
 
     def insert_row(self,
                    connection: ConnectionSqlite,
-                   project_id: int,
+                   tracker_id: int,
                    short_name: str,
                    full_name: str,
                    description: str,
@@ -234,33 +239,33 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
         Inserts a new row in the table
 
         :param connection:  Database connection
-        :param project_id:  ID of the project
-        :param short_name:  Project name
-        :param full_name:   Project name
-        :param description: Project description
-        :param active:      State of the project (active or inactive)
+        :param tracker_id:  ID of the tracker
+        :param short_name:  Tracker name
+        :param full_name:   Tracker name
+        :param description: Tracker description
+        :param active:      State of the tracker (active or inactive)
         :param revision_id: Revision ID
 
         :return:    ID of the newly created row
         """
         try:
             cursor = connection.native_connection.execute(
-                "INSERT INTO project_information\n"
+                "INSERT INTO tracker_information\n"
                 "   (id,\n"
-                "    project_id,\n"
+                "    tracker_id,\n"
                 "    short_name,\n"
                 "    full_name,\n"
                 "    description,\n"
                 "    active,\n"
                 "    revision_id)\n"
                 "VALUES (NULL,\n"
-                "        :project_id,\n"
+                "        :tracker_id,\n"
                 "        :short_name,\n"
                 "        :full_name,\n"
                 "        :description,\n"
                 "        :active,\n"
                 "        :revision_id)",
-                {"project_id": project_id,
+                {"tracker_id": tracker_id,
                  "short_name": short_name,
                  "full_name": full_name,
                  "description": description,

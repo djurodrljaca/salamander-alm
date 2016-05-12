@@ -20,23 +20,23 @@ import enum
 from typing import Any, List, Optional
 
 
-class ProjectSelection(enum.Enum):
+class TrackerSelection(enum.Enum):
     """
-    Project selection
+    Tracker selection
     """
     Active = 1,
     Inactive = 2,
     All = 3
 
 
-class ProjectInformationTable(Table):
+class TrackerInformationTable(Table):
     """
-    Base class for "project_information" table
+    Base class for "tracker_information" table
 
     Table's columns:
 
     - id:           int
-    - project_id:   int, references project.id
+    - tracker_id:   int, references tracker.id
     - short_name:   str
     - full_name:    str
     - description:  Optional[str]
@@ -58,18 +58,20 @@ class ProjectInformationTable(Table):
         """
         raise NotImplementedError()
 
-    def read_all_project_ids(self,
+    def read_all_tracker_ids(self,
                              connection: Connection,
-                             project_selection: ProjectSelection,
+                             project_id: int,
+                             tracker_selection: TrackerSelection,
                              max_revision_id: int) -> List[int]:
         """
-        Reads IDs of all project IDs in the database
+        Reads IDs of all tracker IDs in the database that belong to the specified project
 
         :param connection:          Database connection
-        :param project_selection:   Search for active, inactive or all projects
+        :param project_id:          ID of the project
+        :param tracker_selection:   Search for active, inactive or all trackers
         :param max_revision_id:     Maximum revision ID for the search
 
-        :return:    List of project IDs
+        :return:    List of tracker IDs
         """
         raise NotImplementedError()
 
@@ -77,29 +79,30 @@ class ProjectInformationTable(Table):
                          connection: Connection,
                          attribute_name: str,
                          attribute_value: Any,
-                         project_selection: ProjectSelection,
+                         tracker_selection: TrackerSelection,
                          max_revision_id: int) -> List[dict]:
         """
-        Reads project information for the specified project, state (active/inactive) and max
+        Reads tracker information for the specified tracker, state (active/inactive) and max
         revision
 
         :param connection:          Database connection
         :param attribute_name:      Search attribute name
         :param attribute_value:     Search attribute value
-        :param project_selection:   Search for active, inactive or all projects
+        :param tracker_selection:   Search for active, inactive or all trackers
         :param max_revision_id:     Maximum revision ID for the search
 
-        :return:    Project information of all projects that match the search attribute
+        :return:    Tracker information of all trackers that match the search attribute
 
         Only the following search attributes are supported:
 
-        - project_id
+        - tracker_id
         - short name
         - full name
 
         Each dictionary in the returned list contains items:
 
         - project_id
+        - tracker_id
         - short_name
         - full_name
         - description
@@ -110,7 +113,7 @@ class ProjectInformationTable(Table):
 
     def insert_row(self,
                    connection: Connection,
-                   project_id: int,
+                   tracker_id: int,
                    short_name: str,
                    full_name: str,
                    description: str,
@@ -120,11 +123,11 @@ class ProjectInformationTable(Table):
         Inserts a new row in the table
 
         :param connection:  Database connection
-        :param project_id:  ID of the project
-        :param short_name:  Project name
-        :param full_name:   Project name
-        :param description: Project description
-        :param active:      State of the project (active or inactive)
+        :param tracker_id:  ID of the tracker
+        :param short_name:  Tracker name
+        :param full_name:   Tracker name
+        :param description: Tracker description
+        :param active:      State of the tracker (active or inactive)
         :param revision_id: Revision ID
 
         :return:    ID of the newly created row

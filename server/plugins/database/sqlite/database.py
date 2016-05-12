@@ -24,6 +24,8 @@ from plugins.database.sqlite.tables.user_authentication_parameter \
     import UserAuthenticationParameterTableSqlite
 from plugins.database.sqlite.tables.project import ProjectTableSqlite
 from plugins.database.sqlite.tables.project_information import ProjectInformationTableSqlite
+from plugins.database.sqlite.tables.tracker import TrackerTableSqlite
+from plugins.database.sqlite.tables.tracker_information import TrackerInformationTableSqlite
 import sqlite3
 from typing import Any, Optional
 
@@ -49,6 +51,9 @@ class DatabaseSqlite(Database):
 
         tables.project = ProjectTableSqlite()
         tables.project_information = ProjectInformationTableSqlite()
+
+        tables.tracker = TrackerTableSqlite()
+        tables.tracker_information = TrackerInformationTableSqlite()
 
         Database.__init__(self, tables)
 

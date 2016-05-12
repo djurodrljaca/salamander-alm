@@ -23,7 +23,7 @@ from typing import List, Optional
 
 class ProjectManagementInterface(object):
     """
-    User management
+    Project management
 
     Dependencies:
 
@@ -32,15 +32,9 @@ class ProjectManagementInterface(object):
 
     def __init__(self):
         """
-        Constructor
+        Constructor is disabled!
         """
-        pass
-
-    def __del__(self):
-        """
-        Destructor
-        """
-        pass
+        raise RuntimeError()
 
     @staticmethod
     def read_all_project_ids(project_selection=ProjectSelection.Active,
@@ -579,7 +573,6 @@ class ProjectManagementInterface(object):
         Returned dictionary contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
@@ -624,7 +617,6 @@ class ProjectManagementInterface(object):
         Returned dictionary contains items:
 
         - id
-        - project_id
         - short_name
         - full_name
         - description
