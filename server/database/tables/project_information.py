@@ -94,8 +94,8 @@ class ProjectInformationTable(Table):
         Only the following search attributes are supported:
 
         - project_id
-        - short name
-        - full name
+        - short_name
+        - full_name
 
         Each dictionary in the returned list contains items:
 
@@ -121,8 +121,8 @@ class ProjectInformationTable(Table):
 
         :param connection:  Database connection
         :param project_id:  ID of the project
-        :param short_name:  Project name
-        :param full_name:   Project name
+        :param short_name:  Project short name
+        :param full_name:   Project full name
         :param description: Project description
         :param active:      State of the project (active or inactive)
         :param revision_id: Revision ID

@@ -49,7 +49,7 @@ class ProjectInformation(unittest.TestCase):
                                                                "Test project 2")
         return project_id
 
-    def test_read_all_user_ids(self):
+    def test_read_all_project_ids(self):
         # Create projects
         project_id1 = self.create_project_test1()
         self.assertIsNotNone(project_id1)
@@ -75,7 +75,6 @@ class ProjectInformation(unittest.TestCase):
 
         self.assertEqual(len(project_ids), 2)
         self.assertListEqual(project_ids, [project_id1, project_id2])
-        self.assertNotEqual(project_id1, project_id2)
 
         # Check active projects (revision from project1)
         project_ids = ProjectManagementInterface.read_all_project_ids(ProjectSelection.Active,
@@ -94,7 +93,6 @@ class ProjectInformation(unittest.TestCase):
 
         self.assertEqual(len(project_ids), 2)
         self.assertListEqual(project_ids, [project_id1, project_id2])
-        self.assertNotEqual(project_id1, project_id2)
 
         # Recheck active projects (latest revision)
         project_ids = ProjectManagementInterface.read_all_project_ids(ProjectSelection.Active)

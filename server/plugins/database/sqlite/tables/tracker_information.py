@@ -154,8 +154,8 @@ class TrackerInformationTableSqlite(TrackerInformationTable):
         Only the following search attributes are supported:
 
         - tracker_id
-        - short name
-        - full name
+        - short_name
+        - full_name
 
         Each dictionary in the returned list contains items:
 
@@ -240,8 +240,8 @@ class TrackerInformationTableSqlite(TrackerInformationTable):
 
         :param connection:  Database connection
         :param tracker_id:  ID of the tracker
-        :param short_name:  Tracker name
-        :param full_name:   Tracker name
+        :param short_name:  Tracker short name
+        :param full_name:   Tracker full name
         :param description: Tracker description
         :param active:      State of the tracker (active or inactive)
         :param revision_id: Revision ID

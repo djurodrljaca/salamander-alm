@@ -23,6 +23,8 @@ from database.tables.user_authentication_parameter import UserAuthenticationPara
 from database.tables.project import ProjectTable
 from database.tables.project_information import ProjectInformationTable
 from database.tables.tracker import TrackerTable
+from database.tables.tracker_field import TrackerFieldTable
+from database.tables.tracker_field_information import TrackerFieldInformationTable
 from database.tables.tracker_information import TrackerInformationTable
 import datetime
 from typing import Optional
@@ -48,6 +50,9 @@ class Tables(object):
 
         self.tracker = TrackerTable()
         self.tracker_information = TrackerInformationTable()
+
+        self.tracker_field = TrackerFieldTable()
+        self.tracker_field_information = TrackerFieldInformationTable()
 
 
 class Database(object):
@@ -162,6 +167,9 @@ class Database(object):
 
         self.__tables.tracker.create(connection)
         self.__tables.tracker_information.create(connection)
+
+        self.__tables.tracker_field.create(connection)
+        self.__tables.tracker_field_information.create(connection)
 
     def __create_default_system_users(self, connection: Connection) -> bool:
         """

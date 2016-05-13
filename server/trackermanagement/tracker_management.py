@@ -68,8 +68,7 @@ class TrackerManagementInterface(object):
         return trackers
     
     @staticmethod
-    def read_tracker_by_id(tracker_id: int,
-                           max_revision_id=None) -> Optional[dict]:
+    def read_tracker_by_id(tracker_id: int, max_revision_id=None) -> Optional[dict]:
         """
         Reads a tracker (active or inactive) that matches the specified tracker ID
 
@@ -105,8 +104,7 @@ class TrackerManagementInterface(object):
         return tracker
     
     @staticmethod
-    def read_tracker_by_short_name(short_name: str,
-                                   max_revision_id=None) -> Optional[dict]:
+    def read_tracker_by_short_name(short_name: str, max_revision_id=None) -> Optional[dict]:
         """
         Reads an active tracker that matches the specified short name
 
@@ -227,9 +225,9 @@ class TrackerManagementInterface(object):
     def read_trackers_by_full_name(full_name: str,
                                    max_revision_id=None) -> List[dict]:
         """
-        Reads all active and inactive trackers that match the specified short name
+        Reads all active and inactive trackers that match the specified full name
 
-        :param full_name:       Trackers's full name
+        :param full_name:       Tracker's full name
         :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Tracker information of all trackers that match the search attribute
@@ -336,7 +334,7 @@ class TrackerManagementInterface(object):
         Updates tracker's information
 
         :param requested_by_user:   ID of the user that requested modification of the user
-        :param tracker_to_modify:   ID of the user that should be modified
+        :param tracker_to_modify:   ID of the tracker that should be modified
         :param short_name:          Tracker's new short name
         :param full_name:           Tracker's new full name
         :param description:         Tracker's new description
@@ -411,7 +409,7 @@ class TrackerManagementInterface(object):
         Activates an inactive tracker
 
         :param requested_by_user:   ID of the user that requested modification of the user
-        :param tracker_id:  ID of the tracker that should be activated
+        :param tracker_id:          ID of the tracker that should be activated
 
         :return:    Success or failure
         """
@@ -473,7 +471,7 @@ class TrackerManagementInterface(object):
         Deactivates an active tracker
 
         :param requested_by_user:   ID of the user that requested modification of the user
-        :param tracker_id: ID of the tracker that should be deactivated
+        :param tracker_id:          ID of the tracker that should be deactivated
 
         :return:    Success or failure
         """
@@ -583,7 +581,7 @@ class TrackerManagementInterface(object):
         Reads an active tracker that matches the specified short name
 
         :param connection:      Database connection
-        :param short_name:      Trackers's short name
+        :param short_name:      Tracker's short name
         :param max_revision_id: Maximum revision ID for the search
 
         :return:    Tracker information object
@@ -629,7 +627,7 @@ class TrackerManagementInterface(object):
         Reads an active tracker that matches the specified full name
 
         :param connection:      Database connection
-        :param full_name:       Trackers's full name
+        :param full_name:       Tracker's full name
         :param max_revision_id: Maximum revision ID for the search
 
         :return:    Tracker information object
@@ -724,11 +722,38 @@ class TrackerManagementInterface(object):
         return tracker_id
     
     @staticmethod
-    def __parse_tracker_information(tracker_information: dict) -> dict:
-        return {"id": tracker_information["tracker_id"],
-                "project_id": tracker_information["project_id"],
-                "short_name": tracker_information["short_name"],
-                "full_name": tracker_information["full_name"],
-                "description": tracker_information["description"],
-                "active": tracker_information["active"],
-                "revision_id": tracker_information["revision_id"]}
+    def __parse_tracker_information(raw_tracker_information: dict) -> dict:
+        """
+        Parse raw tracker information object and convert it to a tracker information object
+
+        :param raw_tracker_information: Tracker information
+
+        :return:    Tracker information object
+
+        Input (raw) dictionary contains items:
+
+        - project_id
+        - tracker_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+
+        Returned dictionary contains items:
+
+        - id
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+        """
+        return {"id": raw_tracker_information["tracker_id"],
+                "project_id": raw_tracker_information["project_id"],
+                "short_name": raw_tracker_information["short_name"],
+                "full_name": raw_tracker_information["full_name"],
+                "description": raw_tracker_information["description"],
+                "active": raw_tracker_information["active"],
+                "revision_id": raw_tracker_information["revision_id"]}

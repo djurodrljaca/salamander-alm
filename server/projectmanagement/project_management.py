@@ -320,7 +320,7 @@ class ProjectManagementInterface(object):
         Updates project's information
 
         :param requested_by_user:   ID of the user that requested modification of the user
-        :param project_to_modify:   ID of the user that should be modified
+        :param project_to_modify:   ID of the project that should be modified
         :param short_name:          Project's new short name
         :param full_name:           Project's new full name
         :param description:         Project's new description
@@ -700,10 +700,35 @@ class ProjectManagementInterface(object):
         return project_id
 
     @staticmethod
-    def __parse_project_information(project_information: dict) -> dict:
-        return {"id": project_information["project_id"],
-                "short_name": project_information["short_name"],
-                "full_name": project_information["full_name"],
-                "description": project_information["description"],
-                "active": project_information["active"],
-                "revision_id": project_information["revision_id"]}
+    def __parse_project_information(raw_project_information: dict) -> dict:
+        """
+        Parse raw tracker information object and convert it to a tracker information object
+
+        :param raw_project_information: Project information
+
+        :return:    Project information object
+
+        Input (raw) dictionary contains items:
+
+        - project_id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+
+        Returned dictionary contains items:
+
+        - id
+        - short_name
+        - full_name
+        - description
+        - active
+        - revision_id
+        """
+        return {"id": raw_project_information["project_id"],
+                "short_name": raw_project_information["short_name"],
+                "full_name": raw_project_information["full_name"],
+                "description": raw_project_information["description"],
+                "active": raw_project_information["active"],
+                "revision_id": raw_project_information["revision_id"]}

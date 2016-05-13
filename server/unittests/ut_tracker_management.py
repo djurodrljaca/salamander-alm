@@ -59,7 +59,7 @@ class TrackerInformation(unittest.TestCase):
                                                                "Test tracker 2")
         return tracker_id
 
-    def test_read_all_user_ids(self):
+    def test_read_all_tracker_ids(self):
         # Create trackers
         project_id1 = self.create_project_test1()
         self.assertIsNotNone(project_id1)
@@ -90,7 +90,6 @@ class TrackerInformation(unittest.TestCase):
 
         self.assertEqual(len(tracker_ids), 2)
         self.assertListEqual(tracker_ids, [tracker_id1, tracker_id2])
-        self.assertNotEqual(tracker_id1, tracker_id2)
 
         # Check active trackers (revision from tracker1)
         tracker_ids = TrackerManagementInterface.read_all_tracker_ids(project_id1,
@@ -111,7 +110,6 @@ class TrackerInformation(unittest.TestCase):
 
         self.assertEqual(len(tracker_ids), 2)
         self.assertListEqual(tracker_ids, [tracker_id1, tracker_id2])
-        self.assertNotEqual(tracker_id1, tracker_id2)
 
         # Recheck active trackers (latest revision)
         tracker_ids = TrackerManagementInterface.read_all_tracker_ids(project_id1,

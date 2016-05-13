@@ -145,7 +145,7 @@ Constraints:
     - tracker_id --> tracker.id
 
 -------------------------------------------------
-| tracker_field_info
+| tracker_field_information
 -------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment

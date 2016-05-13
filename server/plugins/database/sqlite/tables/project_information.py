@@ -235,8 +235,8 @@ class ProjectInformationTableSqlite(ProjectInformationTable):
 
         :param connection:  Database connection
         :param project_id:  ID of the project
-        :param short_name:  Project name
-        :param full_name:   Project name
+        :param short_name:  Project short name
+        :param full_name:   Project full name
         :param description: Project description
         :param active:      State of the project (active or inactive)
         :param revision_id: Revision ID
