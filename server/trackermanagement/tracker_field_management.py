@@ -272,7 +272,9 @@ class TrackerFieldManagementInterface(object):
                         tracker_field_information))
         
         return tracker_fields
-    
+
+    # TODO: implement create_tracker_fields() !
+
     @staticmethod
     def create_tracker_field(requested_by_user: int,
                              tracker_id: int,
@@ -390,7 +392,7 @@ class TrackerFieldManagementInterface(object):
             
             # Update tracker field's information in the new revision
             if success:
-                row_id = DatabaseInterface.tables().tracker_information.insert_row(
+                row_id = DatabaseInterface.tables().tracker_field_information.insert_row(
                     connection,
                     tracker_field_to_modify,
                     name,

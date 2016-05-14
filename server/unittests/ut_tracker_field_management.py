@@ -368,311 +368,338 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(
             len(TrackerFieldManagementInterface.read_tracker_fields_by_display_name("Test XYZ")), 0)
 
-    # def test_create_tracker(self):
-    #     project_id1 = self.create_project_test1()
-    #     self.assertIsNotNone(project_id1)
-    #
-    #     # Positive tests ---------------------------------------------------------------------------
-    #     self.assertIsNotNone(self.create_tracker_test1(project_id1))
-    #
-    #     # Negative tests ---------------------------------------------------------------------------
-    #     # Try to create a tracker with a reference to a non-existing user
-    #     self.assertIsNone(TrackerManagementInterface.create_tracker(999,
-    #                                                                 project_id1,
-    #                                                                 "test_other",
-    #                                                                 "Test Other",
-    #                                                                 "Other test tracker"))
-    #
-    #     # Try to create a tracker with a reference to a non-existing project
-    #     self.assertIsNone(TrackerManagementInterface.create_tracker(self.__admin_user_id,
-    #                                                                 999,
-    #                                                                 "test_other",
-    #                                                                 "Test Other",
-    #                                                                 "Other test tracker"))
-    #
-    #     # Try to create a tracker with an invalid short name
-    #     self.assertIsNone(TrackerManagementInterface.create_tracker(self.__admin_user_id,
-    #                                                                 project_id1,
-    #                                                                 "",
-    #                                                                 "Test Other",
-    #                                                                 "Other test tracker"))
-    #
-    #     self.assertIsNone(TrackerManagementInterface.create_tracker(self.__admin_user_id,
-    #                                                                 project_id1,
-    #                                                                 "test1",
-    #                                                                 "Test Other",
-    #                                                                 "Other test tracker"))
-    #
-    #     # Try to create a tracker with an invalid full name
-    #     self.assertIsNone(TrackerManagementInterface.create_tracker(self.__admin_user_id,
-    #                                                                 project_id1,
-    #                                                                 "test_other",
-    #                                                                 "",
-    #                                                                 "Other test tracker"))
-    #
-    #     self.assertIsNone(TrackerManagementInterface.create_tracker(self.__admin_user_id,
-    #                                                                 project_id1,
-    #                                                                 "test_other",
-    #                                                                 "Test 1",
-    #                                                                 "Other test tracker"))
-    #
-    # def test_update_tracker_invalid_tracker_id(self):
-    #     project_id1 = self.create_project_test1()
-    #     self.assertIsNotNone(project_id1)
-    #
-    #     tracker_id2 = self.create_tracker_test2(project_id1)
-    #     self.assertIsNotNone(tracker_id2)
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Positive tests ---------------------------------------------------------------------------
-    #     # Try to update a tracker with a reference to a non-existing tracker ID
-    #     self.assertFalse(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         999,
-    #         tracker2["short_name"],
-    #         tracker2["full_name"],
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    #     # Negative tests ---------------------------------------------------------------------------
-    #     # There are no negative tests
-    #
-    # def test_update_tracker_short_name(self):
-    #     project_id1 = self.create_project_test1()
-    #     self.assertIsNotNone(project_id1)
-    #
-    #     tracker_id1 = self.create_tracker_test1(project_id1)
-    #     self.assertIsNotNone(tracker_id1)
-    #
-    #     tracker1 = TrackerManagementInterface.read_tracker_by_id(tracker_id1)
-    #     self.assertIsNotNone(tracker1)
-    #
-    #     self.assertEqual(tracker1["id"], tracker_id1)
-    #     self.assertEqual(tracker1["project_id"], project_id1)
-    #     self.assertEqual(tracker1["short_name"], "test1")
-    #     self.assertEqual(tracker1["full_name"], "Test 1")
-    #     self.assertEqual(tracker1["description"], "Test tracker 1")
-    #     self.assertEqual(tracker1["active"], True)
-    #     self.assertIsNotNone(tracker1["revision_id"])
-    #
-    #     tracker_id2 = self.create_tracker_test2(project_id1)
-    #     self.assertIsNotNone(tracker_id2)
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #     self.assertIsNotNone(tracker2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Positive tests ---------------------------------------------------------------------------
-    #     self.assertTrue(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         "test_other",
-    #         tracker2["full_name"],
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #     self.assertIsNotNone(tracker2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test_other")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Negative tests ---------------------------------------------------------------------------
-    #     self.assertFalse(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         "",
-    #         tracker2["full_name"],
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    #     self.assertFalse(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         tracker1["short_name"],
-    #         tracker2["full_name"],
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    # def test_update_tracker_full_name(self):
-    #     project_id1 = self.create_project_test1()
-    #     self.assertIsNotNone(project_id1)
-    #
-    #     tracker_id1 = self.create_tracker_test1(project_id1)
-    #     self.assertIsNotNone(tracker_id1)
-    #
-    #     tracker1 = TrackerManagementInterface.read_tracker_by_id(tracker_id1)
-    #     self.assertIsNotNone(tracker1)
-    #
-    #     self.assertEqual(tracker1["id"], tracker_id1)
-    #     self.assertEqual(tracker1["project_id"], project_id1)
-    #     self.assertEqual(tracker1["short_name"], "test1")
-    #     self.assertEqual(tracker1["full_name"], "Test 1")
-    #     self.assertEqual(tracker1["description"], "Test tracker 1")
-    #     self.assertEqual(tracker1["active"], True)
-    #     self.assertIsNotNone(tracker1["revision_id"])
-    #
-    #     tracker_id2 = self.create_tracker_test2(project_id1)
-    #     self.assertIsNotNone(tracker_id2)
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #     self.assertIsNotNone(tracker2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Positive tests ---------------------------------------------------------------------------
-    #     self.assertTrue(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         tracker2["short_name"],
-    #         "Test Other",
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #     self.assertIsNotNone(tracker2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test Other")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Negative tests ---------------------------------------------------------------------------
-    #     self.assertFalse(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         tracker2["short_name"],
-    #         "",
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    #     self.assertFalse(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         tracker2["short_name"],
-    #         tracker1["full_name"],
-    #         tracker2["description"],
-    #         tracker2["active"]))
-    #
-    # def test_update_tracker_description(self):
-    #     project_id1 = self.create_project_test1()
-    #     self.assertIsNotNone(project_id1)
-    #
-    #     tracker_id2 = self.create_tracker_test2(project_id1)
-    #     self.assertIsNotNone(tracker_id2)
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #     self.assertIsNotNone(tracker2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Positive tests ---------------------------------------------------------------------------
-    #     self.assertTrue(TrackerManagementInterface.update_tracker_information(
-    #         self.__admin_user_id,
-    #         tracker_id2,
-    #         tracker2["short_name"],
-    #         tracker2["full_name"],
-    #         "Test tracker other",
-    #         tracker2["active"]))
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #     self.assertIsNotNone(tracker2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker other")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Negative tests ---------------------------------------------------------------------------
-    #     # There are no negative tests
-    #
-    # def test_deactivate_activate_tracker(self):
-    #     project_id1 = self.create_project_test1()
-    #     self.assertIsNotNone(project_id1)
-    #
-    #     tracker_id2 = self.create_tracker_test2(project_id1)
-    #     self.assertIsNotNone(tracker_id2)
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Positive tests ---------------------------------------------------------------------------
-    #     # Deactivate tracker
-    #     self.assertTrue(TrackerManagementInterface.deactivate_tracker(self.__admin_user_id,
-    #                                                                   tracker_id2))
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], False)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Activate tracker
-    #     self.assertTrue(TrackerManagementInterface.activate_tracker(self.__admin_user_id,
-    #                                                                 tracker_id2))
-    #
-    #     tracker2 = TrackerManagementInterface.read_tracker_by_id(tracker_id2)
-    #
-    #     self.assertEqual(tracker2["id"], tracker_id2)
-    #     self.assertEqual(tracker2["project_id"], project_id1)
-    #     self.assertEqual(tracker2["short_name"], "test2")
-    #     self.assertEqual(tracker2["full_name"], "Test 2")
-    #     self.assertEqual(tracker2["description"], "Test tracker 2")
-    #     self.assertEqual(tracker2["active"], True)
-    #     self.assertIsNotNone(tracker2["revision_id"])
-    #
-    #     # Negative tests ---------------------------------------------------------------------------
-    #     # There are no negative tests
+    def test_create_tracker_field(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertIsNotNone(self.create_tracker_field_test1(tracker_id1))
+
+        # Negative tests ---------------------------------------------------------------------------
+        # Try to create a tracker field with a reference to a non-existing user
+        self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
+            999,
+            tracker_id1,
+            "test_other",
+            "Test Other",
+            "Other test tracker field"))
+
+        # Try to create a tracker field with a reference to a non-existing tracker
+        self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
+            self.__admin_user_id,
+            999,
+            "test_other",
+            "Test Other",
+            "Other test tracker field"))
+
+        # Try to create a tracker field with an invalid name
+        self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
+            self.__admin_user_id,
+            tracker_id1,
+            "",
+            "Test Other",
+            "Other test tracker field"))
+
+        self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
+            self.__admin_user_id,
+            tracker_id1,
+            "test1",
+            "Test Other",
+            "Other test tracker field"))
+
+        # Try to create a tracker field with an invalid display name
+        self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
+            self.__admin_user_id,
+            tracker_id1,
+            "test_other",
+            "",
+            "Other test tracker field"))
+
+        self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
+            self.__admin_user_id,
+            tracker_id1,
+            "test_other",
+            "Test 1",
+            "Other test tracker field"))
+
+    def test_update_tracker_field_invalid_tracker_field_id(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        # Try to update a tracker field with a reference to a non-existing tracker field ID
+        self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            999,
+            tracker_field2["name"],
+            tracker_field2["display_name"],
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
+
+    def test_update_tracker_field_name(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id1 = self.create_tracker_field_test1(tracker_id1)
+        self.assertIsNotNone(tracker_field_id1)
+
+        tracker_field1 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id1)
+        self.assertIsNotNone(tracker_field1)
+
+        self.assertEqual(tracker_field1["id"], tracker_field_id1)
+        self.assertEqual(tracker_field1["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field1["name"], "test1")
+        self.assertEqual(tracker_field1["display_name"], "Test 1")
+        self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["active"], True)
+        self.assertIsNotNone(tracker_field1["revision_id"])
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            "test_other",
+            tracker_field2["display_name"],
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test_other")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            "",
+            tracker_field2["display_name"],
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+        self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field1["name"],
+            tracker_field2["display_name"],
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+    def test_update_tracker_field_display_name(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id1 = self.create_tracker_field_test1(tracker_id1)
+        self.assertIsNotNone(tracker_field_id1)
+
+        tracker_field1 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id1)
+        self.assertIsNotNone(tracker_field1)
+
+        self.assertEqual(tracker_field1["id"], tracker_field_id1)
+        self.assertEqual(tracker_field1["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field1["name"], "test1")
+        self.assertEqual(tracker_field1["display_name"], "Test 1")
+        self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["active"], True)
+        self.assertIsNotNone(tracker_field1["revision_id"])
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field2["name"],
+            "Test other",
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test other")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field2["name"],
+            "",
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+        self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field2["name"],
+            tracker_field1["display_name"],
+            tracker_field2["description"],
+            tracker_field2["active"]))
+
+    def test_update_tracker_field_description(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field2["name"],
+            tracker_field2["display_name"],
+            "Test tracker field other",
+            tracker_field2["active"]))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field other")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
+
+    def test_deactivate_activate_tracker_field(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        # Deactivate tracker field
+        self.assertTrue(TrackerFieldManagementInterface.deactivate_tracker_field(
+            self.__admin_user_id,
+            tracker_field_id2))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], False)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Activate tracker
+        self.assertTrue(TrackerFieldManagementInterface.activate_tracker_field(
+            self.__admin_user_id,
+            tracker_field_id2))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
 
 if __name__ == '__main__':
     unittest.main()
