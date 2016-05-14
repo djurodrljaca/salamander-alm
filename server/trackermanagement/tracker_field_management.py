@@ -149,7 +149,7 @@ class TrackerFieldManagementInterface(object):
         """
         Reads all active and inactive tracker fields that match the specified name
 
-        :param name:            Tracker field's short name
+        :param name:            Tracker field's name
         :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Tracker field information of all tracker fields that match the search attribute
@@ -233,7 +233,7 @@ class TrackerFieldManagementInterface(object):
         """
         Reads all active and inactive tracker fields that match the specified display name
 
-        :param display_name:    Tracker field's full name
+        :param display_name:    Tracker field's display name
         :param max_revision_id: Maximum revision ID for the search ("None" for latest revision)
 
         :return:    Tracker field information of all tracker fields that match the search attribute
@@ -273,8 +273,6 @@ class TrackerFieldManagementInterface(object):
         
         return tracker_fields
 
-    # TODO: implement create_tracker_fields() !
-
     @staticmethod
     def create_tracker_field(requested_by_user: int,
                              tracker_id: int,
@@ -286,9 +284,9 @@ class TrackerFieldManagementInterface(object):
 
         :param requested_by_user:   ID of the user that requested creation of the new tracker field
         :param tracker_id:          ID of the tracker
-        :param name:                Tracker's name
-        :param display_name:        Tracker's display name
-        :param description:         Tracker's description
+        :param name:                Tracker field's name
+        :param display_name:        Tracker field's display name
+        :param description:         Tracker field's description
 
         :return:    Tracker field ID of the new tracker field
         """
@@ -332,6 +330,67 @@ class TrackerFieldManagementInterface(object):
             raise
         
         return tracker_field_id
+
+    @staticmethod
+    def create_tracker_fields(requested_by_user: int,
+                              tracker_id: int,
+                              fields: List[dict]) -> bool:
+        """
+        Creates a new tracker
+
+        :param requested_by_user:   ID of the user that requested creation of the new tracker field
+        :param tracker_id:          ID of the tracker
+        :param fields:              Tracker fields
+
+        :return:    Success or failure
+
+        Fields parameter needs to contain a list of dictionaries with the following items:
+
+        - name:         Tracker field's name
+        - display_name: Tracker field's display name
+        - description:  Tracker field's description
+        """
+        connection = DatabaseInterface.create_connection()
+
+        try:
+            success = connection.begin_transaction()
+
+            # Start a new revision
+            revision_id = None
+
+            if success:
+                revision_id = DatabaseInterface.tables().revision.insert_row(
+                    connection,
+                    datetime.datetime.utcnow(),
+                    requested_by_user)
+
+                if revision_id is None:
+                    success = False
+
+            # Create the tracker
+            if success:
+                for field in fields:
+                    tracker_field_id = TrackerFieldManagementInterface.__create_tracker_field(
+                        connection,
+                        tracker_id,
+                        field["name"],
+                        field["display_name"],
+                        field["description"],
+                        revision_id)
+
+                    if tracker_field_id is None:
+                        success = False
+                        break
+
+            if success:
+                connection.commit_transaction()
+            else:
+                connection.rollback_transaction()
+        except:
+            connection.rollback_transaction()
+            raise
+
+        return success
     
     @staticmethod
     def update_tracker_field_information(requested_by_user: int,

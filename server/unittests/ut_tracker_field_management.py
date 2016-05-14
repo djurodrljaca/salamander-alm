@@ -425,6 +425,49 @@ class TrackerFieldInformation(unittest.TestCase):
             "Test 1",
             "Other test tracker field"))
 
+    def test_create_tracker_field(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        self.assertTrue(TrackerFieldManagementInterface.create_tracker_fields(
+            self.__admin_user_id,
+            tracker_id1,
+            [{"name": "test1",
+              "display_name": "Test 1",
+              "description": "Test tracker field 1"},
+             {"name": "test2",
+              "display_name": "Test 2",
+              "description": "Test tracker field 2"}
+             ]))
+
+        tracker_field_ids = TrackerFieldManagementInterface.read_all_tracker_field_ids(tracker_id1)
+        self.assertEqual(len(tracker_field_ids), 2)
+
+        tracker_field1 = TrackerFieldManagementInterface.read_tracker_field_by_id(
+            tracker_field_ids[0])
+
+        self.assertEqual(tracker_field1["id"], tracker_field_ids[0])
+        self.assertEqual(tracker_field1["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field1["name"], "test1")
+        self.assertEqual(tracker_field1["display_name"], "Test 1")
+        self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["active"], True)
+        self.assertIsNotNone(tracker_field1["revision_id"])
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(
+            tracker_field_ids[1])
+
+        self.assertEqual(tracker_field2["id"], tracker_field_ids[1])
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
     def test_update_tracker_field_invalid_tracker_field_id(self):
         project_id1 = self.create_project_test1()
         self.assertIsNotNone(project_id1)
