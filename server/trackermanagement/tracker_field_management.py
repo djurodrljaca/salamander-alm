@@ -87,6 +87,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -124,6 +126,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -161,6 +165,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -207,6 +213,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -245,6 +253,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -278,7 +288,9 @@ class TrackerFieldManagementInterface(object):
                              tracker_id: int,
                              name: str,
                              display_name: str,
-                             description: str) -> Optional[int]:
+                             description: str,
+                             field_type: str,
+                             required: bool) -> Optional[int]:
         """
         Creates a new tracker
 
@@ -287,6 +299,8 @@ class TrackerFieldManagementInterface(object):
         :param name:                Tracker field's name
         :param display_name:        Tracker field's display name
         :param description:         Tracker field's description
+        :param field_type:          Tracker field's type
+        :param required:            Necessity of the tracker field (required or not)
 
         :return:    Tracker field ID of the new tracker field
         """
@@ -316,6 +330,8 @@ class TrackerFieldManagementInterface(object):
                     name,
                     display_name,
                     description,
+                    field_type,
+                    required,
                     revision_id)
                 
                 if tracker_field_id is None:
@@ -349,6 +365,8 @@ class TrackerFieldManagementInterface(object):
         - name:         Tracker field's name
         - display_name: Tracker field's display name
         - description:  Tracker field's description
+        - field_type:   Tracker field's type
+        - required:     Necessity of the tracker field (required or not)
         """
         connection = DatabaseInterface.create_connection()
 
@@ -376,6 +394,8 @@ class TrackerFieldManagementInterface(object):
                         field["name"],
                         field["display_name"],
                         field["description"],
+                        field["field_type"],
+                        field["required"],
                         revision_id)
 
                     if tracker_field_id is None:
@@ -398,6 +418,8 @@ class TrackerFieldManagementInterface(object):
                                          name: str,
                                          display_name: str,
                                          description: str,
+                                         field_type: str,
+                                         required: bool,
                                          active: bool) -> bool:
         """
         Updates tracker's information
@@ -407,6 +429,8 @@ class TrackerFieldManagementInterface(object):
         :param name:                    Tracker field's new name
         :param display_name:            Tracker field's new display name
         :param description:             Tracker field's new description
+        :param field_type:              Tracker field's new type
+        :param required:                Necessity of the tracker field (required or not)
         :param active:                  Tracker field's new state (active or inactive)
 
         :return:    Success or failure
@@ -457,6 +481,8 @@ class TrackerFieldManagementInterface(object):
                     name,
                     display_name,
                     description,
+                    field_type,
+                    required,
                     active,
                     revision_id)
                 
@@ -523,6 +549,8 @@ class TrackerFieldManagementInterface(object):
                     tracker_field["name"],
                     tracker_field["display_name"],
                     tracker_field["description"],
+                    tracker_field["field_type"],
+                    tracker_field["required"],
                     True,
                     revision_id)
             
@@ -586,6 +614,8 @@ class TrackerFieldManagementInterface(object):
                     tracker_field["name"],
                     tracker_field["display_name"],
                     tracker_field["description"],
+                    tracker_field["field_type"],
+                    tracker_field["required"],
                     False,
                     revision_id)
             
@@ -619,6 +649,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -640,6 +672,8 @@ class TrackerFieldManagementInterface(object):
                                  "name": tracker_fields[0]["name"],
                                  "display_name": tracker_fields[0]["display_name"],
                                  "description": tracker_fields[0]["description"],
+                                 "field_type": tracker_fields[0]["field_type"],
+                                 "required": tracker_fields[0]["required"],
                                  "active": tracker_fields[0]["active"],
                                  "revision_id": tracker_fields[0]["revision_id"]}
         
@@ -665,6 +699,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -686,6 +722,8 @@ class TrackerFieldManagementInterface(object):
                                  "name": tracker_fields[0]["name"],
                                  "display_name": tracker_fields[0]["display_name"],
                                  "description": tracker_fields[0]["description"],
+                                 "field_type": tracker_fields[0]["field_type"],
+                                 "required": tracker_fields[0]["required"],
                                  "active": tracker_fields[0]["active"],
                                  "revision_id": tracker_fields[0]["revision_id"]}
 
@@ -711,6 +749,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -732,6 +772,8 @@ class TrackerFieldManagementInterface(object):
                                  "name": tracker_fields[0]["name"],
                                  "display_name": tracker_fields[0]["display_name"],
                                  "description": tracker_fields[0]["description"],
+                                 "field_type": tracker_fields[0]["field_type"],
+                                 "required": tracker_fields[0]["required"],
                                  "active": tracker_fields[0]["active"],
                                  "revision_id": tracker_fields[0]["revision_id"]}
 
@@ -743,6 +785,8 @@ class TrackerFieldManagementInterface(object):
                                name: str,
                                display_name: str,
                                description: str,
+                               field_type: str,
+                               required: bool,
                                revision_id: int) -> Optional[int]:
         """
         Creates a new tracker field
@@ -752,6 +796,8 @@ class TrackerFieldManagementInterface(object):
         :param name:            Tracker field's name
         :param display_name:    Tracker field's display name
         :param description:     Tracker field's description
+        :param field_type:      Tracker field's type
+        :param required:        Necessity of the tracker field (required or not)
         :param revision_id:     Revision ID
 
         :return:    Tracker field ID of the newly created tracker field
@@ -788,6 +834,8 @@ class TrackerFieldManagementInterface(object):
                 name,
                 display_name,
                 description,
+                field_type,
+                required,
                 True,
                 revision_id)
         
@@ -813,6 +861,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
 
@@ -823,6 +873,8 @@ class TrackerFieldManagementInterface(object):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -831,5 +883,7 @@ class TrackerFieldManagementInterface(object):
                 "name": raw_tracker_field_information["name"],
                 "display_name": raw_tracker_field_information["display_name"],
                 "description": raw_tracker_field_information["description"],
+                "field_type": raw_tracker_field_information["field_type"],
+                "required": raw_tracker_field_information["required"],
                 "active": raw_tracker_field_information["active"],
                 "revision_id": raw_tracker_field_information["revision_id"]}

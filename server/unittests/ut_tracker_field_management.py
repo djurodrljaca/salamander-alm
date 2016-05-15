@@ -59,7 +59,9 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_id,
             "test1",
             "Test 1",
-            "Test tracker field 1")
+            "Test tracker field 1",
+            "artifact_id",
+            True)
         return tracker_field_id
 
     def create_tracker_field_test2(self, tracker_id: int):
@@ -68,7 +70,9 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_id,
             "test2",
             "Test 2",
-            "Test tracker field 2")
+            "Test tracker field 2",
+            "artifact_id",
+            False)
         return tracker_field_id
 
     def test_read_all_tracker_field_ids(self):
@@ -173,6 +177,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], True)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -202,6 +208,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], True)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -243,6 +251,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], False)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -251,6 +261,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test1")
         self.assertEqual(tracker_field2["display_name"], "Test 1")
         self.assertEqual(tracker_field2["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], True)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -266,6 +278,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], False)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -293,6 +307,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], True)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -336,6 +352,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], False)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -344,6 +362,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test1")
         self.assertEqual(tracker_field2["display_name"], "Test 1")
         self.assertEqual(tracker_field2["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], True)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -359,6 +379,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], False)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -385,7 +407,9 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_id1,
             "test_other",
             "Test Other",
-            "Other test tracker field"))
+            "Other test tracker field",
+            "artifact_id",
+            True))
 
         # Try to create a tracker field with a reference to a non-existing tracker
         self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
@@ -393,7 +417,9 @@ class TrackerFieldInformation(unittest.TestCase):
             999,
             "test_other",
             "Test Other",
-            "Other test tracker field"))
+            "Other test tracker field",
+            "artifact_id",
+            True))
 
         # Try to create a tracker field with an invalid name
         self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
@@ -401,14 +427,18 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_id1,
             "",
             "Test Other",
-            "Other test tracker field"))
+            "Other test tracker field",
+            "artifact_id",
+            True))
 
         self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
             self.__admin_user_id,
             tracker_id1,
             "test1",
             "Test Other",
-            "Other test tracker field"))
+            "Other test tracker field",
+            "artifact_id",
+            True))
 
         # Try to create a tracker field with an invalid display name
         self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
@@ -416,16 +446,20 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_id1,
             "test_other",
             "",
-            "Other test tracker field"))
+            "Other test tracker field",
+            "artifact_id",
+            True))
 
         self.assertIsNone(TrackerFieldManagementInterface.create_tracker_field(
             self.__admin_user_id,
             tracker_id1,
             "test_other",
             "Test 1",
-            "Other test tracker field"))
+            "Other test tracker field",
+            "artifact_id",
+            True))
 
-    def test_create_tracker_field(self):
+    def test_create_tracker_fields(self):
         project_id1 = self.create_project_test1()
         self.assertIsNotNone(project_id1)
 
@@ -437,10 +471,14 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_id1,
             [{"name": "test1",
               "display_name": "Test 1",
-              "description": "Test tracker field 1"},
+              "description": "Test tracker field 1",
+              "field_type": "artifact_id",
+              "required": True},
              {"name": "test2",
               "display_name": "Test 2",
-              "description": "Test tracker field 2"}
+              "description": "Test tracker field 2",
+              "field_type": "artifact_id",
+              "required": False}
              ]))
 
         tracker_field_ids = TrackerFieldManagementInterface.read_all_tracker_field_ids(tracker_id1)
@@ -454,6 +492,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], True)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -465,6 +505,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -485,6 +527,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -496,6 +540,8 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_field2["name"],
             tracker_field2["display_name"],
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
         # Negative tests ---------------------------------------------------------------------------
@@ -519,6 +565,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], True)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -533,6 +581,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -543,6 +593,8 @@ class TrackerFieldInformation(unittest.TestCase):
             "test_other",
             tracker_field2["display_name"],
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
         tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
@@ -553,6 +605,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test_other")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -563,6 +617,8 @@ class TrackerFieldInformation(unittest.TestCase):
             "",
             tracker_field2["display_name"],
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
         self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
@@ -571,6 +627,8 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_field1["name"],
             tracker_field2["display_name"],
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
     def test_update_tracker_field_display_name(self):
@@ -591,6 +649,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field1["name"], "test1")
         self.assertEqual(tracker_field1["display_name"], "Test 1")
         self.assertEqual(tracker_field1["description"], "Test tracker field 1")
+        self.assertEqual(tracker_field1["field_type"], "artifact_id")
+        self.assertEqual(tracker_field1["required"], True)
         self.assertEqual(tracker_field1["active"], True)
         self.assertIsNotNone(tracker_field1["revision_id"])
 
@@ -605,6 +665,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -615,6 +677,8 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_field2["name"],
             "Test other",
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
         tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
@@ -625,6 +689,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test other")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -635,6 +701,8 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_field2["name"],
             "",
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
         self.assertFalse(TrackerFieldManagementInterface.update_tracker_field_information(
@@ -643,6 +711,8 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_field2["name"],
             tracker_field1["display_name"],
             tracker_field2["description"],
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
     def test_update_tracker_field_description(self):
@@ -663,6 +733,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -673,6 +745,8 @@ class TrackerFieldInformation(unittest.TestCase):
             tracker_field2["name"],
             tracker_field2["display_name"],
             "Test tracker field other",
+            tracker_field2["field_type"],
+            tracker_field2["required"],
             tracker_field2["active"]))
 
         tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
@@ -683,6 +757,108 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field other")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
+
+    def test_update_tracker_field_type(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field2["name"],
+            tracker_field2["display_name"],
+            tracker_field2["description"],
+            "text_area",
+            tracker_field2["required"],
+            tracker_field2["active"]))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "text_area")
+        self.assertEqual(tracker_field2["required"], False)
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Negative tests ---------------------------------------------------------------------------
+        # There are no negative tests
+
+    def test_update_tracker_field_required(self):
+        project_id1 = self.create_project_test1()
+        self.assertIsNotNone(project_id1)
+
+        tracker_id1 = self.create_tracker_test1(project_id1)
+        self.assertIsNotNone(tracker_id1)
+
+        tracker_field_id2 = self.create_tracker_field_test2(tracker_id1)
+        self.assertIsNotNone(tracker_field_id2)
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
+        self.assertEqual(tracker_field2["active"], True)
+        self.assertIsNotNone(tracker_field2["revision_id"])
+
+        # Positive tests ---------------------------------------------------------------------------
+        self.assertTrue(TrackerFieldManagementInterface.update_tracker_field_information(
+            self.__admin_user_id,
+            tracker_field_id2,
+            tracker_field2["name"],
+            tracker_field2["display_name"],
+            tracker_field2["description"],
+            tracker_field2["field_type"],
+            True,
+            tracker_field2["active"]))
+
+        tracker_field2 = TrackerFieldManagementInterface.read_tracker_field_by_id(tracker_field_id2)
+        self.assertIsNotNone(tracker_field2)
+
+        self.assertEqual(tracker_field2["id"], tracker_field_id2)
+        self.assertEqual(tracker_field2["tracker_id"], tracker_id1)
+        self.assertEqual(tracker_field2["name"], "test2")
+        self.assertEqual(tracker_field2["display_name"], "Test 2")
+        self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], True)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -707,6 +883,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -723,6 +901,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], False)
         self.assertIsNotNone(tracker_field2["revision_id"])
 
@@ -738,6 +918,8 @@ class TrackerFieldInformation(unittest.TestCase):
         self.assertEqual(tracker_field2["name"], "test2")
         self.assertEqual(tracker_field2["display_name"], "Test 2")
         self.assertEqual(tracker_field2["description"], "Test tracker field 2")
+        self.assertEqual(tracker_field2["field_type"], "artifact_id")
+        self.assertEqual(tracker_field2["required"], False)
         self.assertEqual(tracker_field2["active"], True)
         self.assertIsNotNone(tracker_field2["revision_id"])
 

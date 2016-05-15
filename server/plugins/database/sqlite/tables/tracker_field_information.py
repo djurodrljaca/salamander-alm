@@ -33,9 +33,13 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
     - name:             str
     - display_name:     str
     - description:      Optional[str]
+    - field_type:       str
+    - required:         bool
     - active:           bool
     - revision_id:      int, references revision.id
     """
+
+# TODO: add "required" field
 
     def __init__(self):
         """
@@ -60,6 +64,11 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
             "    display_name        TEXT    NOT NULL\n"
             "                                CHECK (length(display_name) > 0),\n"
             "    description         TEXT,\n"
+            "    field_type          TEXT    NOT NULL\n"
+            "                                CHECK (length(field_type) > 0),\n"
+            "    required            BOOLEAN NOT NULL\n"
+            "                                CHECK ( (active = 0) OR\n"
+            "                                        (active = 1) ),\n"
             "    active              BOOLEAN NOT NULL\n"
             "                                CHECK ( (active = 0) OR\n"
             "                                        (active = 1) ),\n"
@@ -168,6 +177,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -181,6 +192,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
             "       TFI.name,\n"
             "       TFI.display_name,\n"
             "       TFI.description,\n"
+            "       TFI.field_type,\n"
+            "       TFI.required,\n"
             "       TFI.active,\n"
             "       TFI.revision_id\n"
             "FROM tracker_field as TF\n"
@@ -189,6 +202,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
             "           TFI1.name,\n"
             "           TFI1.display_name,\n"
             "           TFI1.description,\n"
+            "           TFI1.field_type,\n"
+            "           TFI1.required,\n"
             "           TFI1.active,\n"
             "           TFI1.revision_id\n"
             "    FROM tracker_field_information AS TFI1\n"
@@ -225,6 +240,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
                                  "name": row["TFI.name"],
                                  "display_name": row["TFI.display_name"],
                                  "description": row["TFI.description"],
+                                 "field_type": row["TFI.field_type"],
+                                 "required": bool(row["TFI.required"]),
                                  "active": bool(row["TFI.active"]),
                                  "revision_id": row["TFI.revision_id"]}
                 tracker_fields.append(tracker_field)
@@ -237,6 +254,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
                    name: str,
                    display_name: str,
                    description: str,
+                   field_type: str,
+                   required: bool,
                    active: bool,
                    revision_id: int) -> Optional[int]:
         """
@@ -247,6 +266,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
         :param name:                Tracker field name
         :param display_name:        Tracker field display name
         :param description:         Tracker field description
+        :param field_type:          Tracker field type
+        :param required:            Necessity of the tracker field (required or not)
         :param active:              State of the tracker field (active or inactive)
         :param revision_id:         Revision ID
 
@@ -260,6 +281,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
                 "    name,\n"
                 "    display_name,\n"
                 "    description,\n"
+                "    field_type,\n"
+                "    required,\n"
                 "    active,\n"
                 "    revision_id)\n"
                 "VALUES (NULL,\n"
@@ -267,12 +290,16 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
                 "        :name,\n"
                 "        :display_name,\n"
                 "        :description,\n"
+                "        :field_type,\n"
+                "        :required,\n"
                 "        :active,\n"
                 "        :revision_id)",
                 {"tracker_field_id": tracker_field_id,
                  "name": name,
                  "display_name": display_name,
                  "description": description,
+                 "field_type": field_type,
+                 "required": required,
                  "active": active,
                  "revision_id": revision_id})
 

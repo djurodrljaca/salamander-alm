@@ -40,6 +40,8 @@ class TrackerFieldInformationTable(Table):
     - name:             str
     - display_name:     str
     - description:      Optional[str]
+    - field_type:       str
+    - required:         bool
     - active:           bool
     - revision_id:      int, references revision.id
     """
@@ -108,6 +110,8 @@ class TrackerFieldInformationTable(Table):
         - name
         - display_name
         - description
+        - field_type
+        - required
         - active
         - revision_id
         """
@@ -119,6 +123,8 @@ class TrackerFieldInformationTable(Table):
                    name: str,
                    display_name: str,
                    description: str,
+                   field_type: str,
+                   required: bool,
                    active: bool,
                    revision_id: int) -> Optional[int]:
         """
@@ -129,6 +135,8 @@ class TrackerFieldInformationTable(Table):
         :param name:                Tracker field name
         :param display_name:        Tracker field display name
         :param description:         Tracker field description
+        :param field_type:          Tracker field type
+        :param required:            Necessity of the tracker field (required or not)
         :param active:              State of the tracker field (active or inactive)
         :param revision_id:         Revision ID
 
