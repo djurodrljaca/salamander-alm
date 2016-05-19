@@ -47,12 +47,12 @@ class RevisionTableSqlite(RevisionTable):
         """
         connection.native_connection.execute(
             "CREATE TABLE revision (\n"
-            "    id        INTEGER  PRIMARY KEY AUTOINCREMENT\n"
-            "                       NOT NULL,\n"
-            "    timestamp DATETIME NOT NULL\n"
-            "                       CHECK (length(timestamp) >= 23),\n"
-            "    user_id   INTEGER  REFERENCES user (id)\n"
-            "                       NOT NULL\n"
+            "    id        INTEGER PRIMARY KEY AUTOINCREMENT\n"
+            "                      NOT NULL,\n"
+            "    timestamp TEXT    NOT NULL\n"
+            "                      CHECK (length(timestamp) >= 23),\n"
+            "    user_id   INTEGER REFERENCES user (id)\n"
+            "                      NOT NULL\n"
             ")")
 
     def read_current_revision_id(self, connection: ConnectionSqlite) -> Optional[int]:

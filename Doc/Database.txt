@@ -1,6 +1,6 @@
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | revision
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - timestamp: datetime
@@ -9,9 +9,9 @@ Table:
 Constraints:
     - user_id --> user.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | user
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - user_name: text
@@ -23,9 +23,9 @@ Table:
 Constraints:
     - revision_id --> revision.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | user_authentication
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - user_id: integer, unique
     - authentication_type: text
@@ -33,9 +33,9 @@ Table:
 Constraints:
     - user_id --> user.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | user_authentication_parameter
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - user_id: integer, unique
     - name: text
@@ -44,9 +44,9 @@ Table:
 Constraints:
     - user_id --> user.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | UserGroup
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
     - ProjectId: integer OR null
@@ -54,9 +54,9 @@ Table:
 Constraints:
     - ProjectId --> Project.Id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | UserGroupInfo
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
     - UserGroupId: integer
@@ -70,9 +70,9 @@ Constraints:
     - ProjectId --> Project.Id
     - RevisionId --> Revision.Id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | user_group_user_map
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
     - UserGroupId: integer
@@ -84,15 +84,15 @@ Constraints:
     - UserId --> User.Id
     - RevisionId --> Revision.Id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | project
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | project_information
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - project_id: integer
@@ -108,9 +108,9 @@ Constraints:
 
 TODO: project_information_additional ???
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | tracker
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - project_id: integer
@@ -118,9 +118,9 @@ Table:
 Constraints:
     - project_id --> project.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | tracker_information
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - tracker_id: integer
@@ -134,9 +134,9 @@ Constraints:
     - tracker_id --> tracker.id
     - revision_id --> revision.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | tracker_field
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
     - tracker_id: integer
@@ -144,9 +144,9 @@ Table:
 Constraints:
     - tracker_id --> tracker.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | tracker_field_information
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - id: integer, primary key, auto-increment
     - tracker_field_id: integer
@@ -162,60 +162,147 @@ Constraints:
     - tracker_field_id --> tracker_field.id
     - revision_id --> revision.id
 
+TODO: add layout information into its own table?
+TODO: prepare tables for all supported field types (artifact_id, text_field, text_area, dropdown_list, list, checkbox, date, integer, float, etc.)
 
-TODO: add layout information into the field info? Into its own table?
-TODO: prepare tables for all supported field types (TrackerFieldInfoString, TrackerFieldInfoText etc.)
-
--------------------------------------------------
-| Artifact
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| tracker_field_information_dropdown_list_item
+----------------------------------------------------------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - TrackerId: integer
-    - CreatedOn: datetime
-    - CreatedBy: integer
+    - id: integer, primary key, auto-increment
+    - tracker_field_id: integer
+    - index: integer
+    - display_name: text
+    - active: boolean
+    - revision_id: integer
 
 Constraints:
-    - TrackerId --> Tracker.Id
-    - CreatedBy --> User.Id
+    - tracker_field_id --> tracker_field.id
+    - revision_id --> revision.id
 
--------------------------------------------------
-| ArtifactInfo
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| tracker_field_information_list_item
+----------------------------------------------------------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - ArtifactId: integer
-    - Name: text
-    - RevisionId: integer
+    - id: integer, primary key, auto-increment
+    - tracker_field_id: integer
+    - index: integer
+    - display_name: text
+    - active: boolean
+    - revision_id: integer
 
 Constraints:
-    - ArtifactId --> Artifact.Id
-    - RevisionId --> Revision.Id
+    - tracker_field_id --> tracker_field.id
+    - revision_id --> revision.id
 
--------------------------------------------------
-| ArtifactFieldValue
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| artifact
+----------------------------------------------------------------------------------------------------
 Table:
-    - Id: integer, primary key, auto-increment
-    - Value: text
-
--------------------------------------------------
-| ArtifactFieldValueMapping
--------------------------------------------------
-Table:
-    - Id: integer, primary key, auto-increment
-    - ArtifactInfoId: integer
-    - TrackerFieldId: integer
-    - ArtifactFieldValueId: integer
+    - id: integer, primary key, auto-increment
+    - tracker_id: integer
+    - created_on: datetime
+    - created_by: integer
 
 Constraints:
-    - ArtifactInfoId --> ArtifactInfo.Id
-    - TrackerFieldId --> TrackerField.Id
-    - ArtifactFieldValueId --> ArtifactFieldValue.Id
+    - tracker_id --> tracker.id
+    - created_by --> user.id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
+| artifact_information
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_id: integer
+    - locked: boolean
+    - active: boolean
+    - revision_id: integer
+
+Constraints:
+    - artifact_id --> artifact.id
+    - revision_id --> revision.id
+
+----------------------------------------------------------------------------------------------------
+| artifact_field
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_id: integer
+    - tracker_field_id: integer
+
+Constraints:
+    - artifact_id --> artifact.id
+    - tracker_field_id --> tracker_field.id
+
+----------------------------------------------------------------------------------------------------
+| artifact_field_value_text_field
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_field_id: integer
+    - value: text
+    - revision_id: integer
+
+Constraints:
+    - artifact_field_id --> artifact_field.id
+    - revision_id --> revision.id
+
+----------------------------------------------------------------------------------------------------
+| artifact_field_value_text_area
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_field_id: integer
+    - value: text
+    - revision_id: integer
+
+Constraints:
+    - artifact_field_id --> artifact_field.id
+    - revision_id --> revision.id
+
+----------------------------------------------------------------------------------------------------
+| artifact_field_value_dropdown_list
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_field_id: integer
+    - tracker_field_information_dropdown_list_item_id: integer
+    - revision_id: integer
+
+Constraints:
+    - artifact_field_id --> artifact_field.id
+    - tracker_field_information_dropdown_list_item_id --> tracker_field_information_dropdown_list_item.id
+    - revision_id --> revision.id
+
+----------------------------------------------------------------------------------------------------
+| artifact_field_value_list
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_field_id: integer
+    - revision_id: integer
+
+Constraints:
+    - artifact_field_id --> artifact_field.id
+    - revision_id --> revision.id
+
+----------------------------------------------------------------------------------------------------
+| artifact_field_value_list_item
+----------------------------------------------------------------------------------------------------
+Table:
+    - id: integer, primary key, auto-increment
+    - artifact_field_value_list_id: integer
+    - tracker_field_information_list_item_id: integer
+
+Constraints:
+    - artifact_field_value_list_id --> artifact_field_value_list.id
+    - tracker_field_information_list_item_id --> tracker_field_information_list_item.id
+
+TODO: prepare tables for all supported field types
+
+----------------------------------------------------------------------------------------------------
 | ArtifactComment
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
     - ArtifactId: integer
@@ -226,9 +313,9 @@ Constraints:
     - ArtifactId --> Artifact.Id
     - UserId --> User.Id
 
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 | ArtifactCommentText
--------------------------------------------------
+----------------------------------------------------------------------------------------------------
 Table:
     - Id: integer, primary key, auto-increment
     - ArtifactCommentId: integer

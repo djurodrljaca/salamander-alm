@@ -67,8 +67,8 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
             "    field_type          TEXT    NOT NULL\n"
             "                                CHECK (length(field_type) > 0),\n"
             "    required            BOOLEAN NOT NULL\n"
-            "                                CHECK ( (active = 0) OR\n"
-            "                                        (active = 1) ),\n"
+            "                                CHECK ( (required = 0) OR\n"
+            "                                        (required = 1) ),\n"
             "    active              BOOLEAN NOT NULL\n"
             "                                CHECK ( (active = 0) OR\n"
             "                                        (active = 1) ),\n"
@@ -103,7 +103,7 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
 
         :param connection:              Database connection
         :param tracker_id:              ID of the tracker
-        :param tracker_field_selection: Search for active, inactive or all trackers
+        :param tracker_field_selection: Search for active, inactive or all tracker fields
         :param max_revision_id:         Maximum revision ID for the search
 
         :return:    List of tracker field IDs
@@ -142,7 +142,7 @@ class TrackerFieldInformationTableSqlite(TrackerFieldInformationTable):
 
         for row in cursor.fetchall():
             if row is not None:
-                tracker_fields.append(row["TFI.tracker_field_id"])
+                tracker_fields.append(row[0])
 
         return tracker_fields
 

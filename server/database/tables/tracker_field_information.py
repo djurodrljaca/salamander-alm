@@ -46,8 +46,6 @@ class TrackerFieldInformationTable(Table):
     - revision_id:      int, references revision.id
     """
 
-# TODO: add "type" column!
-
     def __init__(self):
         """
         Constructor
@@ -72,7 +70,7 @@ class TrackerFieldInformationTable(Table):
 
         :param connection:              Database connection
         :param tracker_id:              ID of the tracker
-        :param tracker_field_selection: Search for active, inactive or all trackers
+        :param tracker_field_selection: Search for active, inactive or all tracker fields
         :param max_revision_id:         Maximum revision ID for the search
 
         :return:    List of tracker field IDs

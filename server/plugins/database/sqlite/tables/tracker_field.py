@@ -52,12 +52,12 @@ class TrackerFieldTableSqlite(TrackerFieldTable):
 
     def read_all_ids(self, connection: ConnectionSqlite, tracker_id: int) -> List[int]:
         """
-        Reads IDs of all tracker IDs in the database that belong to the specified tracker
+        Reads IDs of all tracker fields in the database that belong to the specified tracker
 
         :param connection:  Database connection
         :param tracker_id:  ID of the tracker
 
-        :return:    List of tracker IDs
+        :return:    List of tracker field IDs
         """
         cursor = connection.native_connection.execute(
             "SELECT id\n"
@@ -84,9 +84,9 @@ class TrackerFieldTableSqlite(TrackerFieldTable):
         try:
             cursor = connection.native_connection.execute(
                 "INSERT INTO tracker_field\n"
-                "   (id,"
+                "   (id,\n"
                 "    tracker_id)\n"
-                "VALUES (NULL,"
+                "VALUES (NULL,\n"
                 "        :tracker_id)",
                 {"tracker_id": tracker_id})
 
