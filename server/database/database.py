@@ -16,10 +16,11 @@ not, see <http://www.gnu.org/licenses/>.
 
 from authentication.authentication import AuthenticationInterface
 from database.connection import Connection
-from database.tables.revision import RevisionTable
 from database.tables.user import UserTable, UserSelection
 from database.tables.user_authentication import UserAuthenticationTable
 from database.tables.user_authentication_parameter import UserAuthenticationParameterTable
+from database.tables.session_token import SessionTokenTable
+from database.tables.revision import RevisionTable
 from database.tables.project import ProjectTable
 from database.tables.project_information import ProjectInformationTable
 from database.tables.tracker import TrackerTable
@@ -39,11 +40,13 @@ class Tables(object):
         """
         Constructor
         """
-        self.revision = RevisionTable()
-
         self.user = UserTable()
         self.user_authentication = UserAuthenticationTable()
         self.user_authentication_parameter = UserAuthenticationParameterTable()
+
+        self.session_token = SessionTokenTable()
+
+        self.revision = RevisionTable()
 
         self.project = ProjectTable()
         self.project_information = ProjectInformationTable()
@@ -156,11 +159,13 @@ class Database(object):
         :param connection:  Database connection
         """
         # Create tables
-        self.__tables.revision.create(connection)
-
         self.__tables.user.create(connection)
         self.__tables.user_authentication.create(connection)
         self.__tables.user_authentication_parameter.create(connection)
+
+        self.__tables.session_token.create(connection)
+
+        self.__tables.revision.create(connection)
 
         self.__tables.project.create(connection)
         self.__tables.project_information.create(connection)
@@ -196,7 +201,7 @@ class Database(object):
             return False
 
         # Add user authentication to the user
-        user_authentication_id = DatabaseInterface.tables().user_authentication.insert_row(
+        user_authentication_id = self.__tables.user_authentication.insert_row(
             connection,
             user_id,
             "basic")
@@ -212,7 +217,7 @@ class Database(object):
         if reference_authentication_parameters is None:
             return False
 
-        success = DatabaseInterface.tables().user_authentication_parameter.insert_rows(
+        success = self.__tables.user_authentication_parameter.insert_rows(
             connection,
             user_id,
             reference_authentication_parameters)
@@ -240,10 +245,10 @@ class Database(object):
         """
         # Get the administrator's user ID
         # Read the users that match the search attribute
-        users = DatabaseInterface.tables().user.read_users_by_attribute(connection,
-                                                                        "user_name",
-                                                                        "administrator",
-                                                                        UserSelection.Active)
+        users = self.__tables.user.read_users_by_attribute(connection,
+                                                           "user_name",
+                                                           "administrator",
+                                                           UserSelection.Active)
 
         user = None
 

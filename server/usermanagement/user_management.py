@@ -18,7 +18,9 @@ from authentication.authentication import AuthenticationInterface
 from database.connection import Connection
 from database.database import DatabaseInterface
 from database.tables.user import UserSelection
+import datetime
 from typing import List, Optional
+import uuid
 
 
 class UserManagementInterface(object):
@@ -385,56 +387,37 @@ class UserManagementInterface(object):
         return user_authentication
 
     @staticmethod
-    def authenticate_user(user_name: str, authentication_parameters: dict) -> Optional[int]:
+    def authenticate_user(connection: Connection,
+                          user_name: str,
+                          authentication_parameters: dict) -> Optional[int]:
         """
         Authenticates a user
 
+        :param connection:                  Database connection
         :param user_name:                   User's user name
         :param authentication_parameters:   User's authentication parameters
 
         :return:    ID of the authenticated user
         """
-        connection = DatabaseInterface.create_connection()
+        user = UserManagementInterface.__read_user_by_user_name(connection, user_name)
 
-        try:
-            success = connection.begin_transaction()
+        if user is None:
+            # Error, invalid user name
+            return None
 
-            user = None
+        # Read user's authentication information
+        user_authentication = UserManagementInterface.__read_user_authentication(connection,
+                                                                                 user["id"])
 
-            if success:
-                user = UserManagementInterface.__read_user_by_user_name(connection, user_name)
+        if user_authentication is None:
+            # Error, no authentication was found for that user
+            return None
 
-                if user is None:
-                    # Error, invalid user name
-                    success = False
-
-            # Read user's authentication information
-            user_authentication = None
-
-            if success:
-                user_authentication = UserManagementInterface.__read_user_authentication(
-                    connection,
-                    user["id"])
-
-                if user_authentication is None:
-                    # Error, no authentication was found for that user
-                    success = False
-
-            # Authenticate user
-            user_authenticated = False
-
-            if success:
-                user_authenticated = AuthenticationInterface.authenticate(
-                    user_authentication["authentication_type"],
-                    authentication_parameters,
-                    user_authentication["authentication_parameters"])
-
-                connection.commit_transaction()
-            else:
-                connection.rollback_transaction()
-        except:
-            connection.rollback_transaction()
-            raise
+        # Authenticate user
+        user_authenticated = AuthenticationInterface.authenticate(
+            user_authentication["authentication_type"],
+            authentication_parameters,
+            user_authentication["authentication_parameters"])
 
         if user_authenticated:
             return user["id"]
@@ -510,6 +493,65 @@ class UserManagementInterface(object):
             raise
 
         return success
+
+    @staticmethod
+    def read_session_token(connection: Connection, token: str) -> Optional[dict]:
+        """
+        Reads a session token from the database
+
+        :param connection:  Database connection
+        :param token:       Session's token value
+
+        :return:    Session token object
+
+        Returned dictionary contains items:
+
+        - id
+        - user_id
+        - created_on
+        - token
+        """
+        session_token = DatabaseInterface.tables().session_token.read_token(connection, token)
+
+        return session_token
+
+    @staticmethod
+    def create_session_token(connection: Connection, user_id: int) -> Optional[str]:
+        """
+        Creates a session token
+
+        :param connection:  Database connection
+        :param user_id:     ID of the user
+
+        :return:    Token value
+        """
+        # Generate a token
+        token = None
+
+        for i in range(10):
+            # Generate a random UUID (up to 10 tries)
+            random_uuid = uuid.uuid4()
+
+            # Check if this token already exists in the database
+            existing_session_token = UserManagementInterface.read_session_token(connection,
+                                                                                random_uuid.hex)
+
+            if existing_session_token is None:
+                token = random_uuid.hex
+                break
+
+        # Store the token in the database
+        if token is not None:
+            row_id = DatabaseInterface.tables().session_token.insert_row(connection,
+                                                                         user_id,
+                                                                         datetime.datetime.utcnow(),
+                                                                         token)
+
+            # In case of an error invalidate the generated token
+            if row_id is None:
+                token = None
+
+        return token
 
     @staticmethod
     def __read_user_by_id(connection: Connection, user_id: int) -> Optional[dict]:

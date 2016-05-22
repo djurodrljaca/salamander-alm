@@ -1,3 +1,7 @@
 http://webpy.org/
 http://flask.pocoo.org/
 http://bottlepy.org/docs/dev/index.html
+
+Results:
+- Flask looks most promising
+- Check this tutorial for how to use it for REST API: http://blog.miguelgrinberg.com/post/designing-a-restful-api-with-python-and-flask

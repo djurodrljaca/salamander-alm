@@ -17,11 +17,12 @@ not, see <http://www.gnu.org/licenses/>.
 from database.database import Database, Tables
 import os
 from plugins.database.sqlite.connection import ConnectionSqlite
-from plugins.database.sqlite.tables.revision import RevisionTableSqlite
 from plugins.database.sqlite.tables.user import UserTableSqlite
 from plugins.database.sqlite.tables.user_authentication import UserAuthenticationTableSqlite
 from plugins.database.sqlite.tables.user_authentication_parameter \
     import UserAuthenticationParameterTableSqlite
+from plugins.database.sqlite.tables.session_token import SessionTokenTableSqlite
+from plugins.database.sqlite.tables.revision import RevisionTableSqlite
 from plugins.database.sqlite.tables.project import ProjectTableSqlite
 from plugins.database.sqlite.tables.project_information import ProjectInformationTableSqlite
 from plugins.database.sqlite.tables.tracker import TrackerTableSqlite
@@ -46,11 +47,13 @@ class DatabaseSqlite(Database):
         """
         tables = Tables()
 
-        tables.revision = RevisionTableSqlite()
-
         tables.user = UserTableSqlite()
         tables.user_authentication = UserAuthenticationTableSqlite()
         tables.user_authentication_parameter = UserAuthenticationParameterTableSqlite()
+
+        tables.session_token = SessionTokenTableSqlite()
+
+        tables.revision = RevisionTableSqlite()
 
         tables.project = ProjectTableSqlite()
         tables.project_information = ProjectInformationTableSqlite()
