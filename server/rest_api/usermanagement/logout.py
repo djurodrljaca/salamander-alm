@@ -1,10 +1,10 @@
 from database.database import DatabaseInterface
-from flask import jsonify
-from flask_restful import Resource, reqparse, abort
+from flask_restful import abort
+from rest_api.restricted_resource import RestrictedResource
 from usermanagement.user_management import UserManagementInterface
 
 
-class Logout(Resource):
+class Logout(RestrictedResource):
     """
     REST API for logging out
     """
@@ -13,23 +13,14 @@ class Logout(Resource):
         """
         Constructor
         """
-        Resource.__init__(self)
-
-        self.request_parser = reqparse.RequestParser()
-        self.request_parser.add_argument('SALM-Session-Token',
-                                         type=str,
-                                         required=True,
-                                         location="headers",
-                                         dest="token")
+        RestrictedResource.__init__(self)
 
     def post(self):
         """
-        Tries to log out the user
-
-        :return:    Tuple with user session token
+        Logs out the user
         """
-        # Extract arguments from the request
-        args = self.request_parser.parse_args(strict=True)
+        # Extract session token from the request
+        token = self._read_session_token()
 
         # Log out
         success = False
@@ -45,16 +36,16 @@ class Logout(Resource):
             session_token = None
 
             if success:
-                session_token = UserManagementInterface.read_session_token(connection,
-                                                                           args["token"])
+                session_token = UserManagementInterface.read_session_token(connection, token)
 
                 if session_token is None:
                     success = False
                     error_code = 400
                     error_message = "Invalid session token"
 
+            # Delete session token
             if success:
-                success = UserManagementInterface.delete_session_token(connection, args["token"])
+                success = UserManagementInterface.delete_session_token(connection, token)
 
                 if not success:
                     error_code = 500
@@ -73,9 +64,6 @@ class Logout(Resource):
             return None
         else:
             if (error_code is not None) and (error_message is not None):
-                print("Error code: " + str(error_code))
-                print("Error message: " + error_message)
-
                 abort(error_code, message=error_message)
             else:
                 abort(500, message="Internal error")

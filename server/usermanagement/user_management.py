@@ -52,23 +52,44 @@ class UserManagementInterface(object):
         return DatabaseInterface.tables().user.read_all_ids(connection, user_selection)
 
     @staticmethod
-    def read_user_by_id(user_id: int) -> Optional[dict]:
+    def read_user_by_id(connection: Connection, user_id: int) -> Optional[dict]:
         """
         Reads a user (active or inactive) that matches the specified user ID
 
-        :param user_id: ID of the user
+        :param connection:  Database connection
+        :param user_id:     ID of the user
 
         :return:    User information object
-        """
-        connection = DatabaseInterface.create_connection()
 
-        return UserManagementInterface.__read_user_by_id(connection, user_id)
+        Returned dictionary contains items:
+
+        - id
+        - user_name
+        - display_name
+        - email
+        - active
+        """
+        # Read the users that match the search attribute
+        users = DatabaseInterface.tables().user.read_users_by_attribute(connection,
+                                                                        "id",
+                                                                        user_id,
+                                                                        UserSelection.All)
+
+        # Return a user only if exactly one was found
+        user = None
+
+        if users is not None:
+            if len(users) == 1:
+                user = users[0]
+
+        return user
 
     @staticmethod
-    def read_user_by_user_name(user_name: str) -> Optional[dict]:
+    def read_user_by_user_name(connection: Connection, user_name: str) -> Optional[dict]:
         """
         Reads an active user that matches the specified user name
 
+        :param connection:  Database connection
         :param user_name:   User's user name
 
         :return:    User information object
@@ -81,15 +102,14 @@ class UserManagementInterface(object):
         - email
         - active
         """
-        connection = DatabaseInterface.create_connection()
-
         return UserManagementInterface.__read_user_by_user_name(connection, user_name)
 
     @staticmethod
-    def read_users_by_user_name(user_name: str) -> List[dict]:
+    def read_users_by_user_name(connection: Connection, user_name: str) -> List[dict]:
         """
         Reads all active and inactive users that match the specified user name
 
+        :param connection:  Database connection
         :param user_name:   User's user name
 
         :return:    User information of all users that match the search attribute
@@ -102,18 +122,17 @@ class UserManagementInterface(object):
         - email
         - active
         """
-        connection = DatabaseInterface.create_connection()
-
         return DatabaseInterface.tables().user.read_users_by_attribute(connection,
                                                                        "user_name",
                                                                        user_name,
                                                                        UserSelection.All)
 
     @staticmethod
-    def read_user_by_display_name(display_name: str) -> Optional[dict]:
+    def read_user_by_display_name(connection: Connection, display_name: str) -> Optional[dict]:
         """
         Reads an active user that matches the specified display name
 
+        :param connection:  Database connection
         :param display_name:    User's display name
 
         :return:    User information object
@@ -126,15 +145,14 @@ class UserManagementInterface(object):
         - email
         - active
         """
-        connection = DatabaseInterface.create_connection()
-
         return UserManagementInterface.__read_user_by_display_name(connection, display_name)
 
     @staticmethod
-    def read_users_by_display_name(display_name: str) -> List[dict]:
+    def read_users_by_display_name(connection: Connection, display_name: str) -> List[dict]:
         """
         Reads all active and inactive users that match the specified display name
 
+        :param connection:      Database connection
         :param display_name:    User's display name
 
         :return:    User information of all users that match the search attribute
@@ -147,8 +165,6 @@ class UserManagementInterface(object):
         - email
         - active
         """
-        connection = DatabaseInterface.create_connection()
-
         return DatabaseInterface.tables().user.read_users_by_attribute(connection,
                                                                        "display_name",
                                                                        display_name,
@@ -275,7 +291,7 @@ class UserManagementInterface(object):
             user = None
 
             if success:
-                user = UserManagementInterface.__read_user_by_id(connection, user_id)
+                user = UserManagementInterface.read_user_by_id(connection, user_id)
 
                 if user is None:
                     success = False
@@ -320,7 +336,7 @@ class UserManagementInterface(object):
             user = None
 
             if success:
-                user = UserManagementInterface.__read_user_by_id(connection, user_id)
+                user = UserManagementInterface.read_user_by_id(connection, user_id)
 
                 if user is None:
                     success = False
@@ -573,39 +589,6 @@ class UserManagementInterface(object):
         # Delete the token from the database
         DatabaseInterface.tables().session_token.delete_row_by_token(connection, token)
         return True
-
-    @staticmethod
-    def __read_user_by_id(connection: Connection, user_id: int) -> Optional[dict]:
-        """
-        Reads a user (active or inactive) that matches the search parameters
-
-        :param connection:  Database connection
-        :param user_id:     ID of the user
-
-        :return:    User information object
-
-        Returned dictionary contains items:
-
-        - id
-        - user_name
-        - display_name
-        - email
-        - active
-        """
-        # Read the users that match the search attribute
-        users = DatabaseInterface.tables().user.read_users_by_attribute(connection,
-                                                                        "id",
-                                                                        user_id,
-                                                                        UserSelection.All)
-
-        # Return a user only if exactly one was found
-        user = None
-
-        if users is not None:
-            if len(users) == 1:
-                user = users[0]
-
-        return user
 
     @staticmethod
     def __read_user_by_user_name(connection: Connection, user_name: str) -> Optional[dict]:

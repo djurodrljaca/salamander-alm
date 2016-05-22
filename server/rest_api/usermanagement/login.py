@@ -1,6 +1,6 @@
 from database.database import DatabaseInterface
 from flask import jsonify
-from flask_restful import Resource, reqparse, abort
+from flask_restful import Resource, request, abort
 from usermanagement.user_management import UserManagementInterface
 
 
@@ -15,20 +15,20 @@ class Login(Resource):
         """
         Resource.__init__(self)
 
-        self.request_parser = reqparse.RequestParser()
-        self.request_parser.add_argument('user_name', type=str, required=True)
-        self.request_parser.add_argument('authentication_parameters', type=dict, required=True)
-
     def post(self):
         """
-        Tries to log in the user with the specified parameters
+        Logs in a user with the specified parameters
 
         :return:    Session token
         """
         # Extract arguments from the request
-        args = self.request_parser.parse_args(strict=True)
+        request_data = request.get_json()
+
+        if ("user_name" not in request_data) or ("authentication_parameters" not in request_data):
+            abort(400, message="Missing parameters")
 
         # Log in
+        token = None
         success = False
         error_code = None
         error_message = None
@@ -44,8 +44,8 @@ class Login(Resource):
             if success:
                 user_id = UserManagementInterface.authenticate_user(
                     connection,
-                    args["user_name"],
-                    args["authentication_parameters"])
+                    request_data["user_name"],
+                    request_data["authentication_parameters"])
 
                 if user_id is None:
                     success = False
@@ -53,8 +53,6 @@ class Login(Resource):
                     error_message = "Invalid user name or authentication parameters"
 
             # Create session token
-            token = None
-
             if success:
                 token = UserManagementInterface.create_session_token(connection, user_id)
 

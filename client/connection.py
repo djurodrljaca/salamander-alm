@@ -159,7 +159,7 @@ class Connection(object):
     def call_delete_method(self,
                            relative_url: str,
                            parameters=None,
-                           success_status_codes=list([200])):
+                           success_status_codes=list([200])) -> bool:
         """
         Call DELETE method on the server
 
@@ -195,7 +195,10 @@ class Connection(object):
         else:
             return False
 
-    def call_get_method(self, relative_url: str, parameters=None, success_status_codes=list([200])):
+    def call_get_method(self,
+                        relative_url: str,
+                        parameters=None,
+                        success_status_codes=list([200])) -> bool:
         """
         Call GET method on the server
 
@@ -231,7 +234,10 @@ class Connection(object):
         else:
             return False
 
-    def call_post_method(self, relative_url: str, data=None, success_status_codes=list([200])):
+    def call_post_method(self,
+                         relative_url: str,
+                         data=None,
+                         success_status_codes=list([200])) -> bool:
         """
         Call POST method on the server
 
