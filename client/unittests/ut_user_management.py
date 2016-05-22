@@ -14,6 +14,7 @@ You should have received a copy of the GNU Lesser General Public License along w
 not, see <http://www.gnu.org/licenses/>.
 """
 
+import connection
 import json
 import requests
 import requests.packages
@@ -24,7 +25,7 @@ import time
 import unittest
 
 
-class Login(unittest.TestCase):
+class UserAuthentication(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         requests.packages.urllib3.disable_warnings(
@@ -34,32 +35,57 @@ class Login(unittest.TestCase):
         self.server_instance = subprocess.Popen([sys.executable, "../../server/salamander_alm.py"])
 
         if self.server_instance is not None:
-            time.sleep(3.0)
+            time.sleep(2.0)
 
     def tearDown(self):
         if self.server_instance is not None:
             self.server_instance.send_signal(signal.SIGINT)
-            self.server_instance.wait(3.0)
+            self.server_instance.wait(1.0)
 
             if self.server_instance.returncode is None:
                 self.server_instance.kill()
 
-    def test_login(self):
-        response = requests.post("http://127.0.0.1:5000/api/usermanagement/login",
-                                 json={"user_name": "administrator",
-                                       "authentication_parameters": {"password": "administrator"}})
-        self.assertEqual(response.status_code, 200, "Response: " + response.text)
+    def test_default_administrator_login(self):
+        conn = connection.Connection()
 
-        response_data = json.loads(response.text)
-        self.assertIsNotNone(response_data["session_token"])
+        success = conn.login("http://127.0.0.1:5000/api",
+                             "administrator",
+                             {"password": "administrator"})
+        self.assertTrue(success)
 
-        print("Session token:" + response_data["session_token"])
+    def test_default_administrator_login_failure(self):
+        conn = connection.Connection()
 
-    def test_login_failure(self):
-        response = requests.post("http://127.0.0.1:5000/api/usermanagement/login",
-                                 json={"user_name": "administrator",
-                                       "authentication_parameters": {"password": "xyz"}})
-        self.assertEqual(response.status_code, 400, "Response: " + response.text)
+        success = conn.login("http://127.0.0.1:5000/api",
+                             "administrator",
+                             {"password": "xyz"})
+        self.assertFalse(success)
+
+    def test_default_administrator_logout(self):
+        conn = connection.Connection()
+
+        # First log in
+        success = conn.login("http://127.0.0.1:5000/api",
+                             "administrator",
+                             {"password": "administrator"})
+        self.assertTrue(success)
+
+        # And then try to log out
+        success = conn.logout()
+        self.assertTrue(success)
+
+    def test_default_administrator_logout_failure(self):
+        conn = connection.Connection()
+
+        # First log in
+        success = conn.login("http://127.0.0.1:5000/api",
+                             "administrator",
+                             {"password": "administrator"})
+        self.assertTrue(success)
+
+        # And then try to log out
+        success = conn.logout()
+        self.assertTrue(success)
 
 
 if __name__ == '__main__':

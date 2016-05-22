@@ -81,45 +81,37 @@ class SessionTokenTable(Table):
         """
         raise NotImplementedError()
 
-    def delete_all_rows(self, connection: Connection) -> bool:
+    def delete_all_rows(self, connection: Connection) -> None:
         """
         Removes all rows from the table
 
         :param connection:  Database connection
-
-        :return:    Success or failure
         """
         raise NotImplementedError()
 
-    def delete_row_by_user_id(self, connection: Connection, user_id: int) -> bool:
+    def delete_row_by_user_id(self, connection: Connection, user_id: int) -> None:
         """
         Removes all rows that belong to the specified used from the table
 
         :param connection:  Database connection
         :param user_id:     ID of the user
-
-        :return:    Success or failure
         """
         raise NotImplementedError()
 
-    def delete_row_by_token(self, connection: Connection, token: str) -> bool:
+    def delete_row_by_token(self, connection: Connection, token: str) -> None:
         """
         Removes the row that contains the specified token from the table
 
         :param connection:  Database connection
         :param token:       Session token
-
-        :return:    Success or failure
         """
         raise NotImplementedError()
 
-    def delete_rows_before_timestamp(self, connection: Connection, timestamp: datetime) -> bool:
+    def delete_rows_before_timestamp(self, connection: Connection, timestamp: datetime) -> None:
         """
         Removes the rows that are older than the specified timestamp
 
         :param connection:  Database connection
         :param timestamp:   Timestamp
-
-        :return:    Success or failure
         """
         raise NotImplementedError()

@@ -270,7 +270,8 @@ class Connection(object):
 
     # TODO: create PUT method?
 
-    def get_last_response_message(self) -> Optional[requests.Response]:
+    @property
+    def last_response_message(self) -> Optional[requests.Response]:
         """
         Get last response message
 

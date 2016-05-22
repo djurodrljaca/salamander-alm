@@ -554,6 +554,27 @@ class UserManagementInterface(object):
         return token
 
     @staticmethod
+    def delete_session_token(connection: Connection, token: str) -> bool:
+        """
+        Deletes the specified session token
+
+        :param connection:  Database connection
+        :param token:       Session's token value
+
+        :return:    Success or failure
+        """
+        # Check if the specified token is valid
+        existing_session_token = UserManagementInterface.read_session_token(connection, token)
+
+        if existing_session_token is None:
+            # Error, invalid token
+            return False
+
+        # Delete the token from the database
+        DatabaseInterface.tables().session_token.delete_row_by_token(connection, token)
+        return True
+
+    @staticmethod
     def __read_user_by_id(connection: Connection, user_id: int) -> Optional[dict]:
         """
         Reads a user (active or inactive) that matches the search parameters

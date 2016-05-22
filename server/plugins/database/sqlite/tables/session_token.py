@@ -145,38 +145,32 @@ class SessionTokenTableSqlite(SessionTokenTable):
 
         return row_id
 
-    def delete_all_rows(self, connection: ConnectionSqlite) -> bool:
+    def delete_all_rows(self, connection: ConnectionSqlite) -> None:
         """
         Removes all rows from the table
 
         :param connection:  Database connection
-
-        :return:    Success or failure
         """
         connection.native_connection.execute("DELETE FROM session_token")
 
-    def delete_row_by_user_id(self, connection: ConnectionSqlite, user_id: int) -> bool:
+    def delete_row_by_user_id(self, connection: ConnectionSqlite, user_id: int) -> None:
         """
         Removes all rows that belong to the specified used from the table
 
         :param connection:  Database connection
         :param user_id:     ID of the user
-
-        :return:    Success or failure
         """
         connection.native_connection.execute(
             "DELETE FROM session_token\n"
             "WHERE (user_id = :user_id)",
             {"user_id": user_id})
 
-    def delete_row_by_token(self, connection: ConnectionSqlite, token: str) -> bool:
+    def delete_row_by_token(self, connection: ConnectionSqlite, token: str) -> None:
         """
         Removes the row that contains the specified token from the table
 
         :param connection:  Database connection
         :param token:       Session token
-
-        :return:    Success or failure
         """
         connection.native_connection.execute(
             "DELETE FROM session_token\n"
@@ -185,14 +179,12 @@ class SessionTokenTableSqlite(SessionTokenTable):
 
     def delete_rows_before_timestamp(self,
                                      connection: ConnectionSqlite,
-                                     timestamp: datetime) -> bool:
+                                     timestamp: datetime) -> None:
         """
         Removes the rows that are older than the specified timestamp
 
         :param connection:  Database connection
         :param timestamp:   Timestamp
-
-        :return:    Success or failure
         """
         connection.native_connection.execute(
             "DELETE FROM session_token\n"

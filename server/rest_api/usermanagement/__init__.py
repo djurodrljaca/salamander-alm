@@ -1,5 +1,5 @@
 from rest_api.application import api
-from rest_api.usermanagement import login
+from rest_api.usermanagement import login, logout
 
 
 def _create_url(relative_url: str) -> str:
@@ -20,3 +20,4 @@ def _create_url(relative_url: str) -> str:
 if api is not None:
     # Add all resources from this package
     api.add_resource(login.Login, _create_url("login"))
+    api.add_resource(logout.Logout, _create_url("logout"))
