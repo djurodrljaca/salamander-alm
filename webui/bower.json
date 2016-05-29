@@ -1,10 +1,10 @@
 {
-  "name": "angular-seed",
-  "description": "A starter project for AngularJS",
-  "version": "0.0.0",
-  "homepage": "https://github.com/angular/angular-seed",
-  "license": "MIT",
-  "private": true,
+  "name": "salamander-alm-webui",
+  "description": "Web UI for Salamander ALM",
+  "version": "0.0.1",
+  "homepage": "https://github.com/djurodrljaca/salamander-alm",
+  "license": "GPLv2+",
+  "private": false,
   "dependencies": {
     "angular": "~1.5.0",
     "angular-route": "~1.5.0",
