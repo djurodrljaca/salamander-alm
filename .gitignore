@@ -1,3 +1,8 @@
 server/.idea/workspace.xml
 **/database.db
 **/__pycache__
+.metadata/
+RemoteSystemsTempFiles/
+node_modules/
+bower_components/
+
